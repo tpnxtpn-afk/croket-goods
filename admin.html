@@ -470,9 +470,9 @@
 </div>
 <div class="modal" id="keyGate" hidden>
   <div class="modal-box">
-    <div class="modal-title">🔑 管理画面の合言葉</div>
+    <div class="modal-title">🔑 管理画面のパスワード</div>
     <div class="field">
-      <input type="password" id="keyGateInput" placeholder="合言葉を入力" autocomplete="current-password">
+      <input type="password" id="keyGateInput" placeholder="パスワードを入力" autocomplete="current-password">
     </div>
     <p class="hint err" id="keyGateMsg"></p>
     <button type="button" class="btn" id="keyGateBtn">開く</button>
@@ -482,8 +482,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // GASから開いたときは BOOT（合言葉を含む）がここに埋め込まれる。
-  // Googleサイト埋め込み版（tools/build-sites.js で BOOT=null・API_URL を設定）は合言葉を入力して起動する。
+  // GASから開いたときは BOOT（パスワードを含む）がここに埋め込まれる。
+  // Googleサイト埋め込み版（tools/build-sites.js で BOOT=null・API_URL を設定）はパスワードを入力して起動する。
   let BOOT = null;
   const API_URL = 'https://script.google.com/macros/s/AKfycbzAASqPnaTyRfd7YgLiFCg685L4u_Sy7b6q1zudeJWNuC2RN6mYQy2gygsMDdG6mJE/exec';
   const KEY_STORE = 'korokke.adminKey';
@@ -549,7 +549,7 @@
       .catch(err => { throw err instanceof Error ? err : new Error(String(err)); })
       .then(res => {
         if (res && res.ok) return res.data;
-        if (res && API_URL && /合言葉/.test(res.error)) forgetKey();
+        if (res && API_URL && /パスワード/.test(res.error)) forgetKey();
         throw new Error(res ? res.error : 'サーバーから応答がありません');
       });
   }
@@ -1202,7 +1202,7 @@
     try { localStorage.removeItem(KEY_STORE); } catch (e) { /* 保存できない環境 */ }
   }
 
-  /** 埋め込み版：合言葉を確認してから初期データを取得する（合言葉はこの端末に保存） */
+  /** 埋め込み版：パスワードを確認してから初期データを取得する（パスワードはこの端末に保存） */
   async function openWithKey(key) {
     if (!key) {
       $('keyGate').hidden = false;

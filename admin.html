@@ -176,6 +176,8 @@
     background: #fff; font-size: 13px; cursor: pointer;
   }
   #editModal .modal-box { max-height: 90vh; overflow-y: auto; }
+  .btn.delete { margin-top: 14px; background: #fff; color: var(--danger); border: 2px solid var(--danger); }
+  .btn.delete.armed { background: var(--danger); color: #fff; }
   #optionCard { margin-top: 16px; }
   .chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
   .opt-chip {
@@ -466,6 +468,8 @@
       <button type="button" class="btn ghost" id="editCancel">キャンセル</button>
       <button type="button" class="btn" id="editSave">保存する</button>
     </div>
+    <button type="button" class="btn delete" id="editDelete">🗑 この商品を削除</button>
+    <p class="hint">販売履歴は残ります。削除した商品IDは再利用されません</p>
   </div>
 </div>
 <div class="modal" id="keyGate" hidden>
@@ -967,7 +971,44 @@
     $('eType').value = p.type;
     fillSelect($('eSize'), unique(state.config.sizes.concat([p.size])));
     $('eSize').value = p.size;
+    resetDeleteButton();
     $('editModal').hidden = false;
+  }
+
+  let deleteTimer = null;
+  function resetDeleteButton() {
+    clearTimeout(deleteTimer);
+    const btn = $('editDelete');
+    btn.classList.remove('armed');
+    btn.textContent = '🗑 この商品を削除';
+  }
+
+  /** 1回目は確認表示、5秒以内にもう一度押すと削除（誤操作防止） */
+  async function onDeleteProduct() {
+    const btn = $('editDelete');
+    const p = findProduct(state.editId);
+    if (!p) return;
+    if (!btn.classList.contains('armed')) {
+      btn.classList.add('armed');
+      btn.textContent = p.total > 0 ? '本当に削除する（在庫' + p.total + '枚も消えます）' : '本当に削除する';
+      deleteTimer = setTimeout(resetDeleteButton, 5000);
+      return;
+    }
+    clearTimeout(deleteTimer);
+    setBusy(btn, true, '削除中…');
+    try {
+      await call('deleteProduct', { productId: p.id });
+      state.products = state.products.filter(x => x.id !== p.id);
+      state.monthlyStale = true;
+      refreshDerived();
+      $('editModal').hidden = true;
+      toast('🗑 ' + p.id + ' を削除しました');
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      setBusy(btn, false);
+      resetDeleteButton();
+    }
   }
 
   async function onSaveEdit() {
@@ -1172,6 +1213,7 @@
     $('imgModal').addEventListener('click', e => { if (e.target === $('imgModal')) $('imgModal').hidden = true; });
     $('editCancel').addEventListener('click', () => { $('editModal').hidden = true; });
     $('editSave').addEventListener('click', onSaveEdit);
+    $('editDelete').addEventListener('click', onDeleteProduct);
     $('editModal').addEventListener('click', e => { if (e.target === $('editModal')) $('editModal').hidden = true; });
 
     $('btnReloadAlerts').addEventListener('click', loadAlerts);

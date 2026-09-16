@@ -1986,6 +1986,7 @@
     const slots = ['①', '②', '③', '④', '⑤', '⑥', '⑦'];
     const style = '<style>' +
       '@page { size: A4 landscape; margin: 8mm; }' +
+      '#printArea { background: #fff; color: #111; }' +
       '.sheet-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; margin-bottom: 3mm; }' +
       '.sheet-head h2 { margin: 0; font-size: 15pt; }' +
       '.sheet-head .fields { display: flex; gap: 8mm; font-size: 10.5pt; white-space: nowrap; }' +
@@ -2003,6 +2004,8 @@
       'table.tally td.name small { color: #555; font-size: 7.5pt; }' +
       'table.tally tbody td { height: 9mm; }' +
       'table.tally tbody tr { page-break-inside: avoid; }' +
+      'table.tally tr.extra-head td { background: #fafafa; font-size: 8pt; color: #555; text-align: left; height: 6mm; }' +
+      'table.tally tr.extra td.name { background: repeating-linear-gradient(transparent, transparent 8mm, #ddd 8mm, #ddd 8.2mm); }' +
       '.tally-note { margin-top: 2mm; font-size: 8pt; color: #555; }' +
       '</style>';
     const head = '<div class="sheet-head"><h2>販売チェック表</h2><div class="fields">' +
@@ -2014,8 +2017,11 @@
       '<tr><td class="name"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
       '　' + (p.stock[pool] || 0) + '枚' + (p.price === '' ? '' : '　' + esc(yen(p.price))) + '</small></td>' +
       slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>').join('');
+    // 当日いきなり出た商品を書き込めるよう、商品名が空の行を10行付ける
+    const blank = '<tr class="extra extra-head"><td colspan="' + (slots.length + 3) + '">当日追加の商品（商品名を書いて使ってください）</td></tr>' +
+      new Array(10).fill('<tr class="extra"><td class="name"></td>' + slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>').join('');
     openPrint('販売チェック表', style + head +
-      '<table class="tally"><thead>' + thead + '</thead><tbody>' + tbody + '</tbody></table>' +
+      '<table class="tally"><thead>' + thead + '</thead><tbody>' + tbody + blank + '</tbody></table>' +
       '<p class="tally-note">マスに「正」の字で数えてください（正 ＝ 5個）。売れた分は最後に管理画面の「販売・補充 → まとめて入力」でまとめて記録します。</p>');
   }
 

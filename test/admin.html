@@ -1996,12 +1996,16 @@
     const count = rows.length + 1 + TALLY_BLANKS; // 商品＋区切り＋空欄
     const page = wide
       ? { size: 'A4 landscape', margin: 7, height: 210, slot: 19, sum: 17, memo: 45 }
-      : { size: 'A4 portrait', margin: 6, height: 297, slot: 10, sum: 10, memo: 30 };
-    // 1ページに収まる行の高さ（mm）。見出し7・表の見出し6・余白7を引いて残りを行数で割る
-    const avail = page.height - page.margin * 2 - 7 - 6 - 7;
-    const rowH = wide ? 9 : Math.max(3.2, Math.min(9, avail / count - 0.3));
+      : { size: 'A4 portrait', margin: 6, height: 297, slot: 9.5, sum: 10, memo: 27 };
+    // 印刷の余白設定が大きめでも2ページ目に落ちない高さで作り、印刷時は用紙の下端まで表を伸ばす
+    const head7 = 7;
+    const thead6 = 6;
+    const safeH = page.height - 44;                            // 上下22mmずつ余白でも収まる
+    const fullH = page.height - page.margin * 2 - 5;           // 余白最小で印刷したときの高さ
+    const rowH = wide ? 9 : Math.max(3.2, Math.min(9, (safeH - head7 - thead6) / count - 0.3));
+    const fullRow = wide ? 9 : (fullH - head7 - thead6) / count;
     const compact = rowH < 6.5;
-    const nameFont = Math.min(9.5, Math.max(6, Math.round(rowH * 1.8 * 10) / 10));
+    const nameFont = Math.min(9.5, Math.max(6, Math.round(fullRow * 1.75 * 10) / 10));
     const subFont = Math.round(nameFont * 0.82 * 10) / 10;
 
     const style = '<style>' +
@@ -2018,7 +2022,7 @@
       'table.tally th, table.tally td { border: 1px solid #444; padding: 0 1mm; font-size: ' + nameFont + 'pt; }' +
       'table.tally th { background: #f2f2f2; text-align: center; height: ' + (compact ? 6 : 7) + 'mm; }' +
       'table.tally th.slot { width: ' + page.slot + 'mm; font-size: ' + (compact ? 10 : 12) + 'pt; }' +
-      'table.tally th.slot small { display: block; font-weight: 400; font-size: 5.5pt; color: #555; }' +
+      'table.tally th.slot small { display: block; font-weight: 400; font-size: 5pt; color: #555; white-space: nowrap; overflow: hidden; }' +
       'table.tally th.sum { width: ' + page.sum + 'mm; font-size: ' + (compact ? 8.5 : 10) + 'pt; }' +
       'table.tally .memo { width: ' + page.memo + 'mm; }' +
       'table.tally .name { text-align: left; }' +
@@ -2029,13 +2033,21 @@
       'table.tally tbody tr { page-break-inside: avoid; }' +
       'table.tally tr.extra-head td { background: #fafafa; font-size: 7pt; color: #555; text-align: left; height: ' + Math.min(6, rowH).toFixed(1) + 'mm; }' +
       'table.tally tr.extra td.name { background: repeating-linear-gradient(transparent, transparent ' + (rowH - 1).toFixed(1) + 'mm, #ddd ' + (rowH - 1).toFixed(1) + 'mm, #ddd ' + (rowH - 0.8).toFixed(1) + 'mm); }' +
+      // 印刷では用紙の下端まで表を伸ばす（行が自動で広がるので、余白設定が変わっても下があかない）
+      '@media print {' +
+      '  html, body, #printArea { height: 100%; }' +
+      '  #printArea { display: flex; flex-direction: column; }' +
+      '  #printBody { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }' +
+      '  .sheet-head { flex: 0 0 auto; }' +
+      '  table.tally { flex: 1 1 auto; }' +
+      '}' +
       '</style>';
 
     const head = '<div class="sheet-head"><h2>販売チェック表</h2><div class="fields">' +
       '<span class="date">日付：<u></u></span><span>担当者①：<u></u></span><span>担当者②：<u></u></span>' +
       '<span class="note">マスに「正」＝5個</span></div></div>';
     const thead = '<tr><th class="name">商品（' + esc(pool) + 'の在庫）</th>' +
-      slots.map(sl => '<th class="slot">' + sl + '<small>（　：　〜　）</small></th>').join('') +
+      slots.map(sl => '<th class="slot">' + sl + '<small>（　：　）</small></th>').join('') +
       '<th class="sum">合計</th><th class="memo">備考</th></tr>';
     const tbody = rows.map(p => {
       const sub = compact

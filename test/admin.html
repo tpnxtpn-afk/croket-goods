@@ -834,6 +834,7 @@
 <div id="printArea" hidden>
   <div class="print-bar">
     <button type="button" class="btn" id="printGo">🖨 印刷する</button>
+    <button type="button" class="btn ghost" id="printAlt" hidden></button>
     <button type="button" class="btn ghost" id="printClose">閉じる</button>
   </div>
   <div id="printBody"></div>
@@ -1947,9 +1948,11 @@
   }
 
   // ---------- QRラベル・ポスターの印刷 ----------
-  async function openPrint(title, bodyHtml) {
+  function openPrint(title, bodyHtml) {
     $('printBody').innerHTML = bodyHtml;
+    $('printAlt').hidden = true;
     $('printArea').hidden = false;
+    window.scrollTo(0, 0);
   }
 
   async function printLabels() {
@@ -1976,53 +1979,82 @@
   }
 
   /**
-   * 販売チェック表（A4横）。時間帯①〜⑦のマスに「正」の字でカウントし、合計と備考を書く紙。
-   * 上に日付と担当者2名の欄。行は在庫一覧の絞り込みをそのまま使う。
+   * 販売チェック表。時間帯①〜⑦のマスに「正」の字でカウントし、合計と備考を書く紙。
+   * 上に日付と担当者2名の欄、最後に当日追加の商品用の空欄10行。
+   * mode 'fit'（既定）はA4縦1枚に収まるよう行の高さを自動で詰める。'wide' はA4横でゆったり（複数ページ）。
    */
-  function printTally() {
+  const TALLY_SLOTS = ['①', '②', '③', '④', '⑤', '⑥', '⑦'];
+  const TALLY_BLANKS = 10;
+
+  function printTally(mode) {
     const rows = inventoryRows();
     if (!rows.length) return toast('印刷する商品がありません', true);
+    const wide = mode === 'wide';
     const pool = state.config.owners[0];
-    const slots = ['①', '②', '③', '④', '⑤', '⑥', '⑦'];
+    const slots = TALLY_SLOTS;
+    const count = rows.length + 1 + TALLY_BLANKS; // 商品＋区切り＋空欄
+    // 1ページに収まる行の高さ（mm）。行が多いほど詰める
+    const page = wide
+      ? { size: 'A4 landscape', margin: 7, height: 210, name: 56, slot: 19, sum: 17 }
+      : { size: 'A4 portrait', margin: 6, height: 297, name: 58, slot: 12, sum: 11 };
+    // 'fit' は1ページに収まるよう詰める。'wide' はゆったり9mm固定（商品が多ければ複数ページ）
+    const avail = page.height - page.margin * 2 - 22; // 見出し・表の見出し・注意書きの分
+    const rowH = wide ? 9 : Math.max(3.2, Math.min(9, avail / count - 0.5)); // 罫線の分を引く
+    const compact = rowH < 6.5;
+    const nameFont = compact ? 6.8 : 9.5;
+    const subFont = compact ? 5.6 : 7.5;
+
     const style = '<style>' +
-      '@page { size: A4 landscape; margin: 8mm; }' +
+      '@page { size: ' + page.size + '; margin: ' + page.margin + 'mm; }' +
       '#printArea { background: #fff; color: #111; }' +
-      '.sheet-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; margin-bottom: 3mm; }' +
-      '.sheet-head h2 { margin: 0; font-size: 15pt; }' +
-      '.sheet-head .fields { display: flex; gap: 8mm; font-size: 10.5pt; white-space: nowrap; }' +
-      '.sheet-head u { display: inline-block; min-width: 34mm; border-bottom: 1px solid #333; text-decoration: none; }' +
-      '.sheet-head .date u { min-width: 46mm; }' +
+      '.sheet-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 6mm; margin-bottom: 2mm; }' +
+      '.sheet-head h2 { margin: 0; font-size: ' + (compact ? 12 : 15) + 'pt; }' +
+      '.sheet-head .fields { display: flex; gap: 6mm; font-size: ' + (compact ? 9 : 10.5) + 'pt; white-space: nowrap; }' +
+      '.sheet-head u { display: inline-block; min-width: ' + (compact ? 26 : 34) + 'mm; border-bottom: 1px solid #333; text-decoration: none; }' +
+      '.sheet-head .date u { min-width: ' + (compact ? 34 : 46) + 'mm; }' +
       'table.tally { width: 100%; border-collapse: collapse; table-layout: fixed; }' +
       'table.tally thead { display: table-header-group; }' +
-      'table.tally th, table.tally td { border: 1px solid #444; padding: 1mm 1.5mm; font-size: 9pt; }' +
-      'table.tally th { background: #f2f2f2; text-align: center; }' +
-      'table.tally th.slot { width: 19mm; font-size: 12pt; }' +
-      'table.tally th.slot small { display: block; font-weight: 400; font-size: 6.5pt; color: #555; }' +
-      'table.tally th.sum { width: 17mm; font-size: 10pt; }' +
-      'table.tally .name { width: 56mm; text-align: left; }' +
-      'table.tally td.name b { display: block; font-size: 9.5pt; line-height: 1.3; }' +
-      'table.tally td.name small { color: #555; font-size: 7.5pt; }' +
-      'table.tally tbody td { height: 9mm; }' +
+      'table.tally th, table.tally td { border: 1px solid #444; padding: 0 1mm; font-size: ' + nameFont + 'pt; }' +
+      'table.tally th { background: #f2f2f2; text-align: center; height: ' + (compact ? 6 : 7) + 'mm; }' +
+      'table.tally th.slot { width: ' + page.slot + 'mm; font-size: ' + (compact ? 10 : 12) + 'pt; }' +
+      'table.tally th.slot small { display: block; font-weight: 400; font-size: 5.5pt; color: #555; }' +
+      'table.tally th.sum { width: ' + page.sum + 'mm; font-size: ' + (compact ? 8.5 : 10) + 'pt; }' +
+      'table.tally .name { width: ' + page.name + 'mm; text-align: left; }' +
+      'table.tally td.name { white-space: nowrap; overflow: hidden; line-height: 1.05; }' +
+      'table.tally td.name b { font-size: ' + nameFont + 'pt; }' +
+      'table.tally td.name small { color: #555; font-size: ' + subFont + 'pt; }' +
+      (compact ? '' : 'table.tally td.name b { display: block; }') +
+      'table.tally tbody td { height: ' + rowH.toFixed(1) + 'mm; }' +
       'table.tally tbody tr { page-break-inside: avoid; }' +
-      'table.tally tr.extra-head td { background: #fafafa; font-size: 8pt; color: #555; text-align: left; height: 6mm; }' +
-      'table.tally tr.extra td.name { background: repeating-linear-gradient(transparent, transparent 8mm, #ddd 8mm, #ddd 8.2mm); }' +
-      '.tally-note { margin-top: 2mm; font-size: 8pt; color: #555; }' +
+      'table.tally tr.extra-head td { background: #fafafa; font-size: 7pt; color: #555; text-align: left; height: ' + Math.min(6, rowH).toFixed(1) + 'mm; }' +
+      'table.tally tr.extra td.name { background: repeating-linear-gradient(transparent, transparent ' + (rowH - 1).toFixed(1) + 'mm, #ddd ' + (rowH - 1).toFixed(1) + 'mm, #ddd ' + (rowH - 0.8).toFixed(1) + 'mm); }' +
+      '.tally-note { margin-top: 1.5mm; font-size: 7pt; color: #555; }' +
       '</style>';
+
     const head = '<div class="sheet-head"><h2>販売チェック表</h2><div class="fields">' +
       '<span class="date">日付：<u></u></span><span>担当者①：<u></u></span><span>担当者②：<u></u></span></div></div>';
     const thead = '<tr><th class="name">商品（' + esc(pool) + 'の在庫）</th>' +
       slots.map(sl => '<th class="slot">' + sl + '<small>（　：　〜　）</small></th>').join('') +
       '<th class="sum">合計</th><th>備考</th></tr>';
-    const tbody = rows.map(p =>
-      '<tr><td class="name"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-      '　' + (p.stock[pool] || 0) + '枚' + (p.price === '' ? '' : '　' + esc(yen(p.price))) + '</small></td>' +
-      slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>').join('');
-    // 当日いきなり出た商品を書き込めるよう、商品名が空の行を10行付ける
+    const tbody = rows.map(p => {
+      const sub = compact
+        ? esc(p.type) + '/' + esc(p.color) + '/' + esc(p.size) + ' ' + (p.stock[pool] || 0)
+        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + '枚';
+      return '<tr><td class="name"><b>' + esc(p.category) + '</b>' + (compact ? ' ' : '') + '<small>' + sub + '</small></td>' +
+        slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>';
+    }).join('');
+    // 当日いきなり出た商品を書き込める空欄行
     const blank = '<tr class="extra extra-head"><td colspan="' + (slots.length + 3) + '">当日追加の商品（商品名を書いて使ってください）</td></tr>' +
-      new Array(10).fill('<tr class="extra"><td class="name"></td>' + slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>').join('');
+      new Array(TALLY_BLANKS).fill('<tr class="extra"><td class="name"></td>' + slots.map(() => '<td></td>').join('') + '<td></td><td></td></tr>').join('');
+
     openPrint('販売チェック表', style + head +
       '<table class="tally"><thead>' + thead + '</thead><tbody>' + tbody + blank + '</tbody></table>' +
-      '<p class="tally-note">マスに「正」の字で数えてください（正 ＝ 5個）。売れた分は最後に管理画面の「販売・補充 → まとめて入力」でまとめて記録します。</p>');
+      '<p class="tally-note">マスに「正」の字で数えてください（正 ＝ 5個）。売れた分は管理画面の「販売・補充 → まとめて入力」でまとめて記録します。</p>');
+    // 印刷バーに「縦1枚 ⇄ 横（大きめ）」の切り替えを出す
+    const alt = $('printAlt');
+    alt.hidden = false;
+    alt.textContent = wide ? '📄 A4縦1枚にする' : '📄 A4横（大きめ）にする';
+    alt.onclick = () => printTally(wide ? 'fit' : 'wide');
   }
 
   async function printPoster() {
@@ -2480,7 +2512,7 @@
     $('btnStocktake').addEventListener('click', openStocktake);
     $('btnStCancel').addEventListener('click', closeStocktake);
     $('btnLabels').addEventListener('click', printLabels);
-    $('btnTally').addEventListener('click', printTally);
+    $('btnTally').addEventListener('click', () => printTally('fit'));
     $('stLocation').addEventListener('change', () => { loadStocktake(); renderStocktake(); });
     $('stSearch').addEventListener('input', renderStocktake);
     $('stList').addEventListener('input', e => {

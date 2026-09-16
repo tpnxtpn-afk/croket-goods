@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#121418">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="テスト在庫">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>【テスト】コロッケ グッズ在庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --theme: #e67e22;
+    --bg: #f4f5f7;
+    --card: #fff;
+    --text: #2c3e50;
+    --muted: #7f8c8d;
+    --line: #e3e6ea;
+    --zero: #b0b6bb;
+    --low: #e67e22;
+    --ok: #27ae60;
+    --rainbow: linear-gradient(90deg, #ff4d4d, #ff9f1a, #ffd93d, #3ddc84, #29b6f6, #7c4dff, #e056fd);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+  }
+  /* 文字を大きくする（ヘッダーの「大」ボタン） */
+  body.big { zoom: 1.18; }
+
+  .top { position: sticky; top: 0; z-index: 10; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .app-header {
+    position: relative;
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 8px 10px 14px;
+    background: radial-gradient(120% 140% at 0% 0%, #343a46 0%, #1d2027 55%, #121418 100%);
+    color: #fff;
+  }
+  .app-header::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
+    background: var(--rainbow);
+  }
+  .brand { flex: 1; min-width: 0; }
+  .brand h1 {
+    margin: 0;
+    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-weight: 400;
+    font-size: 19px; line-height: 1.2; letter-spacing: .04em;
+    background: var(--rainbow);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .brand .sub { font-size: 9px; font-weight: 700; letter-spacing: .3em; color: rgba(255,255,255,.55); }
+  .hbtn {
+    flex: 0 0 auto;
+    min-width: 34px; height: 34px; padding: 0 6px;
+    border: 1px solid rgba(255,255,255,.25); border-radius: 17px;
+    background: rgba(255,255,255,.08); color: #fff;
+    font: inherit; font-size: 15px; font-weight: 700;
+    cursor: pointer;
+  }
+  .hbtn.on { background: #fff; color: #1d2027; }
+  .hbtn.spin { animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .updated-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 12px;
+    background: #fdf6ec;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px; color: #8a6d3b;
+  }
+  .updated-bar .test { margin-left: auto; padding: 1px 8px; border-radius: 9px; background: #e74c3c; color: #fff; font-weight: 700; }
+
+  .tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .tab {
+    flex: 1;
+    padding: 9px 4px 7px;
+    border: 0; border-bottom: 3px solid transparent;
+    background: none; color: var(--muted);
+    font: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer;
+  }
+  .tab small { display: block; margin-top: 1px; font-size: 11px; font-weight: 400; }
+  .tab.active { color: var(--tab-color); border-bottom-color: var(--tab-color); }
+  .pool-note { margin: 0; padding: 6px 14px; background: #fafbfc; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+
+  .controls { padding: 10px 12px 8px; }
+  .search { position: relative; }
+  .search input {
+    width: 100%;
+    padding: 11px 38px 11px 12px;
+    border: 1px solid var(--line); border-radius: 10px;
+    background: #f8f9fa; color: var(--text);
+    font: inherit; font-size: 16px;
+    -webkit-appearance: none; appearance: none;
+  }
+  .search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .search input:focus { outline: none; border-color: var(--theme); background: #fff; }
+  .search .clear {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px;
+    border: 0; background: none; color: var(--muted);
+    font-size: 16px; cursor: pointer;
+  }
+  .chips {
+    display: flex; gap: 6px;
+    margin: 8px -12px 0; padding: 0 12px 2px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+  .chips button {
+    flex: 0 0 auto;
+    padding: 7px 14px;
+    border: 1px solid var(--line); border-radius: 18px;
+    background: #fff; color: var(--text);
+    font: inherit; font-size: 14px;
+    cursor: pointer;
+  }
+  .chips button.on { background: var(--theme); border-color: var(--theme); color: #fff; font-weight: 700; }
+  .row2 { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .seg { display: flex; flex: 1; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .seg button {
+    flex: 1; padding: 8px 2px;
+    border: 0; border-left: 1px solid var(--line);
+    background: #fff; color: var(--muted);
+    font: inherit; font-size: 13px;
+    cursor: pointer;
+  }
+  .seg button:first-child { border-left: 0; }
+  .seg button.on { background: var(--theme); color: #fff; font-weight: 700; }
+  .toggle-zero { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .toggle-zero input { width: 20px; height: 20px; margin: 0; accent-color: var(--theme); }
+
+  main { max-width: 760px; margin: 0 auto; padding: 10px 12px 70px; }
+  .summary { margin: 2px 2px 10px; font-size: 13px; color: var(--muted); }
+  .summary b { color: var(--text); font-size: 15px; }
+
+  .group-title {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin: 16px 4px 8px;
+    font-size: 14px;
+  }
+  .group-title:first-child { margin-top: 4px; }
+  .group-title span { font-size: 12px; font-weight: 400; color: var(--muted); }
+
+  .item {
+    display: flex; align-items: flex-start; gap: 12px;
+    width: 100%;
+    margin-bottom: 8px; padding: 10px 12px;
+    border: 0; border-radius: 12px;
+    background: var(--card);
+    box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    font: inherit; color: inherit; text-align: left;
+    cursor: pointer;
+  }
+  .thumb {
+    flex: 0 0 88px; width: 88px; height: 88px;
+    border-radius: 10px;
+    background: #eef0f2;
+    object-fit: cover;
+  }
+  .thumb.none { display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .info { flex: 1; min-width: 0; }
+  .name { font-size: 16px; font-weight: 700; line-height: 1.3; }
+  .new {
+    display: inline-block; margin-left: 6px; padding: 1px 6px; vertical-align: 2px;
+    border-radius: 8px; background: #e74c3c; color: #fff; font-size: 10px; font-weight: 700;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 6px; }
+  .tag { padding: 1px 8px; border-radius: 10px; background: #f0f2f4; font-size: 12px; color: #5b6670; }
+  .sizes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sz {
+    display: flex; align-items: baseline; gap: 4px;
+    padding: 4px 9px;
+    border: 1px solid; border-radius: 8px;
+    font-size: 13px;
+  }
+  .sz b { font-size: 17px; }
+  .sz.ok { border-color: #bfe6cc; background: #f0faf3; color: #1e8449; }
+  .sz.low { border-color: #f6d8b4; background: #fdf6ec; color: #b9651a; }
+  .sz.zero { border-color: var(--line); background: #f7f8f9; color: var(--zero); }
+  .single { display: flex; align-items: center; gap: 8px; }
+  .single b { font-size: 30px; line-height: 1; }
+  .single.ok b { color: var(--ok); }
+  .single.low b { color: var(--low); }
+  .single.zero b { color: var(--zero); }
+  .state { font-size: 13px; font-weight: 700; }
+
+  .empty { padding: 36px 16px; text-align: center; color: var(--muted); line-height: 1.9; }
+  .link { border: 0; background: none; color: var(--theme); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+
+  .modal {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    background: rgba(0,0,0,.7);
+  }
+  .modal-box {
+    width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto;
+    padding: 16px;
+    border-radius: 14px;
+    background: #fff;
+  }
+  .modal-box img.big { display: block; width: 100%; max-height: 46vh; object-fit: contain; border-radius: 10px; background: #f4f5f7; }
+  .modal-title { margin: 12px 0 6px; font-size: 18px; font-weight: 700; text-align: center; }
+  .modal .sizes { justify-content: center; margin-top: 10px; }
+  .noimg { padding: 26px; text-align: center; font-size: 60px; background: #f4f5f7; border-radius: 10px; }
+  .btn {
+    display: block; width: 100%; margin-top: 14px; padding: 13px;
+    border: 0; border-radius: 10px;
+    background: var(--theme); color: #fff;
+    font: inherit; font-size: 16px; font-weight: 700;
+    cursor: pointer;
+  }
+  .btn.ghost { background: #eef0f2; color: var(--text); }
+
+  .guide h2 { margin: 0 0 4px; font-size: 19px; text-align: center; }
+  .guide p.lead { margin: 0 0 14px; text-align: center; font-size: 13px; color: var(--muted); }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+  .step .n {
+    flex: 0 0 30px; height: 30px;
+    border-radius: 50%; background: var(--theme); color: #fff;
+    font-weight: 700; text-align: center; line-height: 30px;
+  }
+  .step div { flex: 1; line-height: 1.55; }
+  .step b { display: block; font-size: 15px; }
+  .step small { color: var(--muted); font-size: 13px; }
+
+  .banner {
+    position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 40;
+    display: flex; gap: 10px; align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #1d2027; color: #fff;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    font-size: 13px; line-height: 1.5;
+  }
+  .banner .body { flex: 1; }
+  .banner b { display: block; font-size: 14px; }
+  .banner button { border: 0; border-radius: 8px; padding: 8px 12px; background: #fff; color: #1d2027; font: inherit; font-weight: 700; cursor: pointer; }
+  .banner .x { background: none; color: rgba(255,255,255,.6); padding: 4px 6px; font-size: 18px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 20px; z-index: 100;
+    max-width: 90%;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: #2c3e50; color: #fff;
+    font-size: 14px;
+    opacity: 0; transform: translate(-50%, 20px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.error { background: #e74c3c; }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <header class="app-header">
+    <div class="brand">
+      <h1>コロッケ グッズ在庫</h1>
+      <div class="sub">GOODS STOCK</div>
+    </div>
+    <button type="button" class="hbtn" id="btnFont" aria-label="文字の大きさを変える">大</button>
+    <button type="button" class="hbtn" id="btnHelp" aria-label="使い方">？</button>
+    <button type="button" class="hbtn" id="reload" aria-label="最新の在庫に更新">↻</button>
+  </header>
+  <div class="updated-bar">
+    <span id="updated"></span>
+    <span class="test" id="testBadge" hidden>テスト版</span>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+  <p class="pool-note" id="poolNote"></p>
+  <div class="controls">
+    <div class="search">
+      <input type="search" id="q" placeholder="🔍 名前・色・サイズで探す" autocomplete="off" enterkeyhint="search">
+      <button type="button" class="clear" id="qClear" aria-label="消す" hidden>✕</button>
+    </div>
+    <div class="chips" id="typeChips"></div>
+    <div class="row2">
+      <div class="seg" id="sortSeg">
+        <button type="button" data-sort="name" class="on">名前順</button>
+        <button type="button" data-sort="stockDesc">多い順</button>
+        <button type="button" data-sort="stockAsc">少ない順</button>
+      </div>
+      <label class="toggle-zero"><input type="checkbox" id="showZero">売り切れも表示</label>
+    </div>
+  </div>
+</div>
+
+<main>
+  <p class="summary" id="summary"></p>
+  <div id="list"><div class="empty">読み込み中…</div></div>
+</main>
+
+<div class="modal" id="detail" hidden>
+  <div class="modal-box">
+    <img class="big" id="detailImg" alt="" referrerpolicy="no-referrer" hidden>
+    <div class="noimg" id="detailNoImg" hidden>👕</div>
+    <div class="modal-title" id="detailTitle"></div>
+    <div class="tags" id="detailTags" style="justify-content:center"></div>
+    <div class="sizes" id="detailSizes"></div>
+    <p class="summary" id="detailNote" style="text-align:center;margin-top:12px"></p>
+    <button type="button" class="btn ghost" id="detailClose">閉じる</button>
+  </div>
+</div>
+
+<div class="modal" id="guide" hidden>
+  <div class="modal-box guide">
+    <h2>かんたんな使い方</h2>
+    <p class="lead">3つだけ覚えれば大丈夫です</p>
+    <div class="step"><div class="n">1</div><div><b>上のタブで場所をえらぶ</b><small id="guidePools"></small></div></div>
+    <div class="step"><div class="n">2</div><div><b>商品をタップすると大きく見られます</b><small>写真とサイズごとの残りが出ます</small></div></div>
+    <div class="step"><div class="n">3</div><div><b>右上の ↻ で最新の在庫になります</b><small>🟢 あり　🟡 のこりわずか　⚪ 売り切れ</small></div></div>
+    <button type="button" class="btn" id="guideClose">わかりました</button>
+  </div>
+</div>
+
+<div class="banner" id="installBanner" hidden>
+  <div class="body">
+    <b id="installTitle">アプリのように使えます</b>
+    <span id="installText"></span>
+  </div>
+  <button type="button" id="installBtn" hidden>追加</button>
+  <button type="button" class="x" id="installClose" aria-label="閉じる">✕</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // GASから開いたときは BOOT がここに埋め込まれる。
+  // 埋め込み版・GitHub Pages 版（tools/build-sites.js などが BOOT=null・API_URL を設定）は起動時に取得する。
+  let BOOT = null;
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxj_wjVq-eC5T_MikXdrMD259UrUAY77VLipvt18RwFByywBXTmV4c5Id03cKw8DeI/exec';
+  const ENV = 'test';
+
+  const POOL_COLORS = ['#e67e22', '#e84393', '#27ae60', '#3498db', '#8e44ad'];
+  const SORTS = ['name', 'stockDesc', 'stockAsc'];
+  const STORE = 'korokke.client' + (ENV ? '.' + ENV : '');
+  const CACHE_KEY = STORE + '.cache';
+  const GUIDE_KEY = STORE + '.guide';
+  const INSTALL_KEY = STORE + '.install';
+  const FETCH_TIMEOUT_MS = 10000;
+
+  let owners = [];
+  let ownerNotes = [];
+  let sizes = [];
+  let threshold = 5;
+  let newDays = 14;
+  let deferredInstall = null;
+
+  const state = {
+    products: [],
+    pool: '',
+    q: '',
+    type: '',
+    sort: 'name',
+    showZero: false,
+    big: false,
+    loadedAt: Date.now(),
+  };
+
+  const $ = id => document.getElementById(id);
+
+  // ---------- サーバー呼び出し ----------
+  function fetchJson(body, timeoutMs) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    return fetch(API_URL, { method: 'POST', body: JSON.stringify(body), credentials: 'omit', signal: ctrl.signal })
+      .then(r => r.json())
+      .finally(() => clearTimeout(timer));
+  }
+
+  /**
+   * GAS内なら google.script.run、埋め込み版なら POST（Googleのログイン情報は送らない）。
+   * GAS はまれに応答しないことがあるので、10秒で打ち切って最大3回までやり直す（読み取り専用なので安全）。
+   */
+  async function rpc(action, params) {
+    if (!API_URL) {
+      return new Promise((resolve, reject) => {
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).api(action, params);
+      });
+    }
+    const body = Object.assign({ action: action }, params);
+    if (ENV) body.env = ENV;
+    let lastError = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return await fetchJson(body, FETCH_TIMEOUT_MS);
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw new Error(lastError && lastError.name === 'AbortError'
+      ? 'サーバーからの返事がありません'
+      : 'つながりませんでした。電波の良い場所でお試しください');
+  }
+
+  /** 前回の在庫を端末に保存し、次に開いたときすぐ表示する */
+  function saveCache(config, products) {
+    store(CACHE_KEY, JSON.stringify({ at: Date.now(), config: config, products: products }));
+  }
+
+  function loadCache() {
+    try {
+      const cached = JSON.parse(stored(CACHE_KEY) || 'null');
+      return cached && cached.config && Array.isArray(cached.products) ? cached : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function store(key, value) {
+    try {
+      if (value === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch (e) { /* 保存できない環境 */ }
+  }
+
+  function stored(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ---------- 文字のあつかい ----------
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  /** ひらがな・カタカナ・全角半角・大文字小文字・長音の違いを無くして探せるようにする */
+  function norm(s) {
+    return String(s == null ? '' : s)
+      .normalize('NFKC').toLowerCase()
+      .replace(/[ぁ-ゖ]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60))
+      .replace(/ティー/g, 't')
+      .replace(/[\s・ー-]/g, '');
+  }
+
+  // 「しろ」「ホワイト」でも白が出るように
+  const COLOR_WORDS = {
+    '白': 'しろ ホワイト', '黒': 'くろ ブラック', '赤': 'あか レッド', '青': 'あお ブルー',
+    '黄': 'きいろ イエロー', '黄緑': 'きみどり', '緑': 'みどり グリーン', '紫': 'むらさき パープル',
+    'ピンク': 'もも 桃', 'ゴールド': 'きん 金', 'シルバー': 'ぎん 銀', 'オレンジ': 'だいだい',
+    'レインボー': 'にじ 虹', '灰': 'グレー', '茶': 'ブラウン',
+  };
+  const TYPE_WORDS = { 'Tシャツ': 'ティーシャツ tshirt', 'タオル': 'towel', 'マフラータオル': 'まふらー towel', 'キーホルダー': 'キーホルダ' };
+
+  function searchText(p) {
+    let extra = '';
+    Object.keys(COLOR_WORDS).forEach(k => { if (p.color.indexOf(k) >= 0) extra += ' ' + COLOR_WORDS[k]; });
+    Object.keys(TYPE_WORDS).forEach(k => { if (p.type.indexOf(k) >= 0) extra += ' ' + TYPE_WORDS[k]; });
+    return norm([p.id, p.category, p.type, p.color, p.size, extra].join(' '));
+  }
+
+  function cmp(a, b) {
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  function sizeRank(size) {
+    const i = sizes.indexOf(size);
+    return i < 0 ? sizes.length : i;
+  }
+
+  /** 在庫の状態（色と言葉） */
+  function stateOf(n) {
+    if (n <= 0) return { cls: 'zero', word: '売り切れ', mark: '⚪' };
+    if (n <= threshold) return { cls: 'low', word: 'のこりわずか', mark: '🟡' };
+    return { cls: 'ok', word: 'あり', mark: '🟢' };
+  }
+
+  function isNew(p) {
+    if (!p.createdAt) return false;
+    const t = Date.parse(p.createdAt + 'T00:00:00');
+    return !isNaN(t) && Date.now() - t < newDays * 24 * 3600 * 1000;
+  }
+
+  function poolColor(pool) {
+    return POOL_COLORS[Math.max(0, owners.indexOf(pool)) % POOL_COLORS.length];
+  }
+
+  function imageSrc(url, width) {
+    const m = /\/d\/([\w-]{20,})|[?&]id=([\w-]{20,})/.exec(url || '');
+    const id = m ? m[1] || m[2] : '';
+    return id ? 'https://lh3.googleusercontent.com/d/' + id + '=w' + width : url;
+  }
+
+  function typeIcon(type) {
+    if (/タオル/.test(type)) return '🧣';
+    if (/キーホルダー|ストラップ|バッジ/.test(type)) return '🔑';
+    return '👕';
+  }
+
+  let toastTimer = null;
+  function toast(message, isError) {
+    const el = $('toast');
+    el.textContent = message;
+    el.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { el.className = 'toast' + (isError ? ' error' : ''); }, isError ? 5000 : 2000);
+  }
+
+  // ---------- 表示設定の保存 ----------
+  function loadPrefs() {
+    try {
+      const saved = JSON.parse(stored(STORE) || '{}');
+      if (owners.indexOf(saved.pool) >= 0) state.pool = saved.pool;
+      if (SORTS.indexOf(saved.sort) >= 0) state.sort = saved.sort;
+      state.showZero = saved.showZero === true;
+      state.big = saved.big === true;
+    } catch (e) { /* 保存できない環境 */ }
+  }
+
+  function savePrefs() {
+    store(STORE, JSON.stringify({ pool: state.pool, sort: state.sort, showZero: state.showZero, big: state.big }));
+  }
+
+  // ---------- 同じ商品のサイズ違いは1枚のカードにまとめる ----------
+  function groupsOf() {
+    const q = norm(state.q);
+    const groups = [];
+    const byKey = {};
+    state.products.forEach(p => {
+      if (state.type === '__new__') {
+        if (!isNew(p)) return;
+      } else if (state.type && p.type !== state.type) {
+        return;
+      }
+      if (q && searchText(p).indexOf(q) < 0) return;
+      const key = [p.category, p.type, p.color].join(' |');
+      let g = byKey[key];
+      if (!g) {
+        g = byKey[key] = { key: key, category: p.category, type: p.type, color: p.color, items: [], total: 0, imageUrl: '', isNew: false };
+        groups.push(g);
+      }
+      const n = p.stock[state.pool] || 0;
+      g.items.push({ p: p, n: n });
+      g.total += n;
+      if (!g.imageUrl && p.imageUrl) g.imageUrl = p.imageUrl;
+      if (isNew(p)) g.isNew = true;
+    });
+    groups.forEach(g => g.items.sort((a, b) => sizeRank(a.p.size) - sizeRank(b.p.size) || cmp(a.p.id, b.p.id)));
+    return state.showZero ? groups : groups.filter(g => g.total > 0);
+  }
+
+  function sortGroups(groups) {
+    // 名前順はカテゴリを商品IDの若い順（元の在庫表の並び）に
+    const rank = {};
+    state.products.slice().sort((a, b) => cmp(a.id, b.id)).forEach(p => {
+      if (!(p.category in rank)) rank[p.category] = Object.keys(rank).length;
+    });
+    const byName = (a, b) => (rank[a.category] - rank[b.category]) || cmp(a.type, b.type) || cmp(a.color, b.color);
+    const sorters = {
+      name: byName,
+      stockDesc: (a, b) => (b.total - a.total) || byName(a, b),
+      stockAsc: (a, b) => (a.total - b.total) || byName(a, b),
+    };
+    return groups.slice().sort(sorters[state.sort] || byName);
+  }
+
+  // ---------- 描画 ----------
+  function renderTabs() {
+    $('tabs').innerHTML = owners.map(o => {
+      const total = state.products.reduce((sum, p) => sum + (p.stock[o] || 0), 0);
+      return '<button type="button" class="tab' + (o === state.pool ? ' active' : '') + '" data-pool="' + esc(o) +
+        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '枚</small></button>';
+    }).join('');
+    const note = ownerNotes[owners.indexOf(state.pool)] || '';
+    $('poolNote').textContent = note;
+    $('poolNote').hidden = !note;
+    document.documentElement.style.setProperty('--theme', poolColor(state.pool));
+  }
+
+  function renderChips() {
+    const types = [];
+    state.products.forEach(p => {
+      if (((p.stock[state.pool] || 0) > 0 || state.showZero) && types.indexOf(p.type) < 0) types.push(p.type);
+    });
+    const hasNew = state.products.some(p => isNew(p) && ((p.stock[state.pool] || 0) > 0 || state.showZero));
+    const chip = (value, label) => '<button type="button" data-type="' + esc(value) + '"' +
+      (state.type === value ? ' class="on"' : '') + '>' + esc(label) + '</button>';
+    $('typeChips').innerHTML = chip('', 'すべて') + types.map(t => chip(t, t)).join('') + (hasNew ? chip('__new__', '🆕 新着') : '');
+  }
+
+  function sizeChipsHtml(g) {
+    return g.items.map(x => {
+      const st = stateOf(x.n);
+      const label = x.p.size && x.p.size !== '-' ? esc(x.p.size) + ' ' : '';
+      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>枚</span>';
+    }).join('');
+  }
+
+  function groupHtml(g, grouped) {
+    const st = stateOf(g.total);
+    const thumb = g.imageUrl
+      ? '<img class="thumb" src="' + esc(imageSrc(g.imageUrl, 260)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
+      : '<div class="thumb none" aria-hidden="true">' + typeIcon(g.type) + '</div>';
+    const counts = g.items.length === 1
+      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>枚<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
+      : '<div class="sizes">' + sizeChipsHtml(g) + '</div>';
+    const tags = (grouped ? [] : [g.type]).concat([g.color])
+      .filter(v => v && v !== '-')
+      .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
+    return '<button type="button" class="item" data-key="' + esc(g.key) + '">' + thumb +
+      '<div class="info"><div class="name">' + esc(grouped ? g.type : g.category) +
+      (g.isNew ? '<span class="new">NEW</span>' : '') + '</div>' +
+      '<div class="tags">' + tags + '</div>' + counts + '</div></button>';
+  }
+
+  function emptyHtml() {
+    const message = state.q
+      ? '「' + esc(state.q) + '」に合う商品は見つかりませんでした'
+      : (state.type ? 'この種類の在庫はありません' : esc(state.pool) + 'に在庫がある商品はありません');
+    return '<div class="empty">' + message +
+      (state.q ? '<br><button type="button" class="link" data-action="clear-q">検索をやめてすべて表示</button>' : '') +
+      (state.showZero ? '' : '<br><button type="button" class="link" data-action="show-zero">売り切れの商品も表示する</button>') +
+      '</div>';
+  }
+
+  function render() {
+    renderTabs();
+    renderChips();
+    const groups = sortGroups(groupsOf());
+    const total = groups.reduce((sum, g) => sum + g.total, 0);
+    const items = groups.reduce((sum, g) => sum + g.items.length, 0);
+    $('summary').innerHTML = '<b>' + items + '</b>件 ／ 合計 <b>' + total + '</b>枚' +
+      (state.q ? '（「' + esc(state.q) + '」で検索中）' : '');
+
+    if (!groups.length) {
+      $('list').innerHTML = emptyHtml();
+      return;
+    }
+    if (state.sort !== 'name') {
+      $('list').innerHTML = groups.map(g => groupHtml(g, false)).join('');
+      return;
+    }
+    const blocks = [];
+    groups.forEach(g => {
+      const last = blocks[blocks.length - 1];
+      if (last && last.category === g.category) last.groups.push(g);
+      else blocks.push({ category: g.category, groups: [g] });
+    });
+    $('list').innerHTML = blocks.map(b =>
+      '<h2 class="group-title">' + esc(b.category) +
+      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '枚</span></h2>' +
+      b.groups.map(g => groupHtml(g, true)).join('')).join('');
+  }
+
+  /** 「3分前の在庫です」のように、いつの在庫かをやさしく出す */
+  function stampUpdated() {
+    const diff = Date.now() - state.loadedAt;
+    const d = new Date(state.loadedAt);
+    let when;
+    if (diff < 60000) when = 'たった今';
+    else if (diff < 3600000) when = Math.floor(diff / 60000) + '分前';
+    else if (diff < 12 * 3600000) when = Math.floor(diff / 3600000) + '時間前';
+    else when = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    $('updated').textContent = '🕒 ' + when + 'の在庫です（↻ で最新に）';
+  }
+
+  // ---------- くわしく見る ----------
+  function openDetail(key) {
+    const g = groupsOf().find(x => x.key === key);
+    if (!g) return;
+    $('detailImg').hidden = !g.imageUrl;
+    $('detailNoImg').hidden = !!g.imageUrl;
+    if (g.imageUrl) $('detailImg').src = imageSrc(g.imageUrl, 900);
+    else $('detailNoImg').textContent = typeIcon(g.type);
+    $('detailTitle').innerHTML = esc(g.category) + (g.isNew ? '<span class="new">NEW</span>' : '');
+    $('detailTags').innerHTML = [g.type, g.color].filter(v => v && v !== '-')
+      .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
+    $('detailSizes').innerHTML = sizeChipsHtml(g);
+    const st = stateOf(g.total);
+    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + '枚（' + st.word + '）';
+    $('detail').hidden = false;
+  }
+
+  // ---------- 最新の在庫を取得 ----------
+  function reload(silent) {
+    const btn = $('reload');
+    const done = () => { btn.disabled = false; btn.classList.remove('spin'); };
+    btn.disabled = true;
+    btn.classList.add('spin');
+    rpc('getBootData', {})
+      .then(res => {
+        done();
+        if (!res || !res.ok) return toast('最新の在庫を読み込めませんでした：' + (res ? res.error : '返事がありません'), true);
+        applyConfig(res.data.config);
+        state.products = res.data.products;
+        state.loadedAt = Date.now();
+        saveCache(res.data.config, res.data.products);
+        stampUpdated();
+        render();
+        if (!silent) toast('最新の在庫にしました');
+      })
+      .catch(err => {
+        done();
+        toast('最新の在庫を読み込めませんでした（' + (err && err.message ? err.message : err) + '）。電波の良い場所で ↻ を押してください', true);
+      });
+  }
+
+  function applyConfig(config) {
+    BOOT.config = config;
+    owners = config.owners;
+    ownerNotes = config.ownerNotes || owners.map(() => '');
+    sizes = config.sizes;
+    threshold = config.lowStockThreshold;
+    newDays = config.newDays || 14;
+    if (owners.indexOf(state.pool) < 0) state.pool = owners[0];
+    $('testBadge').hidden = config.env !== 'test';
+  }
+
+  // ---------- 使い方・ホーム画面への追加 ----------
+  function showGuide() {
+    $('guidePools').textContent = owners.join(' ／ ') + ' を切り替えられます';
+    $('guide').hidden = false;
+  }
+
+  /** 案内バナーは15秒たったら自動で消す（また次に開いたときに出る） */
+  function autoHideBanner() {
+    setTimeout(() => { $('installBanner').hidden = true; }, 15000);
+  }
+
+  function maybeShowInstall() {
+    if (stored(INSTALL_KEY) === 'no') return;
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (standalone || window.top !== window.self) return;
+    const ua = navigator.userAgent;
+    const banner = $('installBanner');
+    if (/Line\//i.test(ua)) {
+      $('installTitle').textContent = 'ブラウザで開くと見やすくなります';
+      $('installText').textContent = '右下の「︙」や「↗」から Safari / Chrome で開いてください';
+      banner.hidden = false;
+      autoHideBanner();
+      return;
+    }
+    if (/iPhone|iPad|iPod/.test(ua)) {
+      $('installText').textContent = '下の［共有］ボタン →「ホーム画面に追加」で、アプリのように開けます';
+      banner.hidden = false;
+      autoHideBanner();
+      return;
+    }
+    if (deferredInstall) {
+      $('installText').textContent = 'ホーム画面に追加すると、次から1タップで開けます';
+      $('installBtn').hidden = false;
+      banner.hidden = false;
+      autoHideBanner();
+      return;
+    }
+    if (/Android/.test(ua)) {
+      $('installText').textContent = '右上の「︙」→「ホーム画面に追加」で、アプリのように開けます';
+      banner.hidden = false;
+      autoHideBanner();
+    }
+  }
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstall = e;
+    if ($('guide').hidden) maybeShowInstall();
+  });
+
+  // ---------- 初期化 ----------
+  function init() {
+    loadPrefs();
+    document.body.classList.toggle('big', state.big);
+    $('btnFont').classList.toggle('on', state.big);
+    $('showZero').checked = state.showZero;
+    document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b.dataset.sort === state.sort));
+    stampUpdated();
+    render();
+    setInterval(stampUpdated, 30000);
+
+    $('tabs').addEventListener('click', e => {
+      const tab = e.target.closest('[data-pool]');
+      if (!tab) return;
+      state.pool = tab.dataset.pool;
+      savePrefs();
+      render();
+      window.scrollTo(0, 0);
+    });
+    $('q').addEventListener('input', e => {
+      state.q = e.target.value;
+      $('qClear').hidden = !state.q;
+      render();
+    });
+    $('qClear').addEventListener('click', () => {
+      $('q').value = '';
+      state.q = '';
+      $('qClear').hidden = true;
+      render();
+    });
+    $('typeChips').addEventListener('click', e => {
+      const b = e.target.closest('[data-type]');
+      if (!b) return;
+      state.type = b.dataset.type === state.type ? '' : b.dataset.type;
+      render();
+    });
+    $('sortSeg').addEventListener('click', e => {
+      const b = e.target.closest('[data-sort]');
+      if (!b) return;
+      state.sort = b.dataset.sort;
+      document.querySelectorAll('#sortSeg button').forEach(x => x.classList.toggle('on', x === b));
+      savePrefs();
+      render();
+    });
+    $('showZero').addEventListener('change', e => {
+      state.showZero = e.target.checked;
+      savePrefs();
+      render();
+    });
+    $('btnFont').addEventListener('click', () => {
+      state.big = !state.big;
+      document.body.classList.toggle('big', state.big);
+      $('btnFont').classList.toggle('on', state.big);
+      savePrefs();
+      toast(state.big ? '文字を大きくしました' : '文字の大きさを元に戻しました');
+    });
+    $('btnHelp').addEventListener('click', showGuide);
+    $('reload').addEventListener('click', () => reload(false));
+    $('list').addEventListener('click', e => {
+      if (e.target.closest('[data-action="show-zero"]')) {
+        state.showZero = true;
+        $('showZero').checked = true;
+        savePrefs();
+        return render();
+      }
+      if (e.target.closest('[data-action="clear-q"]')) {
+        $('q').value = '';
+        state.q = '';
+        $('qClear').hidden = true;
+        return render();
+      }
+      const item = e.target.closest('[data-key]');
+      if (item) openDetail(item.dataset.key);
+    });
+    $('detailClose').addEventListener('click', () => { $('detail').hidden = true; });
+    $('detail').addEventListener('click', e => { if (e.target === $('detail')) $('detail').hidden = true; });
+    $('guideClose').addEventListener('click', () => {
+      $('guide').hidden = true;
+      store(GUIDE_KEY, 'done');
+      maybeShowInstall();
+    });
+    $('installClose').addEventListener('click', () => {
+      $('installBanner').hidden = true;
+      store(INSTALL_KEY, 'no');
+    });
+    $('installBtn').addEventListener('click', () => {
+      $('installBanner').hidden = true;
+      if (deferredInstall) {
+        deferredInstall.prompt();
+        deferredInstall = null;
+      }
+    });
+    // 開きっぱなしのページに戻ってきたら、5分以上たっていれば自動で最新にする
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && Date.now() - state.loadedAt > 5 * 60 * 1000) reload(true);
+    });
+
+    if (!stored(GUIDE_KEY)) showGuide();
+    else maybeShowInstall();
+    if (!BOOT.ok) toast('在庫の読み込みに失敗しました：' + BOOT.error, true);
+  }
+
+  function start(boot, loadedAt) {
+    BOOT = boot;
+    applyConfig(boot.config);
+    state.pool = owners[0];
+    state.products = boot.products || [];
+    state.loadedAt = loadedAt || Date.now();
+    init();
+  }
+
+  if (BOOT) {
+    start(BOOT);
+  } else {
+    // 前回の在庫があればすぐ表示し、最新は裏で取り直す（GAS の応答待ちで止まって見えないように）
+    const cached = loadCache();
+    if (cached) {
+      start(Object.assign({ ok: true }, cached), cached.at);
+      reload(true);
+    } else {
+      rpc('getBootData', {})
+        .then(res => {
+          if (!res || !res.ok) throw new Error(res ? res.error : '返事がありません');
+          saveCache(res.data.config, res.data.products);
+          start(Object.assign({ ok: true }, res.data));
+        })
+        .catch(err => {
+          $('list').innerHTML = '<div class="empty">在庫を読み込めませんでした（' + esc(err.message) + '）' +
+            '<br><button type="button" class="link" onclick="location.reload()">もう一度読み込む</button></div>';
+        });
+    }
+  }
+</script>
+</body>
+</html>

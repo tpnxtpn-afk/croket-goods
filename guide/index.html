@@ -94,6 +94,10 @@
     font-size: 17px;
     line-height: 1.85;
     -webkit-text-size-adjust: 100%;
+    /* 文節の切れ目（<wbr>）でだけ改行する。長すぎる語は最後の手段として途中で折る */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    line-break: strict;
   }
   body.admin-mode { --accent: var(--admin); --accent-soft: var(--admin-soft); }
   a { color: var(--accent); }
@@ -162,7 +166,7 @@
   .url-box b { display: block; font-size: 14px; color: var(--muted); font-weight: 700; }
   .url-text {
     display: block; margin: 2px 0 8px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; word-break: break-all; color: var(--text);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; word-break: normal; overflow-wrap: anywhere; color: var(--text);
     user-select: all;
   }
   .copy {
@@ -214,6 +218,7 @@
   }
   .step .note b { color: var(--text); }
   .step .warn { background: var(--low-soft); }
+  .nw { white-space: nowrap; }
 
   .legend { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 10px; max-width: 36em; }
   .legend li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
@@ -293,7 +298,19 @@
     .step { grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .masthead-inner { grid-template-columns: 1fr; }
     .hero-art { display: none; }
-    .tabs-guide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .tabs-guide { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+    .tabs-guide div {
+      display: grid; grid-template-columns: 34px 6.5em minmax(0, 1fr); gap: 8px; align-items: center;
+      padding: 10px 12px; text-align: left; font-size: 14px;
+    }
+    .tabs-guide .ico { font-size: 22px; text-align: center; }
+    .tabs-guide b { font-size: 15px; }
+    .flow-arrow { flex-basis: 100%; text-align: center; transform: rotate(90deg); line-height: 1; }
+    .shots { gap: 16px; }
+    .shots .phone { flex-basis: 250px; }
+    .switch button { gap: 6px; padding: 8px 6px; }
+    .screen .pin { width: 22px; height: 22px; font-size: 12px; box-shadow: 0 0 0 2px #fff, 0 1px 5px rgba(0,0,0,.35); }
+    .intro { padding: 18px 16px; }
     .howto { grid-template-columns: minmax(0, 1fr); }
     .url-box { grid-template-columns: 1fr; justify-items: start; }
   }
@@ -321,8 +338,8 @@
   <div class="masthead-inner">
     <div>
       <p class="kicker">KOROKKE GOODS STOCK</p>
-      <h1>コロッケ <span class="nb">グッズ在庫ガイド</span></h1>
-      <p class="lead">スマホで在庫を見る方法と、売れた数・入った数を記録する方法を、画面の写真つきで説明します。はじめての方は上から順番に読んでください。</p>
+      <h1><span class="nb">コロッケ</span> <span class="nb">グッズ在庫ガイド</span></h1>
+      <p class="lead">スマホで<wbr>在庫を<wbr>見る<wbr>方<wbr>法と、<wbr>売れた<wbr>数・<wbr>入った<wbr>数を<wbr>記録する<wbr>方<wbr>法を、<wbr>画面の<wbr>写真つきで<wbr>説明します。<wbr>はじめての方は<wbr>上から<wbr>順番に<wbr>読んでください。</p>
     </div>
     <svg class="hero-art" viewBox="0 0 150 230" aria-hidden="true">
       <rect x="10" y="4" width="130" height="222" rx="22" fill="#0b0c0f"/>
@@ -364,11 +381,11 @@
   <div class="switch" role="tablist" aria-label="説明を切りかえる">
     <button type="button" role="tab" id="tab-viewer" data-panel="viewer" aria-selected="true" aria-controls="viewer">
       <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 5-10 7 1 2 5 7 10 7s9-5 10-7c-1-2-5-7-10-7zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg>
-      <span>在庫を見る人<small>お客さま・スタッフ</small></span>
+      <span>見る<wbr>人<small><wbr>お客さま・スタッフ</small></span>
     </button>
     <button type="button" role="tab" id="tab-admin" data-panel="admin" aria-selected="false" aria-controls="admin">
       <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.3V21h3.7l10.9-10.9-3.7-3.7L3 17.3zM20.7 7a1 1 0 000-1.4l-2.3-2.3a1 1 0 00-1.4 0l-1.8 1.8 3.7 3.7L20.7 7z"/></svg>
-      <span>在庫を管理する人<small>販売・補充・登録をする方</small></span>
+      <span>管理する<wbr>人<small>販売・補充・登録</small></span>
     </button>
   </div>
 </div>
@@ -378,68 +395,68 @@
 <!-- ======================================================= -->
 <main class="page" id="viewer" role="tabpanel" aria-labelledby="tab-viewer">
   <div class="intro">
-    <h2>いまある商品と、残りの数がスマホで見られます</h2>
-    <p>見るだけのページなので、どこを押しても在庫が変わることはありません。安心してさわってください。</p>
+    <h2>いまある<wbr>商品と、<wbr>残りの<wbr>数が<wbr>スマホで<wbr>見られます</h2>
+    <p>見るだけの<wbr>ページなので、<wbr>どこを<wbr>押しても<wbr>在庫が<wbr>変わる<wbr>ことは<wbr>ありません。<wbr>安心して<wbr>さわってください。</p>
     <div class="url-box">
       <div class="qr" id="qrViewer" aria-label="在庫ページのQRコード"></div>
       <div>
-        <b>在庫ページのアドレス</b>
-        <span class="url-text" id="urlViewer">https://tpnxtpn-afk.github.io/croket-goods/</span>
-        <button type="button" class="copy" data-copy="urlViewer">アドレスをコピー</button>
+        <b>在庫ページの<wbr>アドレス</b>
+        <span class="url-text" id="urlViewer">https://tpnxtpn-afk.github.io/<wbr>croket-goods/</span>
+        <button type="button" class="copy" data-copy="urlViewer">アドレスを<wbr>コピー</button>
       </div>
     </div>
-    <p style="font-size:15px">スマホのカメラでQRコードを写すと、ページが開きます。</p>
+    <p style="font-size:15px">スマホの<wbr>カメラで<wbr>QRコードを<wbr>写すと、<wbr>ページが<wbr>開きます。</p>
   </div>
 
   <nav class="toc" aria-label="もくじ">
     <h2>もくじ</h2>
     <ol>
-      <li><a href="#v-open">ページをひらく</a></li>
-      <li><a href="#v-screen">画面の見かた</a></li>
-      <li><a href="#v-colors">残りの数の見かた</a></li>
-      <li><a href="#v-place">場所を切りかえる</a></li>
-      <li><a href="#v-find">商品をさがす</a></li>
-      <li><a href="#v-detail">大きな写真で見る</a></li>
-      <li><a href="#v-big">文字を大きくする</a></li>
-      <li><a href="#v-home">ホーム画面に置く</a></li>
-      <li><a href="#v-faq">こまったとき</a></li>
+      <li><a href="#v-open">ページを<wbr>ひらく</a></li>
+      <li><a href="#v-screen">画面の<wbr>見かた</a></li>
+      <li><a href="#v-colors">残りの<wbr>数の<wbr>見かた</a></li>
+      <li><a href="#v-place">場所を<wbr>切りかえる</a></li>
+      <li><a href="#v-find">商品を<wbr>さが<wbr>す</a></li>
+      <li><a href="#v-detail">大きな<wbr>写真で<wbr>見る</a></li>
+      <li><a href="#v-big">文字を<wbr>大きくする</a></li>
+      <li><a href="#v-home">ホーム画面に<wbr>置く</a></li>
+      <li><a href="#v-faq">こまった<wbr>とき</a></li>
     </ol>
   </nav>
 
   <section class="step" id="v-open">
     <div>
-      <div class="step-head"><span class="no">1</span><h3>ページをひらく</h3></div>
-      <p>上のアドレスをタップするか、QRコードをカメラで写してください。</p>
-      <p>はじめて開いたときだけ、<b>「かんたんな使い方」</b>が出ます。読んだら<b>「わかりました」</b>を押してください。</p>
-      <div class="note">この説明は、あとから右上の <b>？</b> ボタンでいつでも見られます。</div>
+      <div class="step-head"><span class="no">1</span><h3>ページを<wbr>ひらく</h3></div>
+      <p>上の<wbr>アドレスを<wbr>タップするか、<wbr>QRコードを<wbr>カメラで<wbr>写してください。</p>
+      <p>はじめて<wbr>開いた<wbr>ときだけ、<b><wbr>「かんたんな<wbr>使い方」</b>が<wbr>出ます。<wbr>読んだら<b><wbr>「わかりました」</b>を<wbr>押してください。</p>
+      <div class="note">この<wbr>説明は、<wbr>あとから<wbr>右上の <b>？</b> ボタンで<wbr>いつでも<wbr>見られます。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c01-guide.jpg" width="600" height="1298" alt="はじめて開いたときに出る、かんたんな使い方の画面"></div>
-      <figcaption>はじめて開いたときの画面</figcaption>
+      <figcaption>はじめて<wbr>開いた<wbr>ときの<wbr>画面</figcaption>
     </figure>
   </section>
 
   <section class="step" id="v-screen">
     <div>
-      <div class="step-head"><span class="no">2</span><h3>画面の見かた</h3></div>
-      <p>写真の赤い番号と、下の説明の番号が同じ場所です。</p>
+      <div class="step-head"><span class="no">2</span><h3>画面の<wbr>見かた</h3></div>
+      <p>写真の<wbr>赤い<wbr>番号と、<wbr>下の<wbr>説明の<wbr>番号が<wbr>同じ<wbr>場所です。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>大</b> … 文字が大きくなります。もう一度押すと元に戻ります。</span></li>
-        <li><span class="pin">2</span><span><b>？</b> … 使い方をもう一度見られます。</span></li>
-        <li><span class="pin">3</span><span><b>↻</b> … いちばん新しい在庫にします。</span></li>
-        <li><span class="pin">4</span><span><b>場所のタブ</b> … 在庫が置いてある場所ごとに見られます。</span></li>
-        <li><span class="pin">5</span><span><b>さがす</b> … 名前・色・サイズで探せます。</span></li>
-        <li><span class="pin">6</span><span><b>種類のボタン</b> … Tシャツだけ、タオルだけ、のように絞れます。</span></li>
-        <li><span class="pin">7</span><span><b>並び順</b> … 名前順・多い順・少ない順を選べます。</span></li>
-        <li><span class="pin">8</span><span><b>売り切れも表示</b> … チェックすると、残りが0の商品も出ます。</span></li>
-        <li><span class="pin">9</span><span><b>残りの数</b> … サイズごとに何枚あるかが出ます。</span></li>
+        <li><span class="pin">1</span><span><b>大</b> … 文字が<wbr>大きくなります。<wbr>もう<wbr>一度<wbr>押すと<wbr>元に<wbr>戻ります。</span></li>
+        <li><span class="pin">2</span><span><b>？</b> … 使い方を<wbr>もう<wbr>一度<wbr>見られます。</span></li>
+        <li><span class="pin">3</span><span><b>↻</b> … いちばん新しい<wbr>在庫にします。</span></li>
+        <li><span class="pin">4</span><span><b>場所の<wbr>タブ</b> … 在庫が<wbr>置いてある<wbr>場所ごとに<wbr>見られます。</span></li>
+        <li><span class="pin">5</span><span><b>さが<wbr>す</b> … 名前・色・サイズで<wbr>探せます。</span></li>
+        <li><span class="pin">6</span><span><b>種類の<wbr>ボタン</b> … Tシャツだけ、<wbr>タオルだけ、のように<wbr>絞れます。</span></li>
+        <li><span class="pin">7</span><span><b>並び順</b> … 名前順・<wbr>多い順・少ない<wbr>順を<wbr>選べます。</span></li>
+        <li><span class="pin">8</span><span><b>売り<wbr>切れも<wbr>表示</b> … チェックすると、<wbr>残りが<wbr>0の<wbr>商品も<wbr>出ます。</span></li>
+        <li><span class="pin">9</span><span><b>残りの<wbr>数</b> … サイズごとに<wbr>何枚あるかが<wbr>出ます。</span></li>
       </ol>
     </div>
     <figure class="phone">
       <div class="screen">
         <img src="img/c02-list.jpg" width="600" height="1298" alt="在庫一覧の画面">
         <span class="pin" style="left:73.1%;top:2.8%">1</span>
-        <span class="pin" style="left:83.3%;top:6.4%">2</span>
+        <span class="pin" style="left:83.3%;top:7.4%">2</span>
         <span class="pin" style="left:93.6%;top:2.8%">3</span>
         <span class="pin" style="left:50%;top:13.2%">4</span>
         <span class="pin" style="left:88%;top:24.1%">5</span>
@@ -448,155 +465,155 @@
         <span class="pin" style="left:82.1%;top:35.3%">8</span>
         <span class="pin" style="left:78%;top:55.7%">9</span>
       </div>
-      <figcaption>いつも見る画面（在庫の一覧）</figcaption>
+      <figcaption>いつも<wbr>見る<wbr>画面<wbr>（在庫の<wbr>一覧）</figcaption>
     </figure>
   </section>
 
   <section class="step" id="v-colors">
     <div>
-      <div class="step-head"><span class="no">3</span><h3>残りの数の見かた</h3></div>
-      <p>残りの数は、色と言葉でも分かるようになっています。</p>
+      <div class="step-head"><span class="no">3</span><h3>残りの<wbr>数の<wbr>見かた</h3></div>
+      <p>残りの<wbr>数は、<wbr>色と<wbr>言葉でも<wbr>分かるようになっています。</p>
       <div class="states">
-        <div class="state ok"><span class="dot">🟢</span><b>あり</b><small>6枚以上</small></div>
-        <div class="state low"><span class="dot">🟡</span><b>のこりわずか</b><small>5枚以下</small></div>
-        <div class="state zero"><span class="dot">⚪</span><b>売り切れ</b><small>0枚</small></div>
+        <div class="state ok"><span class="dot">🟢</span><b><wbr>あり</b><small>6枚以上</small></div>
+        <div class="state low"><span class="dot">🟡</span><b>の<wbr>こりわずか</b><small><wbr>5枚以下</small></div>
+        <div class="state zero"><span class="dot">⚪</span><b>売り<wbr>切れ</b><small>0枚</small></div>
       </div>
-      <p>サイズがいくつかある商品は、1つのカードにまとめて、サイズごとの数が並びます。</p>
+      <p>サイズが<wbr>いくつか<wbr>ある<wbr>商品は、<wbr>1つの<wbr>カードに<wbr>まとめて、<wbr>サイズごとの<wbr>数が<wbr>並びます。</p>
       <div class="chip-demo" aria-label="サイズごとの表示の例">
         <span class="ok">S 12枚</span><span class="low">M 3枚</span><span class="zero">L 0枚</span><span class="ok">XL 8枚</span>
       </div>
-      <p>この例では、Mは残り少なく、Lは売り切れです。</p>
-      <div class="note">最近入った商品には、赤い <b>NEW</b> の印が付きます（入ってから2週間）。</div>
+      <p>この<wbr>例では、<wbr>Mは<wbr>残り少なく、<wbr>Lは<wbr>売り切れです。</p>
+      <div class="note">最近<wbr>入った<wbr>商品には、<wbr>赤い <b>NEW</b> の<wbr>印が<wbr>付きます<wbr>（<wbr>入ってから<wbr>2週間）。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c08-sort.jpg" width="600" height="1298" alt="在庫の多い順に並べた画面"></div>
-      <figcaption>「多い順」に並べたところ</figcaption>
+      <figcaption>「多い順」に<wbr>並べた<wbr>ところ</figcaption>
     </figure>
   </section>
 
   <section class="step" id="v-place">
     <div>
-      <div class="step-head"><span class="no">4</span><h3>場所を切りかえる</h3></div>
-      <p>いちばん上のタブで、在庫が置いてある場所を切りかえます。タブの下の小さな数字は、その場所にある合計の枚数です。</p>
+      <div class="step-head"><span class="no">4</span><h3>場所を<wbr>切りかえる</h3></div>
+      <p>いちばん上の<wbr>タブで、<wbr>在庫が<wbr>置いてある<wbr>場所を<wbr>切りかえます。<wbr>タブの<wbr>下の<wbr>小さな<wbr>数字は、<wbr>その<wbr>場所に<wbr>ある<wbr>合計の<wbr>枚数です。</p>
       <ol class="legend">
-        <li><span class="pin" style="background:#e67e22">現</span><span><b>現場用</b> … イベント・公演の会場に持っていく在庫です。</span></li>
-        <li><span class="pin" style="background:#e84393">フ</span><span><b>ファンクラブ用</b> … ファンクラブ向けに取っておいている在庫です。</span></li>
-        <li><span class="pin" style="background:#27ae60">販</span><span><b>販売在庫</b> … 通販などで販売する在庫です。</span></li>
+        <li><span class="pin" style="background:#e67e22">現</span><span><b>現場用</b> … イベント・<wbr>公演の<wbr>会場に<wbr>持っていく<wbr>在庫です。</span></li>
+        <li><span class="pin" style="background:#e84393">フ</span><span><b>ファンクラブ用</b> … ファンクラブ向けに<wbr>取っておいている<wbr>在庫です。</span></li>
+        <li><span class="pin" style="background:#27ae60">販</span><span><b>販売在庫</b> … 通販などで<wbr>販売する<wbr>在庫です。</span></li>
       </ol>
-      <div class="note">最後に見ていた場所は覚えているので、次に開いたときもそのまま出ます。</div>
+      <div class="note">最後に<wbr>見ていた<wbr>場所は<wbr>覚えているので、<wbr>次に<wbr>開いた<wbr>ときも<wbr>そのまま<wbr>出ます。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c03-tab.jpg" width="600" height="1298" alt="ファンクラブ用のタブを選んだ画面"></div>
-      <figcaption>「ファンクラブ用」を選んだところ</figcaption>
+      <figcaption>「ファンクラブ用」を<wbr>選んだ<wbr>ところ</figcaption>
     </figure>
   </section>
 
   <section class="step two-shots" id="v-find">
     <div>
-      <div class="step-head"><span class="no">5</span><h3>商品をさがす</h3></div>
-      <p><b>文字を打たずに探すとき</b>は、種類のボタン（Tシャツ・タオルなど）を押します。もう一度押すと元に戻ります。</p>
-      <p><b>言葉で探すとき</b>は、上の「さがす」欄に打ちこみます。ひらがなでも大丈夫です。</p>
-      <div class="note">「しろ」で白い商品、「てぃーしゃつ」でTシャツ、「xl」でXLサイズが見つかります。✕ を押すと検索をやめて、全部の商品に戻ります。</div>
+      <div class="step-head"><span class="no">5</span><h3>商品を<wbr>さが<wbr>す</h3></div>
+      <p><b>文字を<wbr>打たずに<wbr>探すとき</b>は、<wbr>種類の<wbr>ボタン<wbr>（Tシャツ・タオルなど）を<wbr>押します。<wbr>もう<wbr>一度<wbr>押すと<wbr>元に<wbr>戻ります。</p>
+      <p><b>言葉で<wbr>探すとき</b>は、<wbr>上の<wbr>「さが<wbr>す」欄に<wbr>打ちこみます。<wbr>ひらがなでも<wbr>大丈夫です。</p>
+      <div class="note">「しろ」で<wbr>白い<wbr>商品、<wbr>「て<wbr>ぃーしゃつ」で<wbr>Tシャツ、<wbr>「xl」で<wbr>XLサイズが<wbr>見つかります。<wbr>✕ を<wbr>押すと<wbr>検索を<wbr>やめて、<wbr>全部の<wbr>商品に<wbr>戻ります。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/c04-chip.jpg" width="600" height="1298" alt="Tシャツのボタンを押して、Tシャツだけにした画面"></div>
-        <figcaption>「Tシャツ」を押すと、Tシャツだけ出ます</figcaption>
+        <figcaption>「Tシャツ」を<wbr>押すと、<wbr>Tシャツだけ出ます</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/c05-search.jpg" width="600" height="1298" alt="しろ と入れて検索した画面"></div>
-        <figcaption>「しろ」と入れると、白い商品が出ます</figcaption>
+        <figcaption>「しろ」と<wbr>入れると、<wbr>白い<wbr>商品が<wbr>出ます</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step" id="v-detail">
     <div>
-      <div class="step-head"><span class="no">6</span><h3>大きな写真で見る</h3></div>
-      <p>商品のカードをタップすると、大きな写真とサイズごとの残りの数が出ます。</p>
-      <p>見終わったら<b>「閉じる」</b>を押すか、写真の外側を押してください。</p>
+      <div class="step-head"><span class="no">6</span><h3>大きな<wbr>写真で<wbr>見る</h3></div>
+      <p>商品の<wbr>カードを<wbr>タップすると、<wbr>大きな<wbr>写真と<wbr>サイズごとの<wbr>残りの<wbr>数が<wbr>出ます。</p>
+      <p>見終わったら<b><wbr>「閉じる」</b>を<wbr>押すか、<wbr>写真の<wbr>外側を<wbr>押してください。</p>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c06-detail.jpg" width="600" height="1298" alt="商品をタップして大きな写真を出した画面"></div>
-      <figcaption>商品をタップしたところ</figcaption>
+      <figcaption>商品を<wbr>タップした<wbr>ところ</figcaption>
     </figure>
   </section>
 
   <section class="step" id="v-big">
     <div>
-      <div class="step-head"><span class="no">7</span><h3>文字を大きくする</h3></div>
-      <p>右上の<b>「大」</b>を押すと、画面全体の文字が大きくなります。押すと白くなり、大きくなっている印です。</p>
-      <p>もう一度押すと元の大きさに戻ります。選んだ大きさは、次に開いたときも同じです。</p>
+      <div class="step-head"><span class="no">7</span><h3>文字を<wbr>大きくする</h3></div>
+      <p>右上の<b><wbr>「大」</b>を<wbr>押すと、<wbr>画面全体の<wbr>文字が<wbr>大きくなります。<wbr>押すと<wbr>白くなり、<wbr>大きくなっている<wbr>印です。</p>
+      <p>もう<wbr>一度<wbr>押すと<wbr>元の<wbr>大きさに<wbr>戻ります。<wbr>選んだ<wbr>大きさは、<wbr>次に<wbr>開いた<wbr>ときも<wbr>同じです。</p>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c07-big.jpg" width="600" height="1298" alt="文字を大きくした画面"></div>
-      <figcaption>文字を大きくしたところ</figcaption>
+      <figcaption>文字を<wbr>大きくした<wbr>ところ</figcaption>
     </figure>
   </section>
 
   <section class="step" id="v-home">
     <div>
-      <div class="step-head"><span class="no">8</span><h3>ホーム画面に置く（おすすめ）</h3></div>
-      <p>スマホのホーム画面にアイコンを置くと、次からは<b>アイコンを押すだけ</b>で開けます。アプリを入れる必要はありません。</p>
+      <div class="step-head"><span class="no">8</span><h3>ホーム画面に<wbr>置く<wbr>（おすすめ）</h3></div>
+      <p>スマホの<wbr>ホーム画面に<wbr>アイコンを<wbr>置くと、<wbr>次からは<b><wbr>アイコンを<wbr>押すだけ</b>で<wbr>開けます。<wbr>アプリを<wbr>入れる<wbr>必要は<wbr>ありません。</p>
       <div class="howto">
         <div>
-          <h4>iPhone（Safari）</h4>
+          <h4>iPhone<wbr>（Safari）</h4>
           <ol>
-            <li>画面の下の
+            <li>画面の<wbr>下の
               <svg width="22" height="22" viewBox="0 0 24 24" aria-label="共有ボタン"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8 7m4-4l4 4M7 11H5v10h14V11h-2"/></svg>
-              （共有）を押す</li>
-            <li>「ホーム画面に追加」を押す</li>
-            <li>右上の「追加」を押す</li>
+              （共有）を<wbr>押す</li>
+            <li>「ホーム画面に<wbr>追加」を<wbr>押す</li>
+            <li>右上の<wbr>「追加」を<wbr>押す</li>
           </ol>
         </div>
         <div>
-          <h4>Android（Chrome）</h4>
+          <h4>Android<wbr>（Chrome）</h4>
           <ol>
             <li>右上の
               <svg width="22" height="22" viewBox="0 0 24 24" aria-label="メニューボタン"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>
-              （メニュー）を押す</li>
-            <li>「ホーム画面に追加」を押す</li>
-            <li>「追加」を押す</li>
+              （メニュー）を<wbr>押す</li>
+            <li>「ホーム画面に<wbr>追加」を<wbr>押す</li>
+            <li>「追加」を<wbr>押す</li>
           </ol>
         </div>
       </div>
-      <div class="note">ページを開くと、画面の下に案内が出ることがあります。いらないときは ✕ で消せます。<br>LINEの中で開いたときは、右下のメニューから「Safariで開く」や「ブラウザで開く」を選ぶと見やすくなります。</div>
+      <div class="note">ページを<wbr>開くと、<wbr>画面の<wbr>下に<wbr>案内が<wbr>出る<wbr>ことがあります。<wbr>いらない<wbr>ときは ✕ で<wbr>消せます。<br><wbr>LINEの<wbr>中で<wbr>開いた<wbr>ときは、<wbr>右下の<wbr>メニューから<wbr>「Safariで<wbr>開く」や<wbr>「ブラウザで<wbr>開く」を<wbr>選ぶと<wbr>見やすくなります。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c10-install.jpg" width="600" height="1298" alt="画面の下に、ホーム画面への追加の案内が出ているところ"></div>
-      <figcaption>画面の下に出る案内</figcaption>
+      <figcaption>画面の<wbr>下に<wbr>出る<wbr>案内</figcaption>
     </figure>
   </section>
 
   <section class="step wide" id="v-faq">
     <div>
-      <div class="step-head"><span class="no">?</span><h3>こまったとき</h3></div>
+      <div class="step-head"><span class="no">?</span><h3>こまった<wbr>とき</h3></div>
       <div class="faq">
         <details open>
-          <summary>数が古いような気がする</summary>
-          <p>画面の上に「◯分前の在庫です」と出ています。右上の <b>↻</b> を押すと、いちばん新しい在庫になります。しばらく開いたままにしていた場合は、戻ってきたときに自動で新しくなります。</p>
+          <summary>数が<wbr>古いような<wbr>気が<wbr>する</summary>
+          <p>画面の<wbr>上に<wbr>「◯分前の<wbr>在庫です」と<wbr>出ています。<wbr>右上の <b>↻</b> を<wbr>押すと、<wbr>いちばん新しい<wbr>在庫に<wbr>なります。<wbr>しばらく<wbr>開いたままに<wbr>していた<wbr>場合は、<wbr>戻ってきた<wbr>ときに<wbr>自動で<wbr>新しくなります。</p>
         </details>
         <details>
-          <summary>「読み込み中…」のまま進まない</summary>
-          <p>電波の良い場所で、右上の <b>↻</b> を押してください。それでも出ないときは、ページを一度閉じて開きなおしてください。</p>
+          <summary>「読み込み中…」のまま<wbr>進まない</summary>
+          <p>電波の<wbr>良い<wbr>場所で、<wbr>右上の <b>↻</b> を<wbr>押してください。<wbr>それでも<wbr>出ない<wbr>ときは、<wbr>ページを<wbr>一度<wbr>閉じて<wbr>開きな<wbr>おしてください。</p>
         </details>
         <details>
-          <summary>写真が出ない</summary>
-          <p>写真は少し遅れて出ることがあります。数秒待つか、↻ を押してください。写真がまだ撮られていない商品は、Tシャツやタオルの絵で表示されます。</p>
+          <summary>写真が<wbr>出ない</summary>
+          <p>写真は<wbr>少し<wbr>遅れて<wbr>出る<wbr>ことがあります。<wbr>数秒待つか、<wbr>↻ を<wbr>押してください。<wbr>写真が<wbr>まだ<wbr>撮られていない<wbr>商品は、<wbr>Tシャツや<wbr>タオルの<wbr>絵で<wbr>表示されます。</p>
         </details>
         <details>
-          <summary>探している商品が出てこない</summary>
-          <p>検索の欄に文字が残っていないか、種類のボタンが選ばれたままになっていないか確かめてください。残りが0の商品は、「売り切れも表示」にチェックを入れると出てきます。</p>
+          <summary>探している<wbr>商品が<wbr>出てこない</summary>
+          <p>検索の<wbr>欄に<wbr>文字が<wbr>残っていないか、<wbr>種類の<wbr>ボタンが<wbr>選ばれたままに<wbr>なっていないか<wbr>確かめてください。<wbr>残りが<wbr>0の<wbr>商品は、<wbr>「売り<wbr>切れも<wbr>表示」に<wbr>チェックを<wbr>入れると<wbr>出てきます。</p>
         </details>
         <details>
-          <summary>ここで在庫を変えられますか？</summary>
-          <p>このページは見るだけです。在庫を変えるのは、管理する人の画面からです（上の「在庫を管理する人」を見てください）。</p>
+          <summary>ここで<wbr>在庫を<wbr>変えられますか？</summary>
+          <p>この<wbr>ページは<wbr>見るだけです。<wbr>在庫を<wbr>変えるのは、<wbr>管理する<wbr>人の<wbr>画面からです<wbr>（上の<wbr>「管理する<wbr>人」を<wbr>押すと<wbr>説明が<wbr>出ます）。</p>
         </details>
       </div>
     </div>
   </section>
 
-  <p class="footer">コロッケ グッズ在庫ガイド　見る人向け</p>
+  <p class="footer">コロッケ グッズ在庫ガイド　見る<wbr>人向け</p>
 </main>
 
 <!-- ======================================================= -->
@@ -604,14 +621,14 @@
 <!-- ======================================================= -->
 <main class="page" id="admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
   <div class="intro">
-    <h2>売れた数・入った数を記録して、在庫をいつも正しく保ちます</h2>
-    <p>管理の画面で記録した数は、すぐに「見る人」のページにも反映されます。まちがえても、あとから取り消せるので安心してください。</p>
+    <h2>売れた<wbr>数・<wbr>入った<wbr>数を<wbr>記録して、<wbr>在庫を<wbr>いつも<wbr>正しく<wbr>保ちます</h2>
+    <p>管理の<wbr>画面で<wbr>記録した数は、<wbr>すぐに<wbr>「見る<wbr>人」の<wbr>ページにも<wbr>反映されます。<wbr>まちがえても、<wbr>あとから<wbr>取り消せるので<wbr>安心してください。</p>
     <div class="url-box">
       <div class="qr" id="qrAdmin" aria-label="管理画面のQRコード"></div>
       <div>
-        <b>管理画面のアドレス</b>
-        <span class="url-text" id="urlAdmin">https://tpnxtpn-afk.github.io/croket-goods/admin.html</span>
-        <button type="button" class="copy" data-copy="urlAdmin">アドレスをコピー</button>
+        <b>管理画面の<wbr>アドレス</b>
+        <span class="url-text" id="urlAdmin">https://tpnxtpn-afk.github.io/<wbr>croket-goods/<wbr>admin.html</span>
+        <button type="button" class="copy" data-copy="urlAdmin">アドレスを<wbr>コピー</button>
       </div>
     </div>
   </div>
@@ -619,21 +636,21 @@
   <nav class="toc" aria-label="もくじ">
     <h2>もくじ</h2>
     <ol>
-      <li><a href="#a-start">はじめに開くとき</a></li>
-      <li><a href="#a-tabs">画面の全体</a></li>
-      <li><a href="#a-sale">売れたとき</a></li>
-      <li><a href="#a-undo">まちがえたとき</a></li>
-      <li><a href="#a-sheet">販売チェック表</a></li>
-      <li><a href="#a-batch">まとめて記録</a></li>
+      <li><a href="#a-start">はじめに<wbr>開く<wbr>とき</a></li>
+      <li><a href="#a-tabs">画面の<wbr>全体</a></li>
+      <li><a href="#a-sale">売れた<wbr>とき</a></li>
+      <li><a href="#a-undo">まちがえた<wbr>とき</a></li>
+      <li><a href="#a-sheet">販売チェック<wbr>表</a></li>
+      <li><a href="#a-batch">まとめて<wbr>記録</a></li>
       <li><a href="#a-restock">補充・移動</a></li>
-      <li><a href="#a-register">新しい商品</a></li>
-      <li><a href="#a-edit">商品を直す・終える</a></li>
-      <li><a href="#a-count">数え直す（棚卸し）</a></li>
+      <li><a href="#a-register">新しい<wbr>商品</a></li>
+      <li><a href="#a-edit">商品を<wbr>直す・<wbr>終える</a></li>
+      <li><a href="#a-count">数え直す<wbr>（棚卸し）</a></li>
       <li><a href="#a-alerts">在庫わずか</a></li>
       <li><a href="#a-summary">集計</a></li>
-      <li><a href="#a-import">在庫表から取り込む</a></li>
-      <li><a href="#a-other">その他・注意</a></li>
-      <li><a href="#a-faq">こまったとき</a></li>
+      <li><a href="#a-import">在庫表から<wbr>取り込む</a></li>
+      <li><a href="#a-other">その他・<wbr>注意</a></li>
+      <li><a href="#a-faq">こまった<wbr>とき</a></li>
     </ol>
   </nav>
 
@@ -641,53 +658,53 @@
 
   <section class="step two-shots" id="a-start">
     <div>
-      <div class="step-head"><span class="no">1</span><h3>はじめに開くとき</h3></div>
-      <p>はじめて開くと<b>パスワード</b>を聞かれます。パスワードは、管理の担当者から教えてもらってください。一度入れれば、そのスマホでは次から聞かれません。</p>
-      <p>つぎに<b>お名前</b>を聞かれます。入れておくと、だれが記録したかが販売履歴に残ります。ここで入れた名前は、画面右上の 👤 からいつでも変えられます。</p>
-      <div class="note warn"><b>パスワードは、ほかの人に送ったり、見える場所に書いたりしないでください。</b>管理画面では在庫を変えられるためです。</div>
+      <div class="step-head"><span class="no">1</span><h3>はじめに<wbr>開く<wbr>とき</h3></div>
+      <p>はじめて<wbr>開くと<b><wbr>パスワード</b>を<wbr>聞かれます。<wbr>パスワードは、<wbr>管理の<wbr>担当者から<wbr>教えて<wbr>もらってください。<wbr>一度<wbr>入れれば、<wbr>その<wbr>スマホでは<wbr>次から<wbr>聞かれません。</p>
+      <p>つぎに<b><wbr>お名前</b>を<wbr>聞かれます。<wbr>入れておくと、<wbr>だれが<wbr>記録したかが<wbr>販売履歴に<wbr>残ります。<wbr>ここで<wbr>入れた<wbr>名前は、<wbr>画面右上の 👤 から<wbr>いつでも<wbr>変えられます。</p>
+      <div class="note warn"><b>パスワードは、<wbr>ほかの<wbr>人に<wbr>送ったり、<wbr>見える<wbr>場所に<wbr>書いたりしないでください。</b><wbr>管理画面では<wbr>在庫を<wbr>変えられる<wbr>ためです。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a01-password.jpg" width="600" height="1298" alt="パスワードを入れる画面"></div>
-        <figcaption>パスワードを入れる</figcaption>
+        <figcaption>パスワードを<wbr>入れる</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a02-operator.jpg" width="600" height="1298" alt="担当者のお名前を入れる画面"></div>
-        <figcaption>お名前を入れて「保存する」</figcaption>
+        <figcaption>お名前を<wbr>入れて<wbr>「保存する」</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step wide" id="a-tabs">
     <div>
-      <div class="step-head"><span class="no">2</span><h3>画面の全体</h3></div>
-      <p>画面の上に5つのボタン（タブ）が並んでいます。やりたいことに合わせて押してください。</p>
+      <div class="step-head"><span class="no">2</span><h3>画面の<wbr>全体</h3></div>
+      <p>画面の<wbr>上に<wbr>5つの<wbr>ボタン<wbr>（タブ）が<wbr>並んでいます。<wbr>やりたいことに<wbr>合わせて<wbr>押してください。</p>
       <div class="tabs-guide">
-        <div><span class="ico">📝</span><b>商品登録</b>新しい商品を入れる</div>
-        <div><span class="ico">🛒</span><b>販売・補充</b>売れた・入った・動かした</div>
-        <div><span class="ico">📋</span><b>在庫一覧</b>全部の在庫・棚卸し・印刷</div>
-        <div><span class="ico">🔔</span><b>在庫わずか</b>残り5枚以下の商品</div>
-        <div><span class="ico">📊</span><b>集計・他</b>月ごと・公演ごとの売上</div>
+        <div><span class="ico">📝</span><b>商品登録</b>新しい<wbr>商品を<wbr>入れる</div>
+        <div><span class="ico">🛒</span><b>販売・補充</b>売れた<wbr>・<wbr>入った<wbr>・<wbr>動かした</div>
+        <div><span class="ico">📋</span><b>在庫一覧</b><wbr>全部の<wbr>在庫・<wbr>棚卸し・印刷</div>
+        <div><span class="ico">🔔</span><b>在庫わずか</b><wbr>残り5枚以下の<wbr>商品</div>
+        <div><span class="ico">📊</span><b>集計・他</b>月ごと<wbr>・<wbr>公演ごとの<wbr>売上</div>
       </div>
-      <p>タブの上にある <b>👀 在庫確認ページ</b> を押すと、お客さまが見る在庫のページが開きます。<b>📖 説明書</b> を押すと、この説明書が開きます。</p>
-      <div class="note">タブを押すと、画面の上の色も変わります（販売は赤、在庫一覧はオレンジ、など）。今どの画面にいるかの目印にしてください。</div>
+      <p>タブの<wbr>上に<wbr>ある <b>👀 在庫確認ページ</b> を<wbr>押すと、<wbr>お客さまが<wbr>見る<wbr>在庫の<wbr>ページが<wbr>開きます。<b><wbr>📖 説明書</b> を<wbr>押すと、<wbr>この<wbr>説明書が<wbr>開きます。</p>
+      <div class="note">タブを<wbr>押すと、<wbr>画面の<wbr>上の<wbr>色も<wbr>変わります<wbr>（販売は<wbr>赤、<wbr>在庫一覧は<wbr>オレンジ、<wbr>など）。<wbr>今どの<wbr>画面に<wbr>いるかの<wbr>目印に<wbr>してください。</div>
     </div>
   </section>
 
-  <p class="chapter-title">毎日の記録</p>
+  <p class="chapter-title">毎日の<wbr>記録</p>
 
   <section class="step" id="a-sale">
     <div>
-      <div class="step-head"><span class="no">3</span><h3>売れたとき（1つずつ記録）</h3></div>
-      <p><b>🛒 販売・補充</b> を押して、<b>「1商品ずつ」</b>を選びます。</p>
+      <div class="step-head"><span class="no">3</span><h3>売れた<wbr>とき<wbr>（1つずつ記録）</h3></div>
+      <p><b>🛒 販売・補充</b> を<wbr>押して、<b><wbr>「1商<wbr>品ずつ」</b>を<wbr>選びます。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>▼ 販売</b> を選びます（赤くなっていればOK）。</span></li>
-        <li><span class="pin">2</span><span><b>🔍 選ぶ</b> を押すと、写真つきの一覧から商品を選べます。商品IDを覚えていなくて大丈夫です。</span></li>
-        <li><span class="pin">3</span><span><b>📷</b> を押すと、商品に貼ったQRラベルをカメラで読み取れます。</span></li>
-        <li><span class="pin">4</span><span><b>数量</b>を ＋ − で合わせます。</span></li>
-        <li><span class="pin">5</span><span>どこの在庫から売れたか（<b>在庫区分</b>）を選びます。</span></li>
-        <li><span class="pin">6</span><span><b>イベント名</b>を入れると、公演ごとの売上が分かります（入れなくてもOK）。</span></li>
-        <li><span class="pin">7</span><span><b>▼ 販売する</b> を押します。</span></li>
+        <li><span class="pin">1</span><span><b>▼ 販売</b> を<wbr>選びます<wbr>（赤くなっていれば<wbr>OK）。</span></li>
+        <li><span class="pin">2</span><span><b>🔍 選ぶ</b> を<wbr>押すと、<wbr>写真つきの<wbr>一覧から<wbr>商品を<wbr>選べます。<wbr>商品IDを<wbr>覚えていなくて<wbr>大丈夫です。</span></li>
+        <li><span class="pin">3</span><span><b>📷</b> を<wbr>押すと、<wbr>商品に<wbr>貼った<wbr>QRラベルを<wbr>カメラで<wbr>読み取れます。</span></li>
+        <li><span class="pin">4</span><span><b>数量</b>を ＋ − で<wbr>合わせます。</span></li>
+        <li><span class="pin">5</span><span>どこの<wbr>在庫から<wbr>売れたか<wbr>（<b>在庫区分</b>）を<wbr>選びます。</span></li>
+        <li><span class="pin">6</span><span><b>イベント名</b>を<wbr>入れると、<wbr>公演ごとの<wbr>売上が<wbr>分かります<wbr>（入れなくても<wbr>OK）。</span></li>
+        <li><span class="pin">7</span><span><b>▼ 販売する</b> を<wbr>押します。</span></li>
       </ol>
     </div>
     <figure class="phone">
@@ -701,49 +718,49 @@
         <span class="pin" style="left:88%;top:86.2%">6</span>
         <span class="pin" style="left:78%;top:93.1%">7</span>
       </div>
-      <figcaption>「販売・補充」の画面</figcaption>
+      <figcaption>「販売・補充」の<wbr>画面</figcaption>
     </figure>
   </section>
 
   <section class="step two-shots" id="a-sale-confirm">
     <div>
-      <div class="step-head"><span class="no">4</span><h3>確認して、記録する</h3></div>
-      <p>「販売します。よろしいですか？」と、商品と数が出ます。合っていれば <b>▼ 販売する</b>、ちがっていれば <b>やめる</b> を押します。</p>
-      <p>記録できると <b>✅ 販売しました</b> と出て、在庫の数が「10 → 8」のように変わったことが分かります。</p>
+      <div class="step-head"><span class="no">4</span><h3>確認して、<wbr>記録する</h3></div>
+      <p>「販売します。<wbr>よろしいですか？」と、<wbr>商品と<wbr>数が<wbr>出ます。<wbr>合っていれば <b>▼ 販売する</b>、<wbr>ちがっていれば <b>やめる</b> を<wbr>押します。</p>
+      <p>記録できると <b>✅ 販売しました</b> と<wbr>出て、<wbr>在庫の<wbr>数が<wbr>「10 → 8」のように<wbr>変わった<wbr>ことが<wbr>分かります。</p>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a07-confirm.jpg" width="600" height="1298" alt="販売する前の確認画面"></div>
-        <figcaption>記録する前に、必ず確認が出ます</figcaption>
+        <figcaption>記録する<wbr>前に、<wbr>必ず<wbr>確認が<wbr>出ます</figcaption>
       </figure>
       <span class="flow-arrow" aria-hidden="true">→</span>
       <figure class="phone">
         <div class="screen"><img src="img/a08-done.jpg" width="600" height="1298" alt="販売を記録したあとの画面。下に取り消すボタンがある"></div>
-        <figcaption>記録できたら、下に「取り消す」が出ます</figcaption>
+        <figcaption>記録できたら、<wbr>下に<wbr>「取り消す」が<wbr>出ます</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step" id="a-undo">
     <div>
-      <div class="step-head"><span class="no">5</span><h3>まちがえたとき</h3></div>
-      <p>記録したあと、画面の下に黒い帯が出ます。まちがえたときは <b>↩ 取り消す</b> を押し、確認で <b>取り消す</b> を押すと、在庫が元に戻ります。</p>
-      <div class="note">取り消せるのは <b>24時間以内</b>の「販売・補充・移動・棚卸し」です。<br>帯を ✕ で消してしまったときや、24時間より前のものは、反対の操作（売った数を「補充」する、など）で直してください。</div>
+      <div class="step-head"><span class="no">5</span><h3>まちがえた<wbr>とき</h3></div>
+      <p>記録した<wbr>あと、<wbr>画面の<wbr>下に<wbr>黒い帯が<wbr>出ます。<wbr>まちがえた<wbr>ときは <b>↩ 取り消す</b> を<wbr>押し、<wbr>確認で <b>取り消す</b> を<wbr>押すと、<wbr>在庫が<wbr>元に<wbr>戻ります。</p>
+      <div class="note">取り消せるのは <b>24時間以内</b>の<wbr>「販売・補充・移動・<wbr>棚卸し」です。<br><wbr>帯を ✕ で<wbr>消してしまった<wbr>ときや、<wbr>24時間より<wbr>前の<wbr>ものは、<wbr>反対の<wbr>操作<wbr>（売った<wbr>数を<wbr>「補充」する、<wbr>など）で<wbr>直してください。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a08b-undo-confirm.jpg" width="600" height="1298" alt="取り消しますか、という確認の画面"></div>
-      <figcaption>「取り消しますか？」の確認</figcaption>
+      <figcaption>「取り消しますか？」の<wbr>確認</figcaption>
     </figure>
   </section>
 
-  <p class="chapter-title">イベント・公演の日</p>
+  <p class="chapter-title">イベント・<wbr>公演の<wbr>日</p>
 
   <section class="step wide" id="a-sheet">
     <div>
-      <div class="step-head"><span class="no">6</span><h3>販売チェック表で数える</h3></div>
-      <p>会場では、1つ売れるたびにスマホで記録するのは大変です。紙の<b>販売チェック表</b>に「正」の字で数えておき、あとでまとめて記録するのがおすすめです。</p>
-      <p><b>📋 在庫一覧</b> を押して、<b>🖨 販売チェック表</b> を押すと、いまの商品の一覧が入った表が出ます。パソコンやスマホのブラウザの「印刷」から、<b>A4・縦</b>で印刷してください（1枚に入ります）。</p>
-      <p>時間帯①〜⑦のマスに、売れるたびに線を1本ずつ書きます。5本で「正」が1つ＝5個です。</p>
+      <div class="step-head"><span class="no">6</span><h3>販売チェック表で<wbr>数える</h3></div>
+      <p>会場では、<wbr>1つ<wbr>売れる<wbr>たびに<wbr>スマホで<wbr>記録するのは<wbr>大変です。<wbr>紙の<b><wbr>販売チェック表</b>に<wbr>「正」の<wbr>字で<wbr>数えて<wbr>おき、<wbr>あとで<wbr>まとめて<wbr>記録するのが<wbr>おすすめです。</p>
+      <p><b>📋 在庫一覧</b> を<wbr>押して、<b><wbr>🖨 販売チェック<wbr>表</b> を<wbr>押すと、<wbr>いまの<wbr>商品の<wbr>一覧が<wbr>入った<wbr>表が<wbr>出ます。<wbr>パソコンや<wbr>スマホの<wbr>ブラウザの<wbr>「印刷」から、<b class="nw"><wbr>A4・縦</b>で<wbr>印刷してください<wbr>（1枚に<wbr>入ります）。</p>
+      <p>時間帯①〜⑦の<wbr>マスに、<wbr>売れる<wbr>たびに<wbr>線を<wbr>1本ずつ<wbr>書きます。<wbr>5本で<wbr>「正」が<wbr>1つ＝5個です。</p>
       <div class="tally-demo" aria-label="正の字の書き方">
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32" stroke-width="3" stroke-linecap="round" fill="none"/></svg>1個</figure>
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33" stroke-width="3" stroke-linecap="round" fill="none"/></svg>2個</figure>
@@ -751,7 +768,7 @@
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33" stroke-width="3" stroke-linecap="round" fill="none"/></svg>4個</figure>
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33M6 33H34" stroke-width="3" stroke-linecap="round" fill="none"/></svg>5個</figure>
       </div>
-      <p>いちばん下に<b>空欄が10行</b>あります。当日いきなり出た商品は、ここに名前を書いて使ってください。上には日付と担当者2名の欄があります。</p>
+      <p>いちばん<wbr>下に<b><wbr>空欄が<wbr>10行</b>あります。<wbr>当日いきなり出た<wbr>商品は、<wbr>ここに<wbr>名前を<wbr>書いて<wbr>使ってください。<wbr>上には<wbr>日付と<wbr>担当者2名の<wbr>欄が<wbr>あります。</p>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -759,25 +776,25 @@
           <img src="img/a10-inventory.jpg" width="600" height="1298" alt="在庫一覧の画面。棚卸し、販売チェック表、QRラベル印刷のボタンがある">
           <span class="pin" style="left:64%;top:43.2%">1</span>
         </div>
-        <figcaption>① 在庫一覧の「🖨 販売チェック表」</figcaption>
+        <figcaption>① 在庫一覧の<wbr>「🖨 販売チェック表」</figcaption>
       </figure>
       <figure class="paper">
         <img src="img/a13-tally.jpg" width="900" height="1272" alt="販売チェック表の見本。商品の一覧と、時間帯①から⑦、合計、備考の欄がある">
-        <figcaption>出てくる表（上の「印刷する」で印刷します）</figcaption>
+        <figcaption>出てくる<wbr>表（上の<wbr>「印刷する」で<wbr>印刷します）</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step" id="a-batch">
     <div>
-      <div class="step-head"><span class="no">7</span><h3>公演のあとに、まとめて記録する</h3></div>
-      <p>販売チェック表の「合計」を見ながら、まとめて記録します。</p>
+      <div class="step-head"><span class="no">7</span><h3>公演の<wbr>あとに、<wbr>まとめて<wbr>記録する</h3></div>
+      <p>販売チェック表の<wbr>「合計」を<wbr>見ながら、<wbr>まとめて<wbr>記録します。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>🛒 販売・補充</b> で <b>「まとめて入力」</b>を選び、<b>▼ 販売</b>・在庫区分・イベント名を合わせます。</span></li>
-        <li><span class="pin">2</span><span>売れた商品の <b>＋</b> を、売れた数だけ押します。多すぎたら <b>−</b> で減らします。</span></li>
-        <li><span class="pin">3</span><span>画面の下に「◯商品 ◯枚」と合計が出ます。<b>確認へ</b> を押し、内容が合っていれば <b>▼ 販売する</b>。</span></li>
+        <li><span class="pin">1</span><span><b>🛒 販売・補充</b> で <b>「まとめて<wbr>入力」</b>を<wbr>選び、<b><wbr>▼ 販売</b>・在庫区分・イベント名を<wbr>合わせます。</span></li>
+        <li><span class="pin">2</span><span>売れた<wbr>商品の <b>＋</b> を、<wbr>売れた<wbr>数だけ押します。<wbr>多すぎたら <b>−</b> で<wbr>減らします。</span></li>
+        <li><span class="pin">3</span><span>画面の<wbr>下に<wbr>「◯商品 ◯枚」と<wbr>合計が<wbr>出ます。<b><wbr>確認へ</b> を<wbr>押し、<wbr>内容が<wbr>合っていれば <b>▼ 販売する</b>。</span></li>
       </ol>
-      <div class="note">途中で画面を閉じても、入れた数はそのスマホに残っています。「商品をさがす」の欄に名前を入れると、目的の商品がすぐ見つかります。📷 でQRラベルを読むと、1回で＋1されます。</div>
+      <div class="note">途中で<wbr>画面を<wbr>閉じても、<wbr>入れた<wbr>数は<wbr>その<wbr>スマホに<wbr>残っています。<wbr>「商品を<wbr>さが<wbr>す」の<wbr>欄に<wbr>名前を<wbr>入れると、<wbr>目的の<wbr>商品が<wbr>すぐ<wbr>見つかります。<wbr>📷 で<wbr>QRラベルを<wbr>読むと、<wbr>1回で<wbr>＋1されます。</div>
     </div>
     <figure class="phone">
       <div class="screen">
@@ -786,43 +803,43 @@
         <span class="pin" style="left:28.5%;top:92%">3</span>
         <span class="pin" style="left:86.2%;top:91%">3</span>
       </div>
-      <figcaption>数を入れると、下に合計と「確認へ」が出ます</figcaption>
+      <figcaption>数を<wbr>入れると、<wbr>下に<wbr>合計と<wbr>「確認へ」が<wbr>出ます</figcaption>
     </figure>
   </section>
 
   <section class="step" id="a-restock">
     <div>
-      <div class="step-head"><span class="no">8</span><h3>商品が入ったとき・場所を移すとき</h3></div>
-      <p>売れたときと同じ画面の、いちばん上のボタンを切りかえます。</p>
+      <div class="step-head"><span class="no">8</span><h3>商品が<wbr>入った<wbr>とき・場所を<wbr>移すとき</h3></div>
+      <p>売れた<wbr>ときと<wbr>同じ<wbr>画面の、<wbr>いちばん上の<wbr>ボタンを<wbr>切りかえます。</p>
       <ol class="legend">
-        <li><span class="pin" style="background:#27ae60">▲</span><span><b>▲ 補充</b> … 商品が入って、在庫が増えたとき。</span></li>
-        <li><span class="pin" style="background:#3498db">⇄</span><span><b>⇄ 移動</b> … 「現場用」から「ファンクラブ用」のように、置き場所を移すとき。移動元と移動先を選びます。合計の数は変わらず、売上にも入りません。</span></li>
+        <li><span class="pin" style="background:#27ae60">▲</span><span><b>▲ 補充</b> … 商品が<wbr>入って、<wbr>在庫が<wbr>増えた<wbr>とき。</span></li>
+        <li><span class="pin" style="background:#3498db">⇄</span><span><b>⇄ 移動</b> … 「現場用」から<wbr>「ファンクラブ用」のように、<wbr>置き場所を<wbr>移すとき。<wbr>移動元と<wbr>移動先を<wbr>選びます。<wbr>合計の<wbr>数は<wbr>変わらず、<wbr>売上にも<wbr>入りません。</span></li>
       </ol>
-      <p>そのあとの流れ（商品を選ぶ → 数量 → 確認）は、販売と同じです。</p>
+      <p>その<wbr>あとの<wbr>流れ<wbr>（商品を<wbr>選ぶ → 数量 → 確認）は、<wbr>販売と<wbr>同じです。</p>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a06-sale.jpg" width="600" height="1298" alt="販売・補充の画面の上にある、販売・補充・移動のボタン">
         <span class="pin" style="left:50%;top:35.3%;background:#27ae60">▲</span>
         <span class="pin" style="left:79.6%;top:35.3%;background:#3498db">⇄</span>
       </div>
-      <figcaption>上のボタンで「補充」「移動」に切りかえ</figcaption>
+      <figcaption>上の<wbr>ボタンで<wbr>「補充」<wbr>「移動」に<wbr>切りかえ</figcaption>
     </figure>
   </section>
 
-  <p class="chapter-title">商品の管理</p>
+  <p class="chapter-title">商品の<wbr>管理</p>
 
   <section class="step two-shots" id="a-register">
     <div>
-      <div class="step-head"><span class="no">9</span><h3>新しい商品を登録する</h3></div>
-      <p><b>📝 商品登録</b> を押して、上から順に入れていきます。</p>
+      <div class="step-head"><span class="no">9</span><h3>新しい<wbr>商品を<wbr>登録する</h3></div>
+      <p><b>📝 商品登録</b> を<wbr>押して、<wbr>上から<wbr>順に<wbr>入れていきます。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>カテゴリ（商品名）・種別・色</b>を入れます。一度入れた名前は、打ちはじめると候補に出ます。</span></li>
-        <li><span class="pin">2</span><span><b>サイズ</b>は、あるものを全部押して選びます（紫になったものが選ばれています）。選んだ数だけ、まとめて登録されます。</span></li>
-        <li><span class="pin">3</span><span><b>価格</b>を入れると、売上金額が集計できます（空でもOK）。</span></li>
-        <li><span class="pin">4</span><span><b>📷 撮影する</b> でその場で写真を撮れます（なくてもOK）。</span></li>
-        <li><span class="pin">5</span><span><b>初期在庫</b>に、サイズごと・場所ごとの数を入れて、<b>登録する</b> を押します。</span></li>
+        <li><span class="pin">1</span><span><b>カテゴリ<wbr>（商品名）<wbr>・種別・色</b>を<wbr>入れます。<wbr>一度<wbr>入れた<wbr>名前は、<wbr>打ち<wbr>はじめると<wbr>候補に<wbr>出ます。</span></li>
+        <li><span class="pin">2</span><span><b>サイズ</b>は、<wbr>ある<wbr>ものを<wbr>全部<wbr>押して<wbr>選びます<wbr>（紫に<wbr>なった<wbr>ものが<wbr>選ばれています）。<wbr>選んだ数だけ、<wbr>まとめて<wbr>登録されます。</span></li>
+        <li><span class="pin">3</span><span><b>価格</b>を<wbr>入れると、<wbr>売上金額が<wbr>集計できます<wbr>（<wbr>空でも<wbr>OK）。</span></li>
+        <li><span class="pin">4</span><span><b>📷 撮影する</b> で<wbr>その場で<wbr>写真を<wbr>撮れます<wbr>（なくても<wbr>OK）。</span></li>
+        <li><span class="pin">5</span><span><b>初期在庫</b>に、<wbr>サイズごと<wbr>・場所ごとの<wbr>数を<wbr>入れて、<b><wbr>登録する</b> を<wbr>押します。</span></li>
       </ol>
-      <div class="note warn">同じ商品がもうあるときは、黄色い文字で知らせます。そのときは登録せずに、「販売・補充 → ▲ 補充」で数を足してください。</div>
+      <div class="note warn">同じ<wbr>商品が<wbr>もう<wbr>ある<wbr>ときは、<wbr>黄色い<wbr>文字で<wbr>知らせます。<wbr>その<wbr>ときは<wbr>登録せずに、<wbr>「販売・補充 → ▲ 補充」で<wbr>数を<wbr>足してください。</div>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -832,47 +849,47 @@
           <span class="pin" style="left:88%;top:73.7%">3</span>
           <span class="pin" style="left:50%;top:90.2%">4</span>
         </div>
-        <figcaption>商品情報とサイズ（S・M・L）を選んだところ</figcaption>
+        <figcaption>商品情報と<wbr>サイズ<wbr>（S・M・L）を<wbr>選んだ<wbr>ところ</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a04-register-stock.jpg" width="600" height="1298" alt="初期在庫を入れる表と、まとめて登録するボタン">
           <span class="pin" style="left:88%;top:40%">5</span>
         </div>
-        <figcaption>サイズごとの在庫を入れて「まとめて登録する」</figcaption>
+        <figcaption>サイズごとの<wbr>在庫を<wbr>入れて<wbr>「まとめて<wbr>登録する」</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step two-shots" id="a-edit">
     <div>
-      <div class="step-head"><span class="no">10</span><h3>商品を直す・販売を終える</h3></div>
-      <p><b>📋 在庫一覧</b> で、商品IDの横の <b>✏️</b> を押すと、名前・種別・色・サイズ・価格を直せます。在庫の数や履歴は変わりません。</p>
-      <p><b>もう仕入れない商品</b>は、<b>🚫 販売終了にする</b> を押してください。見る人のページと「在庫わずか」から消えます。データは残るので、あとで「販売中に戻す」こともできます。</p>
-      <div class="note warn"><b>🗑 この商品を削除</b> は、2回押すと本当に消えます。元には戻せません。ふだんは「販売終了」を使ってください。</div>
-      <div class="note">一覧の写真の欄を押すと、写真を見たり差しかえたりできます。写真がない商品は ＋ を押すと追加できます。</div>
+      <div class="step-head"><span class="no">10</span><h3>商品を<wbr>直す・販売を<wbr>終える</h3></div>
+      <p><b>📋 在庫一覧</b> で、<wbr>商品IDの<wbr>横の <b>✏️</b> を<wbr>押すと、<wbr>名前・種別・色・サイズ・価格を<wbr>直せます。<wbr>在庫の<wbr>数や<wbr>履歴は<wbr>変わりません。</p>
+      <p><b>もう<wbr>仕入れない<wbr>商品</b>は、<b><wbr>🚫 販売終了に<wbr>する</b> を<wbr>押してください。<wbr>見る<wbr>人の<wbr>ページと<wbr>「在庫わずか」から<wbr>消えます。<wbr>データは<wbr>残るので、<wbr>あとで<wbr>「販売中に<wbr>戻す」ことも<wbr>できます。</p>
+      <div class="note warn"><b>🗑 この<wbr>商品を<wbr>削除</b> は、<wbr>2回押すと<wbr>本当に<wbr>消えます。<wbr>元には<wbr>戻せません。<wbr>ふだんは<wbr>「販売終了」を<wbr>使ってください。</div>
+      <div class="note">一覧の<wbr>写真の<wbr>欄を<wbr>押すと、<wbr>写真を<wbr>見たり差しかえたりできます。<wbr>写真が<wbr>ない<wbr>商品は ＋ を<wbr>押すと<wbr>追加できます。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a12-edit.jpg" width="600" height="1298" alt="商品情報の編集画面"></div>
-        <figcaption>✏️ で開く編集画面</figcaption>
+        <figcaption>✏️ で<wbr>開く<wbr>編集画面</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a12b-edit-bottom.jpg" width="600" height="1298" alt="編集画面の下にある、販売終了と削除のボタン"></div>
-        <figcaption>下にある「販売終了」と「削除」</figcaption>
+        <figcaption>下に<wbr>ある<wbr>「販売終了」と<wbr>「削除」</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step two-shots" id="a-count">
     <div>
-      <div class="step-head"><span class="no">11</span><h3>数え直す（棚卸し）</h3></div>
-      <p>実際の数と画面の数が合わないときに使います。</p>
+      <div class="step-head"><span class="no">11</span><h3>数え直す<wbr>（棚卸し）</h3></div>
+      <p>実際の<wbr>数と<wbr>画面の<wbr>数が<wbr>合わない<wbr>ときに<wbr>使います。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>📋 在庫一覧</b> の <b>📋 棚卸し</b> を押し、数える場所（在庫区分）を選びます。</span></li>
-        <li><span class="pin">2</span><span>数えた数を、商品ごとに入れます。入れなかった商品はそのままです。右に「+2」「−1」のように差が出ます。</span></li>
-        <li><span class="pin">3</span><span>下の <b>確認へ</b> を押し、差がある商品だけが出るので確かめて <b>反映する</b>。</span></li>
+        <li><span class="pin">1</span><span><b>📋 在庫一覧</b> の <b>📋 棚卸し</b> を<wbr>押し、<wbr>数える<wbr>場所<wbr>（在庫区分）を<wbr>選びます。</span></li>
+        <li><span class="pin">2</span><span>数えた<wbr>数を、<wbr>商品ごとに<wbr>入れます。<wbr>入れなかった<wbr>商品は<wbr>そのままです。<wbr>右に<wbr>「+2」<wbr>「−1」のように<wbr>差が<wbr>出ます。</span></li>
+        <li><span class="pin">3</span><span>下の <b>確認へ</b> を<wbr>押し、<wbr>差が<wbr>ある<wbr>商品だけが<wbr>出るので<wbr>確かめて <b>反映する</b>。</span></li>
       </ol>
-      <div class="note">棚卸しで直した数は、売上には入りません。途中でやめても、入れた数はそのスマホに残ります。</div>
+      <div class="note">棚卸しで<wbr>直した数は、<wbr>売上には<wbr>入りません。<wbr>途中で<wbr>やめても、<wbr>入れた<wbr>数は<wbr>その<wbr>スマホに<wbr>残ります。</div>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -881,11 +898,11 @@
           <span class="pin" style="left:58%;top:65.9%">2</span>
           <span class="pin" style="left:86.2%;top:91%">3</span>
         </div>
-        <figcaption>数えた数を入れる</figcaption>
+        <figcaption>数えた<wbr>数を<wbr>入れる</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a11b-stocktake-confirm.jpg" width="600" height="1298" alt="棚卸しの確認画面。差がある商品だけが出る"></div>
-        <figcaption>差がある商品だけ確認して「反映する」</figcaption>
+        <figcaption>差が<wbr>ある<wbr>商品だけ<wbr>確認して<wbr>「反映する」</figcaption>
       </figure>
     </div>
   </section>
@@ -893,93 +910,93 @@
   <section class="step" id="a-alerts">
     <div>
       <div class="step-head"><span class="no">12</span><h3>在庫わずか</h3></div>
-      <p><b>🔔 在庫わずか</b> には、合計が<b>5枚以下</b>の商品が、少ない順に並びます。タブの上の数字が、その件数です。</p>
-      <p><b>▲ 補充</b> を押すと、その商品を選んだ状態で補充の画面に移ります。もう仕入れない商品は <b>🚫 販売終了</b> にすると、この一覧から消えます。</p>
-      <div class="note">メールなどのお知らせは送りません。気になったときにこのタブを見てください。</div>
+      <p><b>🔔 在庫わずか</b> には、<wbr>合計が<b><wbr>5枚以下</b>の<wbr>商品が、<wbr>少ない<wbr>順に<wbr>並びます。<wbr>タブの<wbr>上の<wbr>数字が、<wbr>その<wbr>件数です。</p>
+      <p><b>▲ 補充</b> を<wbr>押すと、<wbr>その<wbr>商品を<wbr>選んだ<wbr>状態で<wbr>補充の<wbr>画面に<wbr>移ります。<wbr>もう<wbr>仕入れない<wbr>商品は <b>🚫 販売終了</b> に<wbr>すると、<wbr>この<wbr>一覧から<wbr>消えます。</p>
+      <div class="note">メールなどの<wbr>お知らせは<wbr>送りません。<wbr>気に<wbr>なった<wbr>ときに<wbr>この<wbr>タブを<wbr>見てください。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a14-alerts.jpg" width="600" height="1298" alt="在庫わずかの一覧"></div>
-      <figcaption>残りが少ない商品の一覧</figcaption>
+      <figcaption>残りが<wbr>少ない<wbr>商品の<wbr>一覧</figcaption>
     </figure>
   </section>
 
   <section class="step two-shots" id="a-summary">
     <div>
-      <div class="step-head"><span class="no">13</span><h3>売上を見る（集計）</h3></div>
-      <p><b>📊 集計・他</b> を押すと、月ごとの販売数・補充数・売上金額が出ます。<b>集計を更新する</b> を押すと最新になります。</p>
-      <p>下の<b>🎪 イベント別</b>では、イベント名を付けて記録した販売を、公演ごとに見られます。</p>
-      <div class="note">売上金額は、商品に価格を入れてから売れた分だけ計算されます。価格は「商品を直す」で入れられます。</div>
+      <div class="step-head"><span class="no">13</span><h3>売上を<wbr>見る<wbr>（集計）</h3></div>
+      <p><b>📊 集計・<wbr>他</b> を<wbr>押すと、<wbr>月ごとの<wbr>販売数・補充数・売上金額が<wbr>出ます。<b><wbr>集計を<wbr>更新する</b> を<wbr>押すと<wbr>最新に<wbr>なります。</p>
+      <p>下の<b><wbr>🎪 イベント別</b>では、<wbr>イベント名を<wbr>付けて<wbr>記録した<wbr>販売を、<wbr>公演ごとに<wbr>見られます。</p>
+      <div class="note">売上金額は、<wbr>商品に<wbr>価格を<wbr>入れてから<wbr>売れた<wbr>分だけ<wbr>計算されます。<wbr>価格は<wbr>「商品を<wbr>直す」で<wbr>入れられます。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a15-monthly.jpg" width="600" height="1298" alt="月ごとの集計の画面"></div>
-        <figcaption>月ごとの集計</figcaption>
+        <figcaption>月ごとの<wbr>集計</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a16-events.jpg" width="600" height="1298" alt="イベント別の集計の画面"></div>
-        <figcaption>公演ごとの集計</figcaption>
+        <figcaption>公演ごとの<wbr>集計</figcaption>
       </figure>
     </div>
   </section>
 
   <section class="step" id="a-import">
     <div>
-      <div class="step-head"><span class="no">14</span><h3>在庫表（スプレッドシート）から取り込む</h3></div>
-      <p>別に管理している在庫表に新しい商品が増えたときに使います。</p>
-      <p><b>📝 商品登録</b> のいちばん下、<b>⑤ 在庫表から取り込む</b> に在庫表のアドレスを貼り、<b>いまの在庫表と比べる</b> を押します。まだ登録されていない商品だけが出るので、チェックを確かめて <b>登録する</b> を押します。</p>
-      <div class="note">名前が少しちがうだけで同じ商品のときは、「◯◯と同じ商品にする」を押してください。次からは同じものとして扱います。登録しない行は「今後この行を表示しない」を押します。</div>
+      <div class="step-head"><span class="no">14</span><h3>在庫表<wbr>（スプレッドシート）から<wbr>取り込む</h3></div>
+      <p>別に<wbr>管理している<wbr>在庫表に<wbr>新しい<wbr>商品が<wbr>増えた<wbr>ときに<wbr>使います。</p>
+      <p><b>📝 商品登録</b> の<wbr>いちばん下、<b><wbr>⑤ 在庫表から<wbr>取り込む</b> に<wbr>在庫表の<wbr>アドレスを<wbr>貼り、<b><wbr>いまの<wbr>在庫表と<wbr>比べる</b> を<wbr>押します。<wbr>まだ<wbr>登録されていない<wbr>商品だけが<wbr>出るので、<wbr>チェックを<wbr>確かめて <b>登録する</b> を<wbr>押します。</p>
+      <div class="note">名前が<wbr>少し<wbr>ちがうだけで<wbr>同じ<wbr>商品の<wbr>ときは、<wbr>「◯◯と<wbr>同じ<wbr>商品に<wbr>する」を<wbr>押してください。<wbr>次からは<wbr>同じ<wbr>ものと<wbr>して<wbr>扱います。<wbr>登録しない<wbr>行は<wbr>「今後<wbr>この<wbr>行を<wbr>表示しない」を<wbr>押します。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a17-source.jpg" width="600" height="1298" alt="在庫表と比べた結果。未登録の商品が2件出ている"></div>
-      <figcaption>未登録の商品だけが出ます</figcaption>
+      <figcaption>未登録の<wbr>商品だけが<wbr>出ます</figcaption>
     </figure>
   </section>
 
   <section class="step wide" id="a-other">
     <div>
-      <div class="step-head"><span class="no">15</span><h3>その他・注意</h3></div>
+      <div class="step-head"><span class="no">15</span><h3>その他・<wbr>注意</h3></div>
       <ol class="legend">
-        <li><span class="pin" style="background:var(--admin)">A</span><span><b>バックアップ</b> … 週に1回、管理画面を開いたときに自動で在庫表のコピーが作られます（Googleドライブの「コロッケ在庫 バックアップ」）。「集計・他」の <b>今すぐバックアップ</b> でも作れます。</span></li>
-        <li><span class="pin" style="background:var(--admin)">B</span><span><b>お客さま用QR</b> … 「集計・他」の <b>お客さま用QR</b> で、見る人のページのQRコードを大きく印刷できます。会場に貼っておくと便利です。</span></li>
-        <li><span class="pin" style="background:var(--admin)">C</span><span><b>QRラベル</b> … 「在庫一覧」の <b>QRラベル印刷</b> で、商品ごとのQRラベルを印刷できます。袋や箱に貼ると、📷 で読むだけで商品を選べます。</span></li>
-        <li><span class="pin" style="background:var(--admin)">D</span><span><b>在庫表を直接書きかえるとき</b> … 書きかえた数は見る人のページにも出ますが、販売履歴に残らず、集計にも入りません。数を合わせたいときは「棚卸し」を使ってください。</span></li>
+        <li><span class="pin" style="background:var(--admin)">A</span><span><b>バックアップ</b> … 週に<wbr>1回、<wbr>管理画面を<wbr>開いた<wbr>ときに<wbr>自動で<wbr>在庫表の<wbr>コピーが<wbr>作られます<wbr>（Googleドライブの<wbr>「コロッケ在庫 バックアップ」）。<wbr>「集計・他」の <b>今すぐ<wbr>バックアップ</b> でも<wbr>作れます。</span></li>
+        <li><span class="pin" style="background:var(--admin)">B</span><span><b>お客さま用QR</b> … 「集計・他」の <b>お客さま用QR</b> で、<wbr>見る<wbr>人の<wbr>ページの<wbr>QRコードを<wbr>大きく<wbr>印刷できます。<wbr>会場に<wbr>貼っておくと<wbr>便利です。</span></li>
+        <li><span class="pin" style="background:var(--admin)">C</span><span><b>QRラベル</b> … 「在庫一覧」の <b>QRラベル印刷</b> で、<wbr>商品ごとの<wbr>QRラベルを<wbr>印刷できます。<wbr>袋や<wbr>箱に<wbr>貼ると、<wbr>📷 で<wbr>読むだけで<wbr>商品を<wbr>選べます。</span></li>
+        <li><span class="pin" style="background:var(--admin)">D</span><span><b>在庫表を<wbr>直接<wbr>書きかえる<wbr>とき</b> … 書きかえた数は<wbr>見る<wbr>人の<wbr>ページにも<wbr>出ますが、<wbr>販売履歴に<wbr>残らず、<wbr>集計にも<wbr>入りません。<wbr>数を<wbr>合わせたい<wbr>ときは<wbr>「棚卸し」を<wbr>使ってください。</span></li>
       </ol>
     </div>
   </section>
 
   <section class="step wide" id="a-faq">
     <div>
-      <div class="step-head"><span class="no">?</span><h3>こまったとき</h3></div>
+      <div class="step-head"><span class="no">?</span><h3>こまった<wbr>とき</h3></div>
       <div class="faq">
         <details open>
-          <summary>「通信が途切れました」と出た</summary>
-          <p>記録できている場合があります。すぐにやり直さず、まず「在庫一覧」の <b>↻ 更新</b> を押して、数が変わっているか確かめてください。変わっていなければ、もう一度記録します。</p>
+          <summary>「通信が<wbr>途切れました」と<wbr>出た</summary>
+          <p>記録できている<wbr>場合が<wbr>あります。<wbr>すぐに<wbr>やり直さず、<wbr>まず<wbr>「在庫一覧」の <b>↻ 更新</b> を<wbr>押して、<wbr>数が<wbr>変わっているか<wbr>確かめてください。<wbr>変わっていなければ、<wbr>もう<wbr>一度<wbr>記録します。</p>
         </details>
         <details>
-          <summary>もう一度パスワードを聞かれた</summary>
-          <p>パスワードが変わったか、スマホの記録が消えた可能性があります。管理の担当者に確かめて、もう一度入れてください。</p>
+          <summary>もう<wbr>一度<wbr>パスワードを<wbr>聞かれた</summary>
+          <p>パスワードが<wbr>変わったか、<wbr>スマホの<wbr>記録が<wbr>消えた<wbr>可能性が<wbr>あります。<wbr>管理の<wbr>担当者に<wbr>確かめて、<wbr>もう<wbr>一度<wbr>入れてください。</p>
         </details>
         <details>
-          <summary>「在庫が足りません」と出た</summary>
-          <p>選んだ場所（在庫区分）の数より多く売ろうとしています。場所が合っているか確かめてください。実際の数と合わないときは「棚卸し」で数を直します。</p>
+          <summary>「在庫が<wbr>足りません」と<wbr>出た</summary>
+          <p>選んだ<wbr>場所<wbr>（在庫区分）の<wbr>数より<wbr>多く<wbr>売ろうと<wbr>しています。<wbr>場所が<wbr>合っているか<wbr>確かめてください。<wbr>実際の<wbr>数と<wbr>合わない<wbr>ときは<wbr>「棚卸し」で<wbr>数を<wbr>直します。</p>
         </details>
         <details>
-          <summary>取り消しができない</summary>
-          <p>24時間より前の記録や、あとから在庫が動いて元に戻せないときは取り消せません。反対の操作（売った数を「補充」する、など）で直してください。</p>
+          <summary>取り消しが<wbr>できない</summary>
+          <p>24時間より<wbr>前の<wbr>記録や、<wbr>あとから<wbr>在庫が<wbr>動いて<wbr>元に<wbr>戻せない<wbr>ときは<wbr>取り消せません。<wbr>反対の<wbr>操作<wbr>（売った<wbr>数を<wbr>「補充」する、<wbr>など）で<wbr>直してください。</p>
         </details>
         <details>
-          <summary>販売チェック表の下があいてしまう</summary>
-          <p>用紙を A4・縦 にして印刷してください。表は用紙の下まで自動で伸びます。印刷の「倍率」は 100% にしてください。</p>
+          <summary>販売チェック表の<wbr>下が<wbr>あいてしまう</summary>
+          <p>用紙を A4・縦 に<wbr>して<wbr>印刷してください。<wbr>表は<wbr>用紙の<wbr>下まで<wbr>自動で<wbr>伸びます。<wbr>印刷の<wbr>「倍率」は 100% に<wbr>してください。</p>
         </details>
         <details>
-          <summary>カメラ（📷）が使えない</summary>
-          <p>ブラウザがカメラの使用を聞いてきたら「許可」を押してください。使えないときは、🔍 選ぶ から写真で選べます。</p>
+          <summary>カメラ<wbr>（📷）が<wbr>使えない</summary>
+          <p>ブラウザが<wbr>カメラの<wbr>使用を<wbr>聞いてきたら<wbr>「許可」を<wbr>押してください。<wbr>使えない<wbr>ときは、<wbr>🔍 選ぶ から<wbr>写真で<wbr>選べます。</p>
         </details>
       </div>
     </div>
   </section>
 
-  <p class="footer">コロッケ グッズ在庫ガイド　管理する人向け　（画面の写真は説明用の見本データです）</p>
+  <p class="footer">コロッケ グッズ在庫ガイド　管理する<wbr>人向け　（画面の<wbr>写真は<wbr>説明用の<wbr>見本データです）</p>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>

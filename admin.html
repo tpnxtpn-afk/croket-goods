@@ -49,6 +49,21 @@
     transition: background .2s;
   }
   .app-header .title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* 在庫確認ページ・説明書へのリンク（ヘッダーの下の段） */
+  .header-links {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 0 12px 10px;
+    background: var(--theme);
+    transition: background .2s;
+  }
+  .header-links a {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,.4); border-radius: 15px;
+    background: rgba(255,255,255,.14); color: #fff;
+    font-size: 13px; font-weight: 700; text-decoration: none;
+  }
+  .header-links a:active { background: rgba(255,255,255,.3); }
   .op-chip {
     flex: 0 0 auto; max-width: 45%;
     padding: 6px 10px;
@@ -415,6 +430,10 @@
   <span class="test-badge" id="testBadge" hidden>テスト版</span>
   <button type="button" class="op-chip" id="opChip">👤 担当者</button>
 </header>
+<nav class="header-links" aria-label="ほかのページ">
+  <a id="linkClient" href="https://tpnxtpn-afk.github.io/croket-goods/" target="_blank" rel="noopener">👀 在庫確認ページ ↗</a>
+  <a id="linkGuide" href="https://tpnxtpn-afk.github.io/croket-goods/guide/" target="_blank" rel="noopener">📖 説明書 ↗</a>
+</nav>
 
 <nav class="tabs" id="tabs">
   <button class="tab" data-tab="product" style="--tab-color:#8e44ad"><span class="ico">📝</span>商品登録</button>
@@ -849,6 +868,7 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycbzAASqPnaTyRfd7YgLiFCg685L4u_Sy7b6q1zudeJWNuC2RN6mYQy2gygsMDdG6mJE/exec';
   const ENV = '';
   const CLIENT_URL = 'https://tpnxtpn-afk.github.io/croket-goods/';
+  const GUIDE_URL = 'https://tpnxtpn-afk.github.io/croket-goods/guide/';
 
   const STORE = 'korokke' + (ENV ? '.' + ENV : '');
   const KEY_STORE = STORE + '.adminKey';
@@ -2421,6 +2441,8 @@
     fillSelect($('bLocation'), state.config.owners);
     fillSelect($('stLocation'), state.config.owners);
     $('sTo').value = state.config.owners[1] || state.config.owners[0];
+    $('linkClient').href = CLIENT_URL;
+    $('linkGuide').href = GUIDE_URL;
     $('testBadge').hidden = state.config.env !== 'test';
     $('btnResetTest').hidden = state.config.env !== 'test';
     if (state.config.lastSourceUrl) $('srcUrl').value = state.config.lastSourceUrl;

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#121418">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<style>:root { color-scheme: light; } img { max-width: 100%; } [hidden] { display: none !important; }</style>
+<title>コロッケ グッズ在庫ガイド</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=BIZ+UDPGothic:wght@400;700&display=swap">
+<style>
+  :root {
+    --ground: #f4f5f7;
+    --surface: #ffffff;
+    --ink: #1d2027;
+    --text: #2c3e50;
+    --muted: #66727d;
+    --line: #e1e4e8;
+    --soft: #eef0f3;
+    --viewer: #e67e22;
+    --viewer-soft: #fdf1e5;
+    --admin: #8e44ad;
+    --admin-soft: #f4ecf8;
+    --accent: var(--viewer);
+    --accent-soft: var(--viewer-soft);
+    --ok: #1e8449;
+    --ok-soft: #eaf7ee;
+    --low: #b9651a;
+    --low-soft: #fdf3e6;
+    --zero: #8d959c;
+    --zero-soft: #f2f3f5;
+    --danger: #d64534;
+    --rainbow: linear-gradient(90deg, #ff4d4d, #ff9f1a, #ffd93d, #3ddc84, #29b6f6, #7c4dff, #e056fd);
+    --frame: #1d2027;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #121418;
+      --surface: #1c1f26;
+      --ink: #0b0c0f;
+      --text: #e6e8ec;
+      --muted: #9ba5af;
+      --line: #2e333c;
+      --soft: #252a33;
+      --viewer: #f0913a;
+      --viewer-soft: #33261a;
+      --admin: #b57bd4;
+      --admin-soft: #2c2233;
+      --ok: #5fd08a;
+      --ok-soft: #1b2e22;
+      --low: #f0a55a;
+      --low-soft: #33281b;
+      --zero: #9aa1a8;
+      --zero-soft: #262a31;
+      --danger: #ff7b6b;
+      --frame: #000000;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #121418;
+    --surface: #1c1f26;
+    --ink: #0b0c0f;
+    --text: #e6e8ec;
+    --muted: #9ba5af;
+    --line: #2e333c;
+    --soft: #252a33;
+    --viewer: #f0913a;
+    --viewer-soft: #33261a;
+    --admin: #b57bd4;
+    --admin-soft: #2c2233;
+    --ok: #5fd08a;
+    --ok-soft: #1b2e22;
+    --low: #f0a55a;
+    --low-soft: #33281b;
+    --zero: #9aa1a8;
+    --zero-soft: #262a31;
+    --danger: #ff7b6b;
+    --frame: #000000;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.85;
+    -webkit-text-size-adjust: 100%;
+  }
+  body.admin-mode { --accent: var(--admin); --accent-soft: var(--admin-soft); }
+  a { color: var(--accent); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  /* ---------- 表紙 ---------- */
+  .masthead {
+    position: relative;
+    background: radial-gradient(120% 160% at 0% 0%, #343a46 0%, #1d2027 55%, #121418 100%);
+    color: #fff;
+    padding: 28px 20px 34px;
+  }
+  .masthead::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--rainbow);
+  }
+  .masthead-inner { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
+  .kicker { margin: 0; font-size: 13px; letter-spacing: .28em; color: rgba(255,255,255,.6); font-weight: 700; }
+  .masthead h1 {
+    margin: 6px 0 10px;
+    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-weight: 400;
+    font-size: clamp(30px, 6.4vw, 52px); line-height: 1.2; letter-spacing: .03em;
+    background: var(--rainbow); -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-wrap: balance;
+  }
+  .masthead .lead { margin: 0; max-width: 34em; color: rgba(255,255,255,.86); font-size: 16px; }
+  .hero-art { width: 150px; height: auto; }
+
+  /* ---------- 切りかえ ---------- */
+  .switch-wrap {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 16px;
+  }
+  .switch { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .switch button {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 56px; padding: 8px 10px;
+    border: 2px solid var(--line); border-radius: 14px;
+    background: var(--surface); color: var(--muted);
+    font: inherit; font-weight: 700; font-size: 16px; line-height: 1.3;
+    cursor: pointer;
+  }
+  .switch button small { display: block; font-size: 12px; font-weight: 400; }
+  .switch button[aria-selected="true"][data-panel="viewer"] { border-color: var(--viewer); background: var(--viewer); color: #fff; }
+  .switch button[aria-selected="true"][data-panel="admin"] { border-color: var(--admin); background: var(--admin); color: #fff; }
+  .switch svg { flex: 0 0 auto; }
+
+  /* ---------- 本文 ---------- */
+  .page { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 8px 72px; }
+  .intro {
+    display: grid; grid-template-columns: 1fr; gap: 16px;
+    margin: 24px 0 8px; padding: 20px;
+    border-radius: 18px; background: var(--accent-soft);
+  }
+  .intro h2 { margin: 0; font-size: 22px; line-height: 1.5; text-wrap: balance; }
+  .intro p { margin: 0; }
+  .url-box {
+    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
+    padding: 14px; border-radius: 14px; background: var(--surface);
+  }
+  .url-box .qr { width: 112px; height: 112px; padding: 6px; border-radius: 10px; background: #fff; }
+  .url-box .qr svg { display: block; width: 100%; height: 100%; }
+  .url-box b { display: block; font-size: 14px; color: var(--muted); font-weight: 700; }
+  .url-text {
+    display: block; margin: 2px 0 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; word-break: break-all; color: var(--text);
+    user-select: all;
+  }
+  .copy {
+    border: 0; border-radius: 10px; padding: 8px 14px;
+    background: var(--accent); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+
+  .toc { margin: 22px 0 6px; }
+  .toc h2 { margin: 0 0 8px; font-size: 15px; color: var(--muted); letter-spacing: .08em; }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; counter-reset: toc; }
+  .toc li { counter-increment: toc; }
+  .toc a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--line);
+    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700;
+  }
+  .toc a::before {
+    content: counter(toc); display: inline-grid; place-items: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 12px;
+  }
+
+  .chapter-title {
+    display: flex; align-items: center; gap: 12px;
+    margin: 48px 0 8px; font-size: 14px; letter-spacing: .12em; color: var(--muted); font-weight: 700;
+  }
+  .chapter-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .step {
+    display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start;
+    padding: 28px 0; border-bottom: 1px solid var(--line);
+    scroll-margin-top: 96px;
+  }
+  .step.wide { grid-template-columns: minmax(0, 1fr); }
+  .step.two-shots { grid-template-columns: minmax(0, 1fr); }
+  .step-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .no {
+    flex: 0 0 auto; display: grid; place-items: center;
+    width: 48px; height: 48px; border-radius: 16px;
+    background: var(--accent); color: #fff;
+    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-size: 22px;
+  }
+  .step h3 { margin: 0; font-size: 23px; line-height: 1.4; font-weight: 700; text-wrap: balance; }
+  .step p { margin: 10px 0; max-width: 36em; }
+  .step .note {
+    margin: 14px 0; padding: 12px 14px; border-radius: 12px;
+    background: var(--soft); font-size: 15px; line-height: 1.75; max-width: 36em;
+  }
+  .step .note b { color: var(--text); }
+  .step .warn { background: var(--low-soft); }
+
+  .legend { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 10px; max-width: 36em; }
+  .legend li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
+  .pin {
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--danger); color: #fff;
+    font-size: 15px; font-weight: 700; line-height: 1;
+    box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.35);
+    font-variant-numeric: tabular-nums;
+  }
+  .legend .pin { margin-top: 2px; box-shadow: none; }
+  .legend b { font-weight: 700; }
+
+  .phone { margin: 0; justify-self: center; width: 100%; max-width: 300px; }
+  .screen {
+    position: relative;
+    border: 9px solid var(--frame); border-radius: 34px; overflow: hidden;
+    background: var(--frame);
+    box-shadow: 0 14px 34px rgba(20, 24, 32, .18);
+  }
+  .screen img { display: block; width: 100%; height: auto; border-radius: 25px; }
+  .screen .pin { position: absolute; transform: translate(-50%, -50%); }
+  .phone figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .shots { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin-top: 12px; }
+  .shots .phone { flex: 0 1 260px; }
+  .flow-arrow { align-self: center; color: var(--muted); font-size: 28px; font-weight: 700; }
+
+  .paper { margin: 0; justify-self: center; width: 100%; max-width: 560px; }
+  .paper img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); box-shadow: 0 10px 28px rgba(20,24,32,.14); }
+  .paper figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; }
+
+  /* 在庫の色 */
+  .states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0; max-width: 36em; }
+  .state { padding: 12px 10px; border-radius: 14px; text-align: center; border: 1px solid; }
+  .state .dot { font-size: 26px; line-height: 1; }
+  .state b { display: block; font-size: 17px; font-weight: 700; }
+  .state small { display: block; font-size: 13px; }
+  .state.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); color: var(--ok); }
+  .state.low { background: var(--low-soft); border-color: color-mix(in srgb, var(--low) 35%, transparent); color: var(--low); }
+  .state.zero { background: var(--zero-soft); border-color: var(--line); color: var(--zero); }
+
+  .chip-demo { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .chip-demo span { padding: 4px 10px; border-radius: 8px; border: 1px solid; font-size: 14px; font-weight: 700; }
+  .chip-demo .ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); color: var(--ok); }
+  .chip-demo .low { background: var(--low-soft); border-color: color-mix(in srgb, var(--low) 35%, transparent); color: var(--low); }
+  .chip-demo .zero { background: var(--zero-soft); border-color: var(--line); color: var(--zero); }
+
+  /* 正の字 */
+  .tally-demo { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+  .tally-demo figure { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
+  .tally-demo svg { display: block; width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .tally-demo svg path { stroke: var(--text); }
+
+  /* ホーム画面に追加 */
+  .howto { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 14px 0; }
+  .howto > div { padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+  .howto h4 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+  .howto ol { margin: 0; padding-left: 1.3em; font-size: 15px; line-height: 1.8; }
+  .howto svg { vertical-align: -6px; }
+
+  .tabs-guide { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+  .tabs-guide div { padding: 10px 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-align: center; font-size: 13px; line-height: 1.5; }
+  .tabs-guide .ico { display: block; font-size: 24px; }
+  .tabs-guide b { display: block; font-size: 14px; font-weight: 700; }
+
+  .faq { margin: 12px 0 0; display: grid; gap: 10px; }
+  .faq details { border-radius: 14px; background: var(--surface); border: 1px solid var(--line); padding: 0 16px; }
+  .faq summary { cursor: pointer; padding: 14px 0; font-weight: 700; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::before { content: "Q"; color: var(--accent); font-family: "Dela Gothic One", sans-serif; }
+  .faq details p { margin: 0 0 14px; font-size: 16px; }
+
+  .footer { margin-top: 40px; font-size: 13px; color: var(--muted); text-align: center; }
+
+  @media (max-width: 760px) {
+    .step { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .masthead-inner { grid-template-columns: 1fr; }
+    .hero-art { display: none; }
+    .tabs-guide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .howto { grid-template-columns: minmax(0, 1fr); }
+    .url-box { grid-template-columns: 1fr; justify-items: start; }
+  }
+  @media (max-width: 420px) {
+    body { font-size: 16px; }
+    .step h3 { font-size: 21px; }
+    .states { gap: 6px; }
+    .state b { font-size: 15px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .switch button { transition: background .15s, color .15s, border-color .15s; }
+  }
+  @media print {
+    .switch-wrap, .copy { display: none; }
+    main[hidden] { display: block !important; }
+    .step { break-inside: avoid; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div>
+      <p class="kicker">KOROKKE GOODS STOCK</p>
+      <h1>コロッケ グッズ在庫ガイド</h1>
+      <p class="lead">スマホで在庫を見る方法と、売れた数・入った数を記録する方法を、画面の写真つきで説明します。はじめての方は上から順番に読んでください。</p>
+    </div>
+    <svg class="hero-art" viewBox="0 0 150 230" aria-hidden="true">
+      <rect x="10" y="4" width="130" height="222" rx="22" fill="#0b0c0f"/>
+      <rect x="17" y="11" width="116" height="208" rx="16" fill="#f4f5f7"/>
+      <rect x="17" y="11" width="116" height="30" rx="16" fill="#1d2027"/>
+      <rect x="17" y="30" width="116" height="11" fill="#1d2027"/>
+      <rect x="17" y="40" width="116" height="3" fill="#ff9f1a"/>
+      <rect x="26" y="20" width="56" height="8" rx="4" fill="#ffd93d"/>
+      <g>
+        <rect x="24" y="52" width="102" height="44" rx="8" fill="#fff"/>
+        <rect x="30" y="58" width="30" height="30" rx="6" fill="#e9d5c4"/>
+        <path d="M38 66 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#e67e22"/>
+        <rect x="66" y="60" width="40" height="6" rx="3" fill="#2c3e50"/>
+        <rect x="66" y="74" width="16" height="12" rx="3" fill="#eaf7ee" stroke="#9fd8b3"/>
+        <rect x="86" y="74" width="16" height="12" rx="3" fill="#fdf3e6" stroke="#f1c996"/>
+        <rect x="106" y="74" width="14" height="12" rx="3" fill="#f2f3f5" stroke="#d6d9dd"/>
+      </g>
+      <g>
+        <rect x="24" y="104" width="102" height="44" rx="8" fill="#fff"/>
+        <rect x="30" y="110" width="30" height="30" rx="6" fill="#d8e3f0"/>
+        <path d="M38 118 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#3498db"/>
+        <rect x="66" y="112" width="46" height="6" rx="3" fill="#2c3e50"/>
+        <circle cx="72" cy="132" r="5" fill="#27ae60"/>
+        <rect x="80" y="129" width="26" height="6" rx="3" fill="#27ae60"/>
+      </g>
+      <g>
+        <rect x="24" y="156" width="102" height="44" rx="8" fill="#fff"/>
+        <rect x="30" y="162" width="30" height="30" rx="6" fill="#f1dde8"/>
+        <path d="M38 170 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#e84393"/>
+        <rect x="66" y="164" width="36" height="6" rx="3" fill="#2c3e50"/>
+        <circle cx="72" cy="184" r="5" fill="#e67e22"/>
+        <rect x="80" y="181" width="34" height="6" rx="3" fill="#e67e22"/>
+      </g>
+    </svg>
+  </div>
+</header>
+
+<div class="switch-wrap">
+  <div class="switch" role="tablist" aria-label="説明を切りかえる">
+    <button type="button" role="tab" id="tab-viewer" data-panel="viewer" aria-selected="true" aria-controls="viewer">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 5-10 7 1 2 5 7 10 7s9-5 10-7c-1-2-5-7-10-7zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg>
+      <span>在庫を見る人<small>お客さま・スタッフ</small></span>
+    </button>
+    <button type="button" role="tab" id="tab-admin" data-panel="admin" aria-selected="false" aria-controls="admin">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.3V21h3.7l10.9-10.9-3.7-3.7L3 17.3zM20.7 7a1 1 0 000-1.4l-2.3-2.3a1 1 0 00-1.4 0l-1.8 1.8 3.7 3.7L20.7 7z"/></svg>
+      <span>在庫を管理する人<small>販売・補充・登録をする方</small></span>
+    </button>
+  </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- 在庫を見る人                                              -->
+<!-- ======================================================= -->
+<main class="page" id="viewer" role="tabpanel" aria-labelledby="tab-viewer">
+  <div class="intro">
+    <h2>いまある商品と、残りの数がスマホで見られます</h2>
+    <p>見るだけのページなので、どこを押しても在庫が変わることはありません。安心してさわってください。</p>
+    <div class="url-box">
+      <div class="qr" id="qrViewer" aria-label="在庫ページのQRコード"></div>
+      <div>
+        <b>在庫ページのアドレス</b>
+        <span class="url-text" id="urlViewer">https://tpnxtpn-afk.github.io/croket-goods/</span>
+        <button type="button" class="copy" data-copy="urlViewer">アドレスをコピー</button>
+      </div>
+    </div>
+    <p style="font-size:15px">スマホのカメラでQRコードを写すと、ページが開きます。</p>
+  </div>
+
+  <nav class="toc" aria-label="もくじ">
+    <h2>もくじ</h2>
+    <ol>
+      <li><a href="#v-open">ページをひらく</a></li>
+      <li><a href="#v-screen">画面の見かた</a></li>
+      <li><a href="#v-colors">残りの数の見かた</a></li>
+      <li><a href="#v-place">場所を切りかえる</a></li>
+      <li><a href="#v-find">商品をさがす</a></li>
+      <li><a href="#v-detail">大きな写真で見る</a></li>
+      <li><a href="#v-big">文字を大きくする</a></li>
+      <li><a href="#v-home">ホーム画面に置く</a></li>
+      <li><a href="#v-faq">こまったとき</a></li>
+    </ol>
+  </nav>
+
+  <section class="step" id="v-open">
+    <div>
+      <div class="step-head"><span class="no">1</span><h3>ページをひらく</h3></div>
+      <p>上のアドレスをタップするか、QRコードをカメラで写してください。</p>
+      <p>はじめて開いたときだけ、<b>「かんたんな使い方」</b>が出ます。読んだら<b>「わかりました」</b>を押してください。</p>
+      <div class="note">この説明は、あとから右上の <b>？</b> ボタンでいつでも見られます。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c01-guide.jpg" width="600" height="1298" alt="はじめて開いたときに出る、かんたんな使い方の画面"></div>
+      <figcaption>はじめて開いたときの画面</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="v-screen">
+    <div>
+      <div class="step-head"><span class="no">2</span><h3>画面の見かた</h3></div>
+      <p>写真の赤い番号と、下の説明の番号が同じ場所です。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>大</b> … 文字が大きくなります。もう一度押すと元に戻ります。</span></li>
+        <li><span class="pin">2</span><span><b>？</b> … 使い方をもう一度見られます。</span></li>
+        <li><span class="pin">3</span><span><b>↻</b> … いちばん新しい在庫にします。</span></li>
+        <li><span class="pin">4</span><span><b>場所のタブ</b> … 在庫が置いてある場所ごとに見られます。</span></li>
+        <li><span class="pin">5</span><span><b>さがす</b> … 名前・色・サイズで探せます。</span></li>
+        <li><span class="pin">6</span><span><b>種類のボタン</b> … Tシャツだけ、タオルだけ、のように絞れます。</span></li>
+        <li><span class="pin">7</span><span><b>並び順</b> … 名前順・多い順・少ない順を選べます。</span></li>
+        <li><span class="pin">8</span><span><b>売り切れも表示</b> … チェックすると、残りが0の商品も出ます。</span></li>
+        <li><span class="pin">9</span><span><b>残りの数</b> … サイズごとに何枚あるかが出ます。</span></li>
+      </ol>
+    </div>
+    <figure class="phone">
+      <div class="screen">
+        <img src="img/c02-list.jpg" width="600" height="1298" alt="在庫一覧の画面">
+        <span class="pin" style="left:73.1%;top:2.8%">1</span>
+        <span class="pin" style="left:83.3%;top:6.4%">2</span>
+        <span class="pin" style="left:93.6%;top:2.8%">3</span>
+        <span class="pin" style="left:50%;top:13.2%">4</span>
+        <span class="pin" style="left:88%;top:24.1%">5</span>
+        <span class="pin" style="left:67.4%;top:29.7%">6</span>
+        <span class="pin" style="left:34.2%;top:35.3%">7</span>
+        <span class="pin" style="left:82.1%;top:35.3%">8</span>
+        <span class="pin" style="left:78%;top:55.7%">9</span>
+      </div>
+      <figcaption>いつも見る画面（在庫の一覧）</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="v-colors">
+    <div>
+      <div class="step-head"><span class="no">3</span><h3>残りの数の見かた</h3></div>
+      <p>残りの数は、色と言葉でも分かるようになっています。</p>
+      <div class="states">
+        <div class="state ok"><span class="dot">🟢</span><b>あり</b><small>6枚以上</small></div>
+        <div class="state low"><span class="dot">🟡</span><b>のこりわずか</b><small>5枚以下</small></div>
+        <div class="state zero"><span class="dot">⚪</span><b>売り切れ</b><small>0枚</small></div>
+      </div>
+      <p>サイズがいくつかある商品は、1つのカードにまとめて、サイズごとの数が並びます。</p>
+      <div class="chip-demo" aria-label="サイズごとの表示の例">
+        <span class="ok">S 12枚</span><span class="low">M 3枚</span><span class="zero">L 0枚</span><span class="ok">XL 8枚</span>
+      </div>
+      <p>この例では、Mは残り少なく、Lは売り切れです。</p>
+      <div class="note">最近入った商品には、赤い <b>NEW</b> の印が付きます（入ってから2週間）。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c08-sort.jpg" width="600" height="1298" alt="在庫の多い順に並べた画面"></div>
+      <figcaption>「多い順」に並べたところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="v-place">
+    <div>
+      <div class="step-head"><span class="no">4</span><h3>場所を切りかえる</h3></div>
+      <p>いちばん上のタブで、在庫が置いてある場所を切りかえます。タブの下の小さな数字は、その場所にある合計の枚数です。</p>
+      <ol class="legend">
+        <li><span class="pin" style="background:#e67e22">現</span><span><b>現場用</b> … イベント・公演の会場に持っていく在庫です。</span></li>
+        <li><span class="pin" style="background:#e84393">フ</span><span><b>ファンクラブ用</b> … ファンクラブ向けに取っておいている在庫です。</span></li>
+        <li><span class="pin" style="background:#27ae60">販</span><span><b>販売在庫</b> … 通販などで販売する在庫です。</span></li>
+      </ol>
+      <div class="note">最後に見ていた場所は覚えているので、次に開いたときもそのまま出ます。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c03-tab.jpg" width="600" height="1298" alt="ファンクラブ用のタブを選んだ画面"></div>
+      <figcaption>「ファンクラブ用」を選んだところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step two-shots" id="v-find">
+    <div>
+      <div class="step-head"><span class="no">5</span><h3>商品をさがす</h3></div>
+      <p><b>文字を打たずに探すとき</b>は、種類のボタン（Tシャツ・タオルなど）を押します。もう一度押すと元に戻ります。</p>
+      <p><b>言葉で探すとき</b>は、上の「さがす」欄に打ちこみます。ひらがなでも大丈夫です。</p>
+      <div class="note">「しろ」で白い商品、「てぃーしゃつ」でTシャツ、「xl」でXLサイズが見つかります。✕ を押すと検索をやめて、全部の商品に戻ります。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/c04-chip.jpg" width="600" height="1298" alt="Tシャツのボタンを押して、Tシャツだけにした画面"></div>
+        <figcaption>「Tシャツ」を押すと、Tシャツだけ出ます</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/c05-search.jpg" width="600" height="1298" alt="しろ と入れて検索した画面"></div>
+        <figcaption>「しろ」と入れると、白い商品が出ます</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="v-detail">
+    <div>
+      <div class="step-head"><span class="no">6</span><h3>大きな写真で見る</h3></div>
+      <p>商品のカードをタップすると、大きな写真とサイズごとの残りの数が出ます。</p>
+      <p>見終わったら<b>「閉じる」</b>を押すか、写真の外側を押してください。</p>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c06-detail.jpg" width="600" height="1298" alt="商品をタップして大きな写真を出した画面"></div>
+      <figcaption>商品をタップしたところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="v-big">
+    <div>
+      <div class="step-head"><span class="no">7</span><h3>文字を大きくする</h3></div>
+      <p>右上の<b>「大」</b>を押すと、画面全体の文字が大きくなります。押すと白くなり、大きくなっている印です。</p>
+      <p>もう一度押すと元の大きさに戻ります。選んだ大きさは、次に開いたときも同じです。</p>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c07-big.jpg" width="600" height="1298" alt="文字を大きくした画面"></div>
+      <figcaption>文字を大きくしたところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="v-home">
+    <div>
+      <div class="step-head"><span class="no">8</span><h3>ホーム画面に置く（おすすめ）</h3></div>
+      <p>スマホのホーム画面にアイコンを置くと、次からは<b>アイコンを押すだけ</b>で開けます。アプリを入れる必要はありません。</p>
+      <div class="howto">
+        <div>
+          <h4>iPhone（Safari）</h4>
+          <ol>
+            <li>画面の下の
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-label="共有ボタン"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8 7m4-4l4 4M7 11H5v10h14V11h-2"/></svg>
+              （共有）を押す</li>
+            <li>「ホーム画面に追加」を押す</li>
+            <li>右上の「追加」を押す</li>
+          </ol>
+        </div>
+        <div>
+          <h4>Android（Chrome）</h4>
+          <ol>
+            <li>右上の
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-label="メニューボタン"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>
+              （メニュー）を押す</li>
+            <li>「ホーム画面に追加」を押す</li>
+            <li>「追加」を押す</li>
+          </ol>
+        </div>
+      </div>
+      <div class="note">ページを開くと、画面の下に案内が出ることがあります。いらないときは ✕ で消せます。<br>LINEの中で開いたときは、右下のメニューから「Safariで開く」や「ブラウザで開く」を選ぶと見やすくなります。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c10-install.jpg" width="600" height="1298" alt="画面の下に、ホーム画面への追加の案内が出ているところ"></div>
+      <figcaption>画面の下に出る案内</figcaption>
+    </figure>
+  </section>
+
+  <section class="step wide" id="v-faq">
+    <div>
+      <div class="step-head"><span class="no">?</span><h3>こまったとき</h3></div>
+      <div class="faq">
+        <details open>
+          <summary>数が古いような気がする</summary>
+          <p>画面の上に「◯分前の在庫です」と出ています。右上の <b>↻</b> を押すと、いちばん新しい在庫になります。しばらく開いたままにしていた場合は、戻ってきたときに自動で新しくなります。</p>
+        </details>
+        <details>
+          <summary>「読み込み中…」のまま進まない</summary>
+          <p>電波の良い場所で、右上の <b>↻</b> を押してください。それでも出ないときは、ページを一度閉じて開きなおしてください。</p>
+        </details>
+        <details>
+          <summary>写真が出ない</summary>
+          <p>写真は少し遅れて出ることがあります。数秒待つか、↻ を押してください。写真がまだ撮られていない商品は、Tシャツやタオルの絵で表示されます。</p>
+        </details>
+        <details>
+          <summary>探している商品が出てこない</summary>
+          <p>検索の欄に文字が残っていないか、種類のボタンが選ばれたままになっていないか確かめてください。残りが0の商品は、「売り切れも表示」にチェックを入れると出てきます。</p>
+        </details>
+        <details>
+          <summary>ここで在庫を変えられますか？</summary>
+          <p>このページは見るだけです。在庫を変えるのは、管理する人の画面からです（上の「在庫を管理する人」を見てください）。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">コロッケ グッズ在庫ガイド　見る人向け</p>
+</main>
+
+<!-- ======================================================= -->
+<!-- 在庫を管理する人                                          -->
+<!-- ======================================================= -->
+<main class="page" id="admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
+  <div class="intro">
+    <h2>売れた数・入った数を記録して、在庫をいつも正しく保ちます</h2>
+    <p>管理の画面で記録した数は、すぐに「見る人」のページにも反映されます。まちがえても、あとから取り消せるので安心してください。</p>
+    <div class="url-box">
+      <div class="qr" id="qrAdmin" aria-label="管理画面のQRコード"></div>
+      <div>
+        <b>管理画面のアドレス</b>
+        <span class="url-text" id="urlAdmin">https://tpnxtpn-afk.github.io/croket-goods/admin.html</span>
+        <button type="button" class="copy" data-copy="urlAdmin">アドレスをコピー</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="toc" aria-label="もくじ">
+    <h2>もくじ</h2>
+    <ol>
+      <li><a href="#a-start">はじめに開くとき</a></li>
+      <li><a href="#a-tabs">画面の全体</a></li>
+      <li><a href="#a-sale">売れたとき</a></li>
+      <li><a href="#a-undo">まちがえたとき</a></li>
+      <li><a href="#a-sheet">販売チェック表</a></li>
+      <li><a href="#a-batch">まとめて記録</a></li>
+      <li><a href="#a-restock">補充・移動</a></li>
+      <li><a href="#a-register">新しい商品</a></li>
+      <li><a href="#a-edit">商品を直す・終える</a></li>
+      <li><a href="#a-count">数え直す（棚卸し）</a></li>
+      <li><a href="#a-alerts">在庫わずか</a></li>
+      <li><a href="#a-summary">集計</a></li>
+      <li><a href="#a-import">在庫表から取り込む</a></li>
+      <li><a href="#a-other">その他・注意</a></li>
+      <li><a href="#a-faq">こまったとき</a></li>
+    </ol>
+  </nav>
+
+  <p class="chapter-title">準備</p>
+
+  <section class="step two-shots" id="a-start">
+    <div>
+      <div class="step-head"><span class="no">1</span><h3>はじめに開くとき</h3></div>
+      <p>はじめて開くと<b>パスワード</b>を聞かれます。パスワードは、管理の担当者から教えてもらってください。一度入れれば、そのスマホでは次から聞かれません。</p>
+      <p>つぎに<b>お名前</b>を聞かれます。入れておくと、だれが記録したかが販売履歴に残ります。ここで入れた名前は、画面右上の 👤 からいつでも変えられます。</p>
+      <div class="note warn"><b>パスワードは、ほかの人に送ったり、見える場所に書いたりしないでください。</b>管理画面では在庫を変えられるためです。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a01-password.jpg" width="600" height="1298" alt="パスワードを入れる画面"></div>
+        <figcaption>パスワードを入れる</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a02-operator.jpg" width="600" height="1298" alt="担当者のお名前を入れる画面"></div>
+        <figcaption>お名前を入れて「保存する」</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step wide" id="a-tabs">
+    <div>
+      <div class="step-head"><span class="no">2</span><h3>画面の全体</h3></div>
+      <p>画面の上に5つのボタン（タブ）が並んでいます。やりたいことに合わせて押してください。</p>
+      <div class="tabs-guide">
+        <div><span class="ico">📝</span><b>商品登録</b>新しい商品を入れる</div>
+        <div><span class="ico">🛒</span><b>販売・補充</b>売れた・入った・動かした</div>
+        <div><span class="ico">📋</span><b>在庫一覧</b>全部の在庫・棚卸し・印刷</div>
+        <div><span class="ico">🔔</span><b>在庫わずか</b>残り5枚以下の商品</div>
+        <div><span class="ico">📊</span><b>集計・他</b>月ごと・公演ごとの売上</div>
+      </div>
+      <div class="note">タブを押すと、画面の上の色も変わります（販売は赤、在庫一覧はオレンジ、など）。今どの画面にいるかの目印にしてください。</div>
+    </div>
+  </section>
+
+  <p class="chapter-title">毎日の記録</p>
+
+  <section class="step" id="a-sale">
+    <div>
+      <div class="step-head"><span class="no">3</span><h3>売れたとき（1つずつ記録）</h3></div>
+      <p><b>🛒 販売・補充</b> を押して、<b>「1商品ずつ」</b>を選びます。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>▼ 販売</b> を選びます（赤くなっていればOK）。</span></li>
+        <li><span class="pin">2</span><span><b>🔍 選ぶ</b> を押すと、写真つきの一覧から商品を選べます。商品IDを覚えていなくて大丈夫です。</span></li>
+        <li><span class="pin">3</span><span><b>📷</b> を押すと、商品に貼ったQRラベルをカメラで読み取れます。</span></li>
+        <li><span class="pin">4</span><span><b>数量</b>を ＋ − で合わせます。</span></li>
+        <li><span class="pin">5</span><span>どこの在庫から売れたか（<b>在庫区分</b>）を選びます。</span></li>
+        <li><span class="pin">6</span><span><b>イベント名</b>を入れると、公演ごとの売上が分かります（入れなくてもOK）。</span></li>
+        <li><span class="pin">7</span><span><b>▼ 販売する</b> を押します。</span></li>
+      </ol>
+    </div>
+    <figure class="phone">
+      <div class="screen">
+        <img src="img/a06-sale.jpg" width="600" height="1298" alt="1商品ずつ販売を記録する画面">
+        <span class="pin" style="left:20.4%;top:30.1%">1</span>
+        <span class="pin" style="left:69.6%;top:43.5%">2</span>
+        <span class="pin" style="left:87.6%;top:48.5%">3</span>
+        <span class="pin" style="left:50%;top:62.5%">4</span>
+        <span class="pin" style="left:88%;top:71.9%">5</span>
+        <span class="pin" style="left:88%;top:81%">6</span>
+        <span class="pin" style="left:78%;top:87.9%">7</span>
+      </div>
+      <figcaption>「販売・補充」の画面</figcaption>
+    </figure>
+  </section>
+
+  <section class="step two-shots" id="a-sale-confirm">
+    <div>
+      <div class="step-head"><span class="no">4</span><h3>確認して、記録する</h3></div>
+      <p>「販売します。よろしいですか？」と、商品と数が出ます。合っていれば <b>▼ 販売する</b>、ちがっていれば <b>やめる</b> を押します。</p>
+      <p>記録できると <b>✅ 販売しました</b> と出て、在庫の数が「10 → 8」のように変わったことが分かります。</p>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a07-confirm.jpg" width="600" height="1298" alt="販売する前の確認画面"></div>
+        <figcaption>記録する前に、必ず確認が出ます</figcaption>
+      </figure>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <figure class="phone">
+        <div class="screen"><img src="img/a08-done.jpg" width="600" height="1298" alt="販売を記録したあとの画面。下に取り消すボタンがある"></div>
+        <figcaption>記録できたら、下に「取り消す」が出ます</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="a-undo">
+    <div>
+      <div class="step-head"><span class="no">5</span><h3>まちがえたとき</h3></div>
+      <p>記録したあと、画面の下に黒い帯が出ます。まちがえたときは <b>↩ 取り消す</b> を押し、確認で <b>取り消す</b> を押すと、在庫が元に戻ります。</p>
+      <div class="note">取り消せるのは <b>24時間以内</b>の「販売・補充・移動・棚卸し」です。<br>帯を ✕ で消してしまったときや、24時間より前のものは、反対の操作（売った数を「補充」する、など）で直してください。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/a08b-undo-confirm.jpg" width="600" height="1298" alt="取り消しますか、という確認の画面"></div>
+      <figcaption>「取り消しますか？」の確認</figcaption>
+    </figure>
+  </section>
+
+  <p class="chapter-title">イベント・公演の日</p>
+
+  <section class="step wide" id="a-sheet">
+    <div>
+      <div class="step-head"><span class="no">6</span><h3>販売チェック表で数える</h3></div>
+      <p>会場では、1つ売れるたびにスマホで記録するのは大変です。紙の<b>販売チェック表</b>に「正」の字で数えておき、あとでまとめて記録するのがおすすめです。</p>
+      <p><b>📋 在庫一覧</b> を押して、<b>🖨 販売チェック表</b> を押すと、いまの商品の一覧が入った表が出ます。パソコンやスマホのブラウザの「印刷」から、<b>A4・縦</b>で印刷してください（1枚に入ります）。</p>
+      <p>時間帯①〜⑦のマスに、売れるたびに線を1本ずつ書きます。5本で「正」が1つ＝5個です。</p>
+      <div class="tally-demo" aria-label="正の字の書き方">
+        <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32" stroke-width="3" stroke-linecap="round" fill="none"/></svg>1個</figure>
+        <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33" stroke-width="3" stroke-linecap="round" fill="none"/></svg>2個</figure>
+        <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30" stroke-width="3" stroke-linecap="round" fill="none"/></svg>3個</figure>
+        <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33" stroke-width="3" stroke-linecap="round" fill="none"/></svg>4個</figure>
+        <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33M6 33H34" stroke-width="3" stroke-linecap="round" fill="none"/></svg>5個</figure>
+      </div>
+      <p>いちばん下に<b>空欄が10行</b>あります。当日いきなり出た商品は、ここに名前を書いて使ってください。上には日付と担当者2名の欄があります。</p>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen">
+          <img src="img/a10-inventory.jpg" width="600" height="1298" alt="在庫一覧の画面。棚卸し、販売チェック表、QRラベル印刷のボタンがある">
+          <span class="pin" style="left:64%;top:38%">1</span>
+        </div>
+        <figcaption>① 在庫一覧の「🖨 販売チェック表」</figcaption>
+      </figure>
+      <figure class="paper">
+        <img src="img/a13-tally.jpg" width="900" height="1272" alt="販売チェック表の見本。商品の一覧と、時間帯①から⑦、合計、備考の欄がある">
+        <figcaption>出てくる表（上の「印刷する」で印刷します）</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="a-batch">
+    <div>
+      <div class="step-head"><span class="no">7</span><h3>公演のあとに、まとめて記録する</h3></div>
+      <p>販売チェック表の「合計」を見ながら、まとめて記録します。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>🛒 販売・補充</b> で <b>「まとめて入力」</b>を選び、<b>▼ 販売</b>・在庫区分・イベント名を合わせます。</span></li>
+        <li><span class="pin">2</span><span>売れた商品の <b>＋</b> を、売れた数だけ押します。多すぎたら <b>−</b> で減らします。</span></li>
+        <li><span class="pin">3</span><span>画面の下に「◯商品 ◯枚」と合計が出ます。<b>確認へ</b> を押し、内容が合っていれば <b>▼ 販売する</b>。</span></li>
+      </ol>
+      <div class="note">途中で画面を閉じても、入れた数はそのスマホに残っています。「商品をさがす」の欄に名前を入れると、目的の商品がすぐ見つかります。📷 でQRラベルを読むと、1回で＋1されます。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen">
+        <img src="img/a09-batch.jpg" width="600" height="1298" alt="まとめて入力の画面。商品ごとに＋と−のボタンがある">
+        <span class="pin" style="left:89.2%;top:20.3%">2</span>
+        <span class="pin" style="left:28.5%;top:92%">3</span>
+        <span class="pin" style="left:86.2%;top:91%">3</span>
+      </div>
+      <figcaption>数を入れると、下に合計と「確認へ」が出ます</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="a-restock">
+    <div>
+      <div class="step-head"><span class="no">8</span><h3>商品が入ったとき・場所を移すとき</h3></div>
+      <p>売れたときと同じ画面の、いちばん上のボタンを切りかえます。</p>
+      <ol class="legend">
+        <li><span class="pin" style="background:#27ae60">▲</span><span><b>▲ 補充</b> … 商品が入って、在庫が増えたとき。</span></li>
+        <li><span class="pin" style="background:#3498db">⇄</span><span><b>⇄ 移動</b> … 「現場用」から「ファンクラブ用」のように、置き場所を移すとき。移動元と移動先を選びます。合計の数は変わらず、売上にも入りません。</span></li>
+      </ol>
+      <p>そのあとの流れ（商品を選ぶ → 数量 → 確認）は、販売と同じです。</p>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/a06-sale.jpg" width="600" height="1298" alt="販売・補充の画面の上にある、販売・補充・移動のボタン">
+        <span class="pin" style="left:50%;top:30.1%;background:#27ae60">▲</span>
+        <span class="pin" style="left:79.6%;top:30.1%;background:#3498db">⇄</span>
+      </div>
+      <figcaption>上のボタンで「補充」「移動」に切りかえ</figcaption>
+    </figure>
+  </section>
+
+  <p class="chapter-title">商品の管理</p>
+
+  <section class="step two-shots" id="a-register">
+    <div>
+      <div class="step-head"><span class="no">9</span><h3>新しい商品を登録する</h3></div>
+      <p><b>📝 商品登録</b> を押して、上から順に入れていきます。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>カテゴリ（商品名）・種別・色</b>を入れます。一度入れた名前は、打ちはじめると候補に出ます。</span></li>
+        <li><span class="pin">2</span><span><b>サイズ</b>は、あるものを全部押して選びます（紫になったものが選ばれています）。選んだ数だけ、まとめて登録されます。</span></li>
+        <li><span class="pin">3</span><span><b>価格</b>を入れると、売上金額が集計できます（空でもOK）。</span></li>
+        <li><span class="pin">4</span><span><b>📷 撮影する</b> でその場で写真を撮れます（なくてもOK）。</span></li>
+        <li><span class="pin">5</span><span><b>初期在庫</b>に、サイズごと・場所ごとの数を入れて、<b>登録する</b> を押します。</span></li>
+      </ol>
+      <div class="note warn">同じ商品がもうあるときは、黄色い文字で知らせます。そのときは登録せずに、「販売・補充 → ▲ 補充」で数を足してください。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a03-register.jpg" width="600" height="1298" alt="商品登録の画面。サイズを複数選べる">
+          <span class="pin" style="left:88%;top:26%">1</span>
+          <span class="pin" style="left:88%;top:53%">2</span>
+          <span class="pin" style="left:88%;top:68.5%">3</span>
+          <span class="pin" style="left:50%;top:85%">4</span>
+        </div>
+        <figcaption>商品情報とサイズ（S・M・L）を選んだところ</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a04-register-stock.jpg" width="600" height="1298" alt="初期在庫を入れる表と、まとめて登録するボタン">
+          <span class="pin" style="left:88%;top:40%">5</span>
+        </div>
+        <figcaption>サイズごとの在庫を入れて「まとめて登録する」</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step two-shots" id="a-edit">
+    <div>
+      <div class="step-head"><span class="no">10</span><h3>商品を直す・販売を終える</h3></div>
+      <p><b>📋 在庫一覧</b> で、商品IDの横の <b>✏️</b> を押すと、名前・種別・色・サイズ・価格を直せます。在庫の数や履歴は変わりません。</p>
+      <p><b>もう仕入れない商品</b>は、<b>🚫 販売終了にする</b> を押してください。見る人のページと「在庫わずか」から消えます。データは残るので、あとで「販売中に戻す」こともできます。</p>
+      <div class="note warn"><b>🗑 この商品を削除</b> は、2回押すと本当に消えます。元には戻せません。ふだんは「販売終了」を使ってください。</div>
+      <div class="note">一覧の写真の欄を押すと、写真を見たり差しかえたりできます。写真がない商品は ＋ を押すと追加できます。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a12-edit.jpg" width="600" height="1298" alt="商品情報の編集画面"></div>
+        <figcaption>✏️ で開く編集画面</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a12b-edit-bottom.jpg" width="600" height="1298" alt="編集画面の下にある、販売終了と削除のボタン"></div>
+        <figcaption>下にある「販売終了」と「削除」</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step two-shots" id="a-count">
+    <div>
+      <div class="step-head"><span class="no">11</span><h3>数え直す（棚卸し）</h3></div>
+      <p>実際の数と画面の数が合わないときに使います。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>📋 在庫一覧</b> の <b>📋 棚卸し</b> を押し、数える場所（在庫区分）を選びます。</span></li>
+        <li><span class="pin">2</span><span>数えた数を、商品ごとに入れます。入れなかった商品はそのままです。右に「+2」「−1」のように差が出ます。</span></li>
+        <li><span class="pin">3</span><span>下の <b>確認へ</b> を押し、差がある商品だけが出るので確かめて <b>反映する</b>。</span></li>
+      </ol>
+      <div class="note">棚卸しで直した数は、売上には入りません。途中でやめても、入れた数はそのスマホに残ります。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a11-stocktake.jpg" width="600" height="1298" alt="棚卸しの画面。商品ごとに数えた数を入れる欄がある">
+          <span class="pin" style="left:88%;top:26.4%">1</span>
+          <span class="pin" style="left:58%;top:60.7%">2</span>
+          <span class="pin" style="left:86.2%;top:91%">3</span>
+        </div>
+        <figcaption>数えた数を入れる</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a11b-stocktake-confirm.jpg" width="600" height="1298" alt="棚卸しの確認画面。差がある商品だけが出る"></div>
+        <figcaption>差がある商品だけ確認して「反映する」</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="a-alerts">
+    <div>
+      <div class="step-head"><span class="no">12</span><h3>在庫わずか</h3></div>
+      <p><b>🔔 在庫わずか</b> には、合計が<b>5枚以下</b>の商品が、少ない順に並びます。タブの上の数字が、その件数です。</p>
+      <p><b>▲ 補充</b> を押すと、その商品を選んだ状態で補充の画面に移ります。もう仕入れない商品は <b>🚫 販売終了</b> にすると、この一覧から消えます。</p>
+      <div class="note">メールなどのお知らせは送りません。気になったときにこのタブを見てください。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/a14-alerts.jpg" width="600" height="1298" alt="在庫わずかの一覧"></div>
+      <figcaption>残りが少ない商品の一覧</figcaption>
+    </figure>
+  </section>
+
+  <section class="step two-shots" id="a-summary">
+    <div>
+      <div class="step-head"><span class="no">13</span><h3>売上を見る（集計）</h3></div>
+      <p><b>📊 集計・他</b> を押すと、月ごとの販売数・補充数・売上金額が出ます。<b>集計を更新する</b> を押すと最新になります。</p>
+      <p>下の<b>🎪 イベント別</b>では、イベント名を付けて記録した販売を、公演ごとに見られます。</p>
+      <div class="note">売上金額は、商品に価格を入れてから売れた分だけ計算されます。価格は「商品を直す」で入れられます。</div>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a15-monthly.jpg" width="600" height="1298" alt="月ごとの集計の画面"></div>
+        <figcaption>月ごとの集計</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a16-events.jpg" width="600" height="1298" alt="イベント別の集計の画面"></div>
+        <figcaption>公演ごとの集計</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="a-import">
+    <div>
+      <div class="step-head"><span class="no">14</span><h3>在庫表（スプレッドシート）から取り込む</h3></div>
+      <p>別に管理している在庫表に新しい商品が増えたときに使います。</p>
+      <p><b>📝 商品登録</b> のいちばん下、<b>⑤ 在庫表から取り込む</b> に在庫表のアドレスを貼り、<b>いまの在庫表と比べる</b> を押します。まだ登録されていない商品だけが出るので、チェックを確かめて <b>登録する</b> を押します。</p>
+      <div class="note">名前が少しちがうだけで同じ商品のときは、「◯◯と同じ商品にする」を押してください。次からは同じものとして扱います。登録しない行は「今後この行を表示しない」を押します。</div>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/a17-source.jpg" width="600" height="1298" alt="在庫表と比べた結果。未登録の商品が2件出ている"></div>
+      <figcaption>未登録の商品だけが出ます</figcaption>
+    </figure>
+  </section>
+
+  <section class="step wide" id="a-other">
+    <div>
+      <div class="step-head"><span class="no">15</span><h3>その他・注意</h3></div>
+      <ol class="legend">
+        <li><span class="pin" style="background:var(--admin)">A</span><span><b>バックアップ</b> … 週に1回、管理画面を開いたときに自動で在庫表のコピーが作られます（Googleドライブの「コロッケ在庫 バックアップ」）。「集計・他」の <b>今すぐバックアップ</b> でも作れます。</span></li>
+        <li><span class="pin" style="background:var(--admin)">B</span><span><b>お客さま用QR</b> … 「集計・他」の <b>お客さま用QR</b> で、見る人のページのQRコードを大きく印刷できます。会場に貼っておくと便利です。</span></li>
+        <li><span class="pin" style="background:var(--admin)">C</span><span><b>QRラベル</b> … 「在庫一覧」の <b>QRラベル印刷</b> で、商品ごとのQRラベルを印刷できます。袋や箱に貼ると、📷 で読むだけで商品を選べます。</span></li>
+        <li><span class="pin" style="background:var(--admin)">D</span><span><b>在庫表を直接書きかえるとき</b> … 書きかえた数は見る人のページにも出ますが、販売履歴に残らず、集計にも入りません。数を合わせたいときは「棚卸し」を使ってください。</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="step wide" id="a-faq">
+    <div>
+      <div class="step-head"><span class="no">?</span><h3>こまったとき</h3></div>
+      <div class="faq">
+        <details open>
+          <summary>「通信が途切れました」と出た</summary>
+          <p>記録できている場合があります。すぐにやり直さず、まず「在庫一覧」の <b>↻ 更新</b> を押して、数が変わっているか確かめてください。変わっていなければ、もう一度記録します。</p>
+        </details>
+        <details>
+          <summary>もう一度パスワードを聞かれた</summary>
+          <p>パスワードが変わったか、スマホの記録が消えた可能性があります。管理の担当者に確かめて、もう一度入れてください。</p>
+        </details>
+        <details>
+          <summary>「在庫が足りません」と出た</summary>
+          <p>選んだ場所（在庫区分）の数より多く売ろうとしています。場所が合っているか確かめてください。実際の数と合わないときは「棚卸し」で数を直します。</p>
+        </details>
+        <details>
+          <summary>取り消しができない</summary>
+          <p>24時間より前の記録や、あとから在庫が動いて元に戻せないときは取り消せません。反対の操作（売った数を「補充」する、など）で直してください。</p>
+        </details>
+        <details>
+          <summary>販売チェック表の下があいてしまう</summary>
+          <p>用紙を A4・縦 にして印刷してください。表は用紙の下まで自動で伸びます。印刷の「倍率」は 100% にしてください。</p>
+        </details>
+        <details>
+          <summary>カメラ（📷）が使えない</summary>
+          <p>ブラウザがカメラの使用を聞いてきたら「許可」を押してください。使えないときは、🔍 選ぶ から写真で選べます。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer">コロッケ グッズ在庫ガイド　管理する人向け　（画面の写真は説明用の見本データです）</p>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('.switch button');
+    var panels = { viewer: document.getElementById('viewer'), admin: document.getElementById('admin') };
+
+    function show(name, scroll) {
+      if (!panels[name]) name = 'viewer';
+      Object.keys(panels).forEach(function (key) { panels[key].hidden = key !== name; });
+      buttons.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.panel === name)); });
+      document.body.classList.toggle('admin-mode', name === 'admin');
+      try { localStorage.setItem('guide.panel', name); } catch (e) { /* 保存できない環境 */ }
+      if (scroll) window.scrollTo({ top: 0 });
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { show(b.dataset.panel, true); });
+    });
+
+    // #admin や #a-sale のようなリンクで開いたときは、その側を出す
+    function fromHash() {
+      var h = (location.hash || '').slice(1);
+      if (h === 'admin' || h.indexOf('a-') === 0) return 'admin';
+      if (h === 'viewer' || h.indexOf('v-') === 0) return 'viewer';
+      return null;
+    }
+    var saved = null;
+    try { saved = localStorage.getItem('guide.panel'); } catch (e) { /* 保存できない環境 */ }
+    show(fromHash() || saved || 'viewer', false);
+    window.addEventListener('hashchange', function () {
+      var p = fromHash();
+      if (p) show(p, false);
+    });
+
+    // QRコード
+    function drawQr(id, text) {
+      var el = document.getElementById(id);
+      if (!el || typeof qrcode !== 'function') return;
+      var qr = qrcode(0, 'M');
+      qr.addData(text);
+      qr.make();
+      el.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+    }
+    drawQr('qrViewer', document.getElementById('urlViewer').textContent.trim());
+    drawQr('qrAdmin', document.getElementById('urlAdmin').textContent.trim());
+
+    // アドレスのコピー
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var target = document.getElementById(btn.dataset.copy);
+        var text = target.textContent.trim();
+        var done = function () {
+          var label = btn.textContent;
+          btn.textContent = 'コピーしました';
+          setTimeout(function () { btn.textContent = label; }, 1800);
+        };
+        var fallback = function () {
+          var range = document.createRange();
+          range.selectNodeContents(target);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          btn.textContent = '選んだ文字をコピーしてください';
+        };
+        try {
+          navigator.clipboard.writeText(text).then(done, fallback);
+        } catch (e) {
+          fallback();
+        }
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

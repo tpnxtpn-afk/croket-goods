@@ -88,11 +88,15 @@
   .pay { margin: 0 16px calc(14px + var(--safe-b)); padding: 18px; border-radius: 16px; background: var(--sale); color: #fff;
     font-size: 22px; font-weight: 800; letter-spacing: .05em; }
   .pay:disabled { background: #c9cfd6; }
-  .log { border-top: 1px solid var(--line); max-height: 28%; overflow-y: auto; padding: 8px 16px 10px; font-size: 13px; }
+  .log { border-top: 1px solid var(--line); max-height: 34%; overflow-y: auto; padding: 8px 16px 10px; font-size: 13px; }
   .log h3 { margin: 4px 0 6px; font-size: 14px; color: var(--muted); }
   .log .ent { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
   .log .ent.pending { color: var(--accent-d); }
   .log .ent.undone { color: var(--muted); text-decoration: line-through; }
+  .log .ent span { min-width: 0; }
+  .log .ent .what { display: block; color: var(--ink); font-size: 13px; line-height: 1.5; margin-top: 2px; }
+  .log .ent.undone .what { color: var(--muted); }
+  .log .ent { align-items: flex-start; }
   .log .ent button { color: var(--sale); font-size: 13px; white-space: nowrap; }
 
   /* ---------- サイズを選ぶ画面 ---------- */
@@ -399,8 +403,9 @@
     const q = load(QUEUE_STORE, []);
     const entries = q.map(e => Object.assign({ pending: true }, e)).concat(log().reverse()).slice(0, 30);
     $('log').innerHTML = entries.length ? entries.map(e =>
-      '<div class="ent' + (e.pending ? ' pending' : '') + (e.undone ? ' undone' : '') + '"><span>' + e.at.slice(11, 16) + '　' + e.qty + '点' +
-      (e.amount ? '　' + yen(e.amount) : '') + (e.pending ? '　未送信' : '') + '</span>' +
+      '<div class="ent' + (e.pending ? ' pending' : '') + (e.undone ? ' undone' : '') + '"><span><b>' + e.at.slice(11, 16) + '　' + e.qty + '点' +
+      (e.amount ? '　' + yen(e.amount) : '') + (e.pending ? '　未送信' : '') + (e.undone ? '　取消済' : '') + '</b>' +
+      ((e.items || e.names || []).length ? '<small class="what">' + (e.items || e.names).map(esc).join('<br>') + '</small>' : '') + '</span>' +
       (!e.pending && !e.undone && e.opId ? '<button data-undo="' + esc(e.opId) + '">取り消す</button>' : '') + '</div>').join('')
       : '<div style="color:var(--muted)">まだありません</div>';
     const n = q.length;
@@ -408,11 +413,20 @@
     $('net').className = 'net' + (!navigator.onLine || n ? ' off' : '');
   }
 
+  // 記録に出す「何を売ったか」（例：コロダス ゴールド S ×2）
+  function itemNames(items) {
+    return items.map(i => {
+      const p = byId(i.id);
+      if (!p) return i.id + ' ×' + i.qty;
+      return [p.category, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ') + ' ×' + i.qty;
+    });
+  }
+
   async function send(entry) {
     const res = await api('processBatch', { mode: 'sale', location: entry.pool, event: entry.event, operator: entry.operator,
       items: entry.items.map(i => ({ productId: i.id, quantity: i.qty })) }, 45000);
     const l = load(LOG_STORE, []);
-    l.push({ at: entry.at, qty: res.quantity, amount: res.amount, opId: res.opId });
+    l.push({ at: entry.at, qty: res.quantity, amount: res.amount, opId: res.opId, items: itemNames(entry.items) });
     save(LOG_STORE, l.slice(-300));
     res.products.forEach(np => { const i = state.products.findIndex(p => p.id === np.id); if (i >= 0) state.products[i] = Object.assign(state.products[i], np); });
     return res;
@@ -442,6 +456,7 @@
   }
 
   function queue(entry, msg) {
+    entry.names = itemNames(entry.items);
     const q = load(QUEUE_STORE, []); q.push(entry); save(QUEUE_STORE, q);
     // 在庫の表示だけ先に減らしておく
     entry.items.forEach(i => { const p = byId(i.id); if (p) p.stock[entry.pool] = Math.max(0, (p.stock[entry.pool] || 0) - i.qty); });

@@ -585,7 +585,7 @@
     $('tabs').innerHTML = owners.map(o => {
       const total = state.products.reduce((sum, p) => sum + (p.stock[o] || 0), 0);
       return '<button type="button" class="tab' + (o === state.pool ? ' active' : '') + '" data-pool="' + esc(o) +
-        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '枚</small></button>';
+        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '点</small></button>';
     }).join('');
     const note = ownerNotes[owners.indexOf(state.pool)] || '';
     $('poolNote').textContent = note;
@@ -604,11 +604,19 @@
     $('typeChips').innerHTML = chip('', 'すべて') + types.map(t => chip(t, t)).join('') + (hasNew ? chip('__new__', '🆕 新着') : '');
   }
 
+  // 数え方（Tシャツ・タオルなどは「枚」、ペンライトなどは「本」、それ以外は「個」。種類が混ざる合計は「点」）
+  const UNIT_MAI = ['Tシャツ', 'ワイシャツ', 'タオル', 'マフラータオル', 'スポーツタオル', 'ハンドタオル', '手ぬぐい',
+    'B5クリアファイル', 'クリアファイル', 'ステッカー', 'ストール'];
+  const UNIT_HON = ['ペンライト', '傘', 'ストラップ', 'ネックストラップ'];
+  function unitOf(type) {
+    return UNIT_MAI.indexOf(type) >= 0 ? '枚' : UNIT_HON.indexOf(type) >= 0 ? '本' : '個';
+  }
+
   function sizeChipsHtml(g) {
     return g.items.map(x => {
       const st = stateOf(x.n);
       const label = x.p.size && x.p.size !== '-' ? esc(x.p.size) + ' ' : '';
-      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>枚</span>';
+      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>' + unitOf(g.type) + '</span>';
     }).join('');
   }
 
@@ -618,7 +626,7 @@
       ? '<img class="thumb" src="' + esc(imageSrc(g.imageUrl, 260)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
       : '<div class="thumb none" aria-hidden="true">' + typeIcon(g.type) + '</div>';
     const counts = g.items.length === 1
-      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>枚<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
+      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>' + unitOf(g.type) + '<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
       : '<div class="sizes">' + sizeChipsHtml(g) + '</div>';
     const tags = (grouped ? [] : [g.type]).concat([g.color])
       .filter(v => v && v !== '-')
@@ -645,7 +653,7 @@
     const groups = sortGroups(groupsOf());
     const total = groups.reduce((sum, g) => sum + g.total, 0);
     const items = groups.reduce((sum, g) => sum + g.items.length, 0);
-    $('summary').innerHTML = '<b>' + items + '</b>件 ／ 合計 <b>' + total + '</b>枚' +
+    $('summary').innerHTML = '<b>' + items + '</b>件 ／ 合計 <b>' + total + '</b>点' +
       (state.q ? '（「' + esc(state.q) + '」で検索中）' : '');
 
     if (!groups.length) {
@@ -664,7 +672,7 @@
     });
     $('list').innerHTML = blocks.map(b =>
       '<h2 class="group-title">' + esc(b.category) +
-      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '枚</span></h2>' +
+      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '点</span></h2>' +
       b.groups.map(g => groupHtml(g, true)).join('')).join('');
   }
 
@@ -693,7 +701,7 @@
       .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
     $('detailSizes').innerHTML = sizeChipsHtml(g);
     const st = stateOf(g.total);
-    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + '枚（' + st.word + '）';
+    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
     $('detail').hidden = false;
   }
 

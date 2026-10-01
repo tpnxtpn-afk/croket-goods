@@ -1022,6 +1022,14 @@
     return skey([p.id, p.category, p.type, p.color, p.size].join(' ')).indexOf(skey(q)) >= 0;
   }
 
+  // 数え方（Tシャツ・タオルなどは「枚」、ペンライトなどは「本」、それ以外は「個」。種類が混ざる合計は「点」）
+  const UNIT_MAI = ['Tシャツ', 'ワイシャツ', 'タオル', 'マフラータオル', 'スポーツタオル', 'ハンドタオル', '手ぬぐい',
+    'B5クリアファイル', 'クリアファイル', 'ステッカー', 'ストール'];
+  const UNIT_HON = ['ペンライト', '傘', 'ストラップ', 'ネックストラップ'];
+  function unitOf(type) {
+    return UNIT_MAI.indexOf(type) >= 0 ? '枚' : UNIT_HON.indexOf(type) >= 0 ? '本' : '個';
+  }
+
   function describe(p) {
     return [p.category, p.type, p.color, p.size].map(esc).join(' / ');
   }
@@ -1397,7 +1405,7 @@
       return '<div class="src-item"><div class="src-head">' +
         '<input type="checkbox" data-pick="' + i + '"' + (item.suggestions.length ? '' : ' checked') + '>' +
         '<div class="body"><b>' + esc(item.category) + '</b>　' + esc(item.type) + ' / ' + esc(item.color) + ' / ' + esc(item.size) +
-        '　<b>' + item.qty + '枚</b></div></div>' +
+        '　<b>' + item.qty + unitOf(item.type) + '</b></div></div>' +
         '<div class="src-sub">' + (suggest ? suggest + '<br>' : '') +
         '<button type="button" class="link-btn" data-link="' + i + '" data-pid="">今後この行を表示しない</button></div></div>';
     }).join('');
@@ -1449,7 +1457,7 @@
     if (!picked.length) return toast('取り込む商品にチェックを入れてください', true);
     const location = $('srcLocation').value;
     const ok = await confirmBox('この商品を登録しますか？',
-      picked.map(p => '・' + esc(p.category) + ' ' + esc(p.type) + ' ' + esc(p.color) + ' ' + esc(p.size) + '　' + p.qty + '枚').join('<br>') +
+      picked.map(p => '・' + esc(p.category) + ' ' + esc(p.type) + ' ' + esc(p.color) + ' ' + esc(p.size) + '　' + p.qty + unitOf(p.type)).join('<br>') +
       '<br>在庫は「' + esc(location) + '」に入ります。', '登録する');
     if (!ok) return;
     const btn = $('btnImport');
@@ -1553,9 +1561,9 @@
 
     const detail = '<b>' + esc(p.id) + '　' + describe(p) + '</b><br>' +
       (mode === 'transfer'
-        ? esc(from) + ' → ' + esc(to) + '　<b>' + qty + '枚</b>'
+        ? esc(from) + ' → ' + esc(to) + '　<b>' + qty + unitOf(p.type) + '</b>'
         : esc(from) + '　' + (p.stock[from] || 0) + ' → <b>' + ((p.stock[from] || 0) + (mode === 'sale' ? -qty : qty)) + '</b>（' +
-          (mode === 'sale' ? '−' : '＋') + qty + '枚）') +
+          (mode === 'sale' ? '−' : '＋') + qty + unitOf(p.type) + '）') +
       (mode === 'sale' && event ? '<br>イベント：' + esc(event) : '');
     const ok = await confirmBox(MODES[mode].verb + 'します。よろしいですか？', detail, MODES[mode].button, MODES[mode].color);
     if (!ok) return;
@@ -1587,7 +1595,7 @@
         '<div class="result-line">合計在庫：<b>' + product.total + '</b></div>';
       box.hidden = false;
       toast(MODES[mode].toast);
-      showUndo(r.opId, MODES[mode].verb + '：' + product.id + ' ' + qty + '枚');
+      showUndo(r.opId, MODES[mode].verb + '：' + product.id + ' ' + qty + unitOf(product.type));
       $('sQty').value = 1;
       updateIdHint();
       if (mode === 'sale' && event) rememberEvent(event);
@@ -1652,7 +1660,7 @@
     let n = Math.max(0, qty);
     if (state.batch.mode === 'sale' && n > (p.stock[location] || 0)) {
       n = p.stock[location] || 0;
-      toast(location + 'の在庫は' + n + '枚です', true);
+      toast(location + 'の在庫は' + n + unitOf(p.type) + 'です', true);
     }
     if (n <= 0) delete state.batch.items[id];
     else state.batch.items[id] = n;
@@ -1671,7 +1679,7 @@
       const n = batchQty(p.id);
       return '<div class="row-item' + (n ? ' picked-row' : '') + '">' + thumbHtml(p, 120) +
         '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-        '　' + esc(location) + ' ' + (p.stock[location] || 0) + '枚</small></div>' +
+        '　' + esc(location) + ' ' + (p.stock[location] || 0) + unitOf(p.type) + '</small></div>' +
         '<div class="stepper"><button type="button" data-bid="' + esc(p.id) + '" data-delta="-1">−</button>' +
         '<span class="n">' + n + '</span>' +
         '<button type="button" data-bid="' + esc(p.id) + '" data-delta="1">＋</button></div></div>';
@@ -1680,7 +1688,7 @@
     const ids = Object.keys(state.batch.items);
     const total = ids.reduce((sum, id) => sum + state.batch.items[id], 0);
     const verb = state.batch.mode === 'sale' ? '販売' : '補充';
-    $('batchInfo').innerHTML = verb + '　<b>' + ids.length + '</b>商品　<b>' + total + '</b>枚';
+    $('batchInfo').innerHTML = verb + '　<b>' + ids.length + '</b>商品　<b>' + total + '</b>点';
     updateBars();
   }
 
@@ -1694,7 +1702,7 @@
       const p = findProduct(id);
       const n = state.batch.items[id];
       const before = p.stock[location] || 0;
-      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　' + n + '枚（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）';
+      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　' + n + unitOf(p.type) + '（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）';
     }).join('<br>');
     const ok = await confirmBox((mode === 'sale' ? '販売' : '補充') + 'します。よろしいですか？',
       esc(location) + (event ? '　イベント：' + esc(event) : '') + '<br>' + lines,
@@ -1712,8 +1720,8 @@
       state.batch.items = {};
       saveBatch();
       renderBatch();
-      toast('✅ ' + res.items.length + '商品・' + res.quantity + '枚を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
-      showUndo(res.opId, (mode === 'sale' ? '販売' : '補充') + '：' + res.items.length + '商品 ' + res.quantity + '枚');
+      toast('✅ ' + res.items.length + '商品・' + res.quantity + '点を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
+      showUndo(res.opId, (mode === 'sale' ? '販売' : '補充') + '：' + res.items.length + '商品 ' + res.quantity + '点');
       if (event) rememberEvent(event);
     } catch (err) {
       toast(err.message, true);
@@ -1737,7 +1745,7 @@
     $('pickList').innerHTML = list.length ? list.map(p =>
       '<div class="row-item" data-pick-id="' + esc(p.id) + '">' + thumbHtml(p, 120) +
       '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-      '　' + esc(location) + ' ' + (p.stock[location] || 0) + '枚</small></div>' +
+      '　' + esc(location) + ' ' + (p.stock[location] || 0) + unitOf(p.type) + '</small></div>' +
       '<div class="diff">' + p.total + '</div></div>').join('') : '<div class="empty">商品が見つかりません</div>';
   }
 
@@ -1807,7 +1815,7 @@
     if (navigator.vibrate) navigator.vibrate(60);
     if (state.scanTarget === 'batch') {
       setBatchQty(id, batchQty(id) + 1);
-      $('scanHint').textContent = '✅ ' + id + ' ' + p.category + '（' + batchQty(id) + '枚）　続けて読み取れます';
+      $('scanHint').textContent = '✅ ' + id + ' ' + p.category + '（' + batchQty(id) + unitOf(p.type) + '）　続けて読み取れます';
       return;
     }
     closeScanner();
@@ -1927,7 +1935,7 @@
       const diffText = diff === null || diff === 0 ? '' : (diff > 0 ? '+' + diff : String(diff));
       return '<div class="row-item">' + thumbHtml(p, 120) +
         '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-        '　いま ' + before + '枚</small></div>' +
+        '　いま ' + before + unitOf(p.type) + '</small></div>' +
         '<div class="stepper"><input type="number" inputmode="numeric" min="0" data-count="' + esc(p.id) + '" value="' +
         (counted == null ? '' : esc(counted)) + '" placeholder="数"></div>' +
         '<div class="diff ' + (diff > 0 ? 'plus' : diff < 0 ? 'minus' : '') + '">' + diffText + '</div></div>';
@@ -2072,7 +2080,7 @@
     const tbody = rows.map(p => {
       const sub = compact
         ? esc(p.type) + '/' + esc(p.color) + '/' + esc(p.size) + ' ' + (p.stock[pool] || 0)
-        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + '枚';
+        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + unitOf(p.type);
       return '<tr><td class="name"><b>' + esc(p.category) + '</b>' + (compact ? ' ' : '') + '<small>' + sub + '</small></td>' +
         slots.map(() => '<td></td>').join('') + '<td></td><td class="memo"></td></tr>';
     }).join('');
@@ -2145,7 +2153,7 @@
     if (!p) return;
     if (!btn.classList.contains('armed')) {
       btn.classList.add('armed');
-      btn.textContent = p.total > 0 ? '本当に削除する（在庫' + p.total + '枚も消えます）' : '本当に削除する';
+      btn.textContent = p.total > 0 ? '本当に削除する（在庫' + p.total + unitOf(p.type) + 'も消えます）' : '本当に削除する';
       deleteTimer = setTimeout(resetDeleteButton, 5000);
       return;
     }

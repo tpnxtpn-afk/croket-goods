@@ -122,8 +122,43 @@
   .login input { width: 100%; font-size: 18px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
   .login button { width: 100%; padding: 14px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 18px; font-weight: 700; }
 
+  .hsets { display: contents; }
+  .phone-only { display: none !important; }
+
+  /* ---------- iPhone（幅600px以下）：写真2列、お会計は下のバーから開く ---------- */
+  @media (max-width: 600px) {
+    .phone-only { display: inline-flex !important; }
+    header { flex-wrap: wrap; gap: 8px; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
+    header h1 { font-size: 18px; }
+    header .spacer, #reload { display: none; }
+    .net { font-size: 11px; padding: 4px 8px; margin-left: auto; }
+    .hsets { display: none; width: 100%; flex-direction: column; gap: 6px; }
+    .hsets.open { display: flex; }
+    .hfield input, .hfield select { width: 100%; flex: 1; }
+    .main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    nav.genres { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--line); padding: 8px; }
+    .genre { width: auto; white-space: nowrap; margin: 0; padding: 8px 12px; font-size: 15px; }
+    .genre small { display: none; }
+    section.items { padding: 10px 10px calc(84px + var(--safe-b)); }
+    .search input { font-size: 16px; padding: 10px 12px; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .tile b { font-size: 15px; }
+    .tile .sub { font-size: 12px; }
+    .cartbar { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 15; align-items: center; gap: 12px;
+      padding: 14px 18px; border-radius: 16px; background: var(--sale); color: #fff; font-size: 17px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+    .cartbar b { margin-left: auto; font-size: 18px; }
+    .cartbar.empty { background: #9aa3ad; }
+    aside.cart { position: fixed; inset: 0; z-index: 25; max-height: none; border: none; transform: translateY(100%); transition: transform .2s; padding-top: env(safe-area-inset-top, 0px); }
+    aside.cart.open { transform: none; }
+    .cart h2 { flex-wrap: wrap; gap: 6px; }
+    .cart h2 .back { width: 100%; font-size: 16px; color: var(--accent-d); font-weight: 700; padding: 4px 0 8px; }
+    .log { display: block; max-height: 22%; }
+    .sizes { grid-template-columns: repeat(2, 1fr); }
+    .sheet { padding: 16px; }
+  }
+
   /* ---------- 縦向き（幅が狭いとき）：ジャンルを上、カゴを下に ---------- */
-  @media (max-width: 900px) {
+  @media (min-width: 601px) and (max-width: 900px) {
     .main { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
     nav.genres { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--line); padding: 8px; }
     .genre { width: auto; white-space: nowrap; margin: 0; padding: 10px 14px; }
@@ -138,10 +173,13 @@
 <div class="app">
   <header>
     <h1>🧾 販売レジ</h1>
+    <button class="hbtn phone-only" id="setBtn">⚙︎ 公演・担当</button>
     <span class="badge" id="envBadge" hidden>テスト版</span>
+    <div class="hsets" id="hsets">
     <label class="hfield"><span>公演</span><input id="event" placeholder="例：10/5 大阪 昼" autocomplete="off"></label>
     <label class="hfield"><span>担当</span><input id="operator" placeholder="名前" autocomplete="off"></label>
     <label class="hfield"><span>在庫</span><select id="pool"></select></label>
+    </div>
     <div class="spacer"></div>
     <div class="net" id="net">● オンライン</div>
     <button class="hbtn" id="reload">↻ 在庫更新</button>
@@ -152,8 +190,9 @@
       <div class="search"><input id="q" placeholder="🔍 商品名・色で探す" autocomplete="off"></div>
       <div class="grid" id="grid"></div>
     </section>
-    <aside class="cart">
-      <h2>お会計 <button id="clear">すべて消す</button></h2>
+    <button class="cartbar phone-only" id="cartBar"><span id="barQty">0点</span><span id="barYen"></span><b>お会計へ ›</b></button>
+    <aside class="cart" id="cart">
+      <h2><button class="phone-only back" id="cartClose">‹ 商品にもどる</button>お会計 <button id="clear">すべて消す</button></h2>
       <div class="lines" id="lines"></div>
       <div class="sum">
         <div class="row"><span>点数</span><b id="sumQty">0点</b></div>
@@ -320,6 +359,9 @@
         '<div class="qty"><button data-dec="' + esc(id) + '">−</button><span>' + n + '</span><button data-inc="' + esc(id) + '">＋</button></div></div>';
     }).join('') : '<div class="cart-empty">商品の写真をタップすると<br>ここに入ります</div>';
     $('sumQty').textContent = qty + '点';
+    $('barQty').textContent = qty ? '🧾 ' + qty + '点' : '🧾 まだ空です';
+    $('barYen').textContent = qty && unpriced < qty ? yen(total) : '';
+    $('cartBar').classList.toggle('empty', !qty);
     $('sumYen').textContent = qty ? (unpriced === qty ? '価格未設定' : yen(total)) : '—';
     $('sumNote').textContent = unpriced && unpriced < qty ? '※ 価格未設定の商品が' + unpriced + '点あります（合計に入っていません）'
       : unpriced ? '※ 管理画面で価格を入れると合計金額が出ます' : '';
@@ -388,6 +430,7 @@
       try {
         const res = await send(entry);
         state.cart = {};
+        $('cart').classList.remove('open');
         toast('✅ ' + res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
       } catch (e) {
         if (e.server) { toast(e.message, true); }
@@ -450,6 +493,9 @@
   $('q').addEventListener('input', e => { state.q = e.target.value; render(); });
   $('clear').addEventListener('click', () => { state.cart = {}; render(); });
   $('pay').addEventListener('click', pay);
+  $('setBtn').addEventListener('click', () => $('hsets').classList.toggle('open'));
+  $('cartBar').addEventListener('click', () => $('cart').classList.add('open'));
+  $('cartClose').addEventListener('click', () => $('cart').classList.remove('open'));
   $('reload').addEventListener('click', () => loadProducts());
   ['event', 'operator', 'pool'].forEach(id => {
     $(id).value = settings[id] || $(id).value;

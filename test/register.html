@@ -115,6 +115,37 @@
   .size .c { display: inline-block; margin-top: 4px; background: var(--sale); color: #fff; border-radius: 10px; padding: 0 8px; font-weight: 700; font-size: 14px; }
   .sheet .close { margin-top: 18px; width: 100%; padding: 14px; border-radius: 14px; background: #f0f2f5; font-size: 18px; font-weight: 700; }
 
+  /* ---------- 売れたもの ---------- */
+  .sales { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+  .sales-hd { background: #fff; padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+  .sales-hd h2 { margin: 0; font-size: 22px; }
+  .sales-hd .back { justify-self: start; color: var(--accent-d); font-weight: 700; font-size: 16px; }
+  .sales-filter { display: flex; gap: 8px; }
+  .sales-filter select { flex: 1; font-size: 17px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+  .hbtn2 { padding: 0 16px; border-radius: 10px; background: #f0f2f5; font-size: 20px; }
+  .seg2 { display: grid; grid-template-columns: 1fr 1fr; background: #f0f2f5; border-radius: 12px; padding: 4px; }
+  .seg2 button { padding: 10px; border-radius: 9px; font-size: 16px; font-weight: 700; color: var(--muted); }
+  .seg2 button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .sales-sum { display: flex; gap: 18px; font-size: 16px; color: var(--muted); }
+  .sales-sum b { color: var(--ink); font-size: 22px; margin-right: 2px; }
+  .sales-body { flex: 1; overflow-y: auto; padding: 12px 16px calc(20px + var(--safe-b)); }
+  .sale { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .sale .top { display: flex; gap: 10px; align-items: baseline; font-size: 15px; color: var(--muted); }
+  .sale .top b { color: var(--ink); font-size: 18px; }
+  .sale .top .amt { margin-left: auto; color: var(--ink); font-weight: 700; }
+  .sale ul { margin: 6px 0 0; padding: 0; list-style: none; font-size: 16px; line-height: 1.7; }
+  .sale ul li span { color: var(--muted); }
+  .sale.undone { opacity: .5; }
+  .sale.undone ul { text-decoration: line-through; }
+  .rank { background: #fff; border-radius: 14px; overflow: hidden; }
+  .rank .r { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 17px; }
+  .rank .r .no { color: var(--muted); font-weight: 700; text-align: center; }
+  .rank .r small { display: block; color: var(--muted); font-size: 13px; }
+  .rank .r .n { font-size: 24px; font-weight: 800; }
+  .rank .r .n small { display: inline; font-size: 14px; font-weight: 400; margin-left: 2px; }
+  .rank .gh { padding: 8px 14px; background: #f7f8fa; font-weight: 700; font-size: 14px; color: var(--muted); }
+  @media (min-width: 900px) { .sales-hd { grid-template-columns: auto 1fr auto; align-items: center; } .sales-hd .seg2, .sales-hd .sales-sum { grid-column: 1 / -1; } }
+
   /* ---------- お知らせ ---------- */
   .toast { position: fixed; left: 50%; bottom: calc(26px + var(--safe-b)); transform: translateX(-50%); background: var(--ink); color: #fff;
     padding: 14px 22px; border-radius: 14px; font-size: 17px; z-index: 40; box-shadow: 0 8px 24px rgba(0,0,0,.3); max-width: 90vw; }
@@ -135,6 +166,7 @@
     header { flex-wrap: wrap; gap: 8px; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
     header h1 { font-size: 18px; }
     header .spacer, #reload { display: none; }
+    #salesBtn { font-size: 13px; padding: 6px 10px; }
     .net { font-size: 11px; padding: 4px 8px; margin-left: auto; }
     .hsets { display: none; width: 100%; flex-direction: column; gap: 6px; }
     .hsets.open { display: flex; }
@@ -186,6 +218,7 @@
     </div>
     <div class="spacer"></div>
     <div class="net" id="net">● オンライン</div>
+    <button class="hbtn" id="salesBtn">📊 売上を見る</button>
     <button class="hbtn" id="reload">↻ 在庫更新</button>
   </header>
   <div class="main">
@@ -209,6 +242,22 @@
   </div>
 </div>
 <div id="sheet" hidden></div>
+<div class="sales" id="sales" hidden>
+  <div class="sales-hd">
+    <button class="back" id="salesClose">‹ レジにもどる</button>
+    <h2>📊 売れたもの</h2>
+    <div class="sales-filter">
+      <select id="salesWhen"></select>
+      <button class="hbtn2" id="salesReload">↻</button>
+    </div>
+    <div class="seg2" id="salesSeg">
+      <button data-v="list" class="on">🕒 会計の順番</button>
+      <button data-v="items">📦 商品ごとの個数</button>
+    </div>
+    <div class="sales-sum" id="salesSum"></div>
+  </div>
+  <div class="sales-body" id="salesBody"></div>
+</div>
 <div class="login" id="login" hidden>
   <form id="loginForm">
     <h2>販売レジ</h2>
@@ -508,6 +557,67 @@
   $('q').addEventListener('input', e => { state.q = e.target.value; render(); });
   $('clear').addEventListener('click', () => { state.cart = {}; render(); });
   $('pay').addEventListener('click', pay);
+
+  // ---------- 売れたもの（全端末の記録をサーバーから読む） ----------
+  const salesState = { view: 'list', data: null };
+  function today() { return new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10); }
+  function fillWhen(events) {
+    const sel = $('salesWhen'), cur = sel.value;
+    const days = [0, 1, 2, 3, 4, 5, 6].map(d => new Date(Date.now() + 9 * 3600e3 - d * 864e5).toISOString().slice(0, 10));
+    sel.innerHTML = days.map((d, i) => '<option value="d:' + d + '">' + (i === 0 ? '今日' : i === 1 ? '昨日' : '') + '（' + d.slice(5).replace('-', '/') + '）</option>').join('') +
+      (events || []).map(e => '<option value="e:' + esc(e) + '">公演：' + esc(e) + '（全日）</option>').join('');
+    if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+  }
+  async function loadSales() {
+    const v = $('salesWhen').value || 'd:' + today();
+    $('salesBody').innerHTML = '<div class="empty">読み込み中…</div>';
+    try {
+      const d = await api('getSales', v[0] === 'e' ? { event: v.slice(2) } : { date: v.slice(2) }, 30000);
+      salesState.data = d;
+      fillWhen(d.events);
+      renderSales();
+    } catch (e) {
+      $('salesBody').innerHTML = '<div class="empty">読み込めませんでした（' + esc(e.message) + '）</div>';
+    }
+  }
+  function renderSales() {
+    const sales = (salesState.data && salesState.data.sales) || [];
+    const live = sales.filter(x => !x.undone);
+    const qty = live.reduce((n, x) => n + x.qty, 0), amt = live.reduce((n, x) => n + x.amount, 0);
+    $('salesSum').innerHTML = '<span><b>' + live.length + '</b>会計</span><span><b>' + qty + '</b>点</span>' + (amt ? '<span><b>' + yen(amt) + '</b></span>' : '');
+    document.querySelectorAll('#salesSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === salesState.view));
+    if (!sales.length) { $('salesBody').innerHTML = '<div class="empty">この日の販売はまだありません</div>'; return; }
+    const label = i => [i.category, i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' ');
+    if (salesState.view === 'list') {
+      $('salesBody').innerHTML = sales.map((x, k) => '<div class="sale' + (x.undone ? ' undone' : '') + '"><div class="top"><b>' + esc(x.at.slice(6)) + '</b>' +
+        '<span>' + x.qty + '点' + (x.operator ? '・' + esc(x.operator) : '') + (x.undone ? '・取消済' : '') + '</span>' +
+        '<span class="amt">' + (x.amount ? yen(x.amount) : '') + '</span></div><ul>' +
+        x.items.map(i => '<li>' + esc(label(i)) + ' <span>' + esc(i.type) + '</span>　×' + i.qty + '</li>').join('') + '</ul></div>').join('');
+      return;
+    }
+    // 商品ごと（ジャンル別にまとめて多い順）
+    const byKey = {}, list = [];
+    live.forEach(x => x.items.forEach(i => {
+      const k = i.id;
+      if (!byKey[k]) { byKey[k] = Object.assign({ n: 0 }, i); list.push(byKey[k]); }
+      byKey[k].n += i.qty;
+    }));
+    const types = {};
+    list.forEach(i => { (types[i.type] = types[i.type] || []).push(i); });
+    const order = Object.keys(types).sort((a, b) => types[b].reduce((n, i) => n + i.n, 0) - types[a].reduce((n, i) => n + i.n, 0));
+    $('salesBody').innerHTML = '<div class="rank">' + order.map(t => {
+      const items = types[t].sort((a, b) => b.n - a.n);
+      return '<div class="gh">' + esc(t) + '　計 ' + items.reduce((n, i) => n + i.n, 0) + unitOf(t) + '</div>' +
+        items.map((i, k) => '<div class="r"><span class="no">' + (k + 1) + '</span><span>' + esc(i.category) +
+          '<small>' + esc([i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' / ')) + '</small></span>' +
+          '<span class="n">' + i.n + '<small>' + unitOf(i.type) + '</small></span></div>').join('');
+    }).join('') + '</div>';
+  }
+  $('salesBtn').addEventListener('click', () => { $('sales').hidden = false; if (!$('salesWhen').options.length) fillWhen([]); loadSales(); });
+  $('salesClose').addEventListener('click', () => { $('sales').hidden = true; });
+  $('salesWhen').addEventListener('change', loadSales);
+  $('salesReload').addEventListener('click', loadSales);
+  $('salesSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; salesState.view = b.dataset.v; renderSales(); });
   $('setBtn').addEventListener('click', () => $('hsets').classList.toggle('open'));
   $('cartBar').addEventListener('click', () => $('cart').classList.add('open'));
   $('cartClose').addEventListener('click', () => $('cart').classList.remove('open'));

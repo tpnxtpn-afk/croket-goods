@@ -395,6 +395,17 @@
   }
   .label svg { width: 100%; height: auto; }
   .label .pid { font: 700 13px ui-monospace, Menlo, monospace; }
+  .ptags { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ptag { border: 2px solid #222; border-radius: 10px; padding: 10px; display: flex; gap: 10px; align-items: center; page-break-inside: avoid; min-height: 62mm; }
+  .ptag img { width: 42%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; }
+  .ptxt { flex: 1; min-width: 0; }
+  .ptag .pt { font-size: 13px; color: #555; }
+  .ptag .pn { font-size: 24px; font-weight: 800; line-height: 1.2; }
+  .ptag .pc { font-size: 15px; margin-top: 2px; }
+  .ptag .ps { font-size: 14px; margin-top: 4px; color: #333; }
+  .ptag .pp { font-size: 30px; font-weight: 800; margin-top: 8px; }
+  .ptag .pp small { font-size: 12px; font-weight: 400; margin-left: 4px; }
+  .ptag .blank { display: inline-block; border-bottom: 2px solid #222; min-width: 90px; }
   .poster { text-align: center; }
   .poster h2 { font-size: 26px; margin: 10px 0 4px; }
   .poster p { font-size: 15px; color: #444; margin: 4px 0; }
@@ -619,6 +630,7 @@
         </div>
         <div class="meta-row">
           <label class="hint" style="margin:0"><input type="checkbox" id="showOff"> 販売終了も表示</label>
+          <label class="hint" style="margin:0"><input type="checkbox" id="noPhoto"> 📷 写真なしだけ</label>
           <button type="button" class="link-btn" id="btnReloadInv">↻ 更新</button>
         </div>
         <div class="meta-row">
@@ -628,6 +640,8 @@
           <button type="button" class="btn ghost mini" id="btnStocktake">📋 棚卸し</button>
           <button type="button" class="btn ghost mini" id="btnTally">🖨 販売チェック表</button>
           <button type="button" class="btn ghost mini" id="btnLabels">🏷 QRラベル印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPriceTags">💴 値札・POP印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoRun">📷 写真なしを続けて登録</button>
         </div>
       </div>
       <div class="card flush">
@@ -1837,7 +1851,7 @@
     const f = { category: $('fCategory').value, type: $('fType').value, color: $('fColor').value };
     return state.products.filter(p =>
       (!f.category || p.category === f.category) && (!f.type || p.type === f.type) && (!f.color || p.color === f.color) &&
-      ($('showOff').checked || !p.discontinued));
+      ($('showOff').checked || !p.discontinued) && (!$('noPhoto').checked || !p.imageUrl));
   }
 
   function renderInventory() {
@@ -2262,11 +2276,70 @@
       const image = await readImage(file);
       const uploaded = await call('uploadImage', image);
       upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
+      // サイズ違いの同じ商品（商品名・種別・色が同じ）で写真がまだ無いものにも同じ写真を付ける
+      const base = findProduct(id);
+      const siblings = state.products.filter(p => p.id !== id && !p.imageUrl && base &&
+        p.category === base.category && p.type === base.type && p.color === base.color);
+      for (const sib of siblings) upsertProduct(await call('setProductImage', { productId: sib.id, imageUrl: uploaded.url }));
       refreshDerived();
-      toast('✅ ' + id + ' の画像を登録しました');
+      toast('✅ ' + id + (siblings.length ? ' ほか' + siblings.length + '件' : '') + ' の画像を登録しました');
+      if (state.photoRun) setTimeout(nextPhoto, 400);
     } catch (err) {
       toast(err.message, true);
+      state.photoRun = false;
     }
+  }
+
+  // ---------- 写真なしの商品を続けて登録（サイズ違いは1枚の写真でまとめて） ----------
+  function photoTargets() {
+    const seen = {};
+    return state.products.filter(p => {
+      if (p.imageUrl || p.discontinued) return false;
+      const k = [p.category, p.type, p.color].join('|');
+      if (seen[k]) return false;
+      return (seen[k] = true);
+    });
+  }
+
+  function startPhotoRun() {
+    if (!photoTargets().length) return toast('写真がない商品はありません');
+    state.photoRun = true;
+    nextPhoto();
+  }
+
+  async function nextPhoto() {
+    const list = photoTargets();
+    if (!list.length) { state.photoRun = false; return toast('✅ すべての商品に写真が入りました'); }
+    const p = list[0];
+    const ok = await confirmBox('📷 次の商品の写真を撮ります（残り ' + list.length + '件）',
+      '<b style="font-size:18px">' + esc(p.category) + '</b><br>' + esc(p.type) + ' / ' + esc(p.color) +
+      '<br><small>サイズ違いにも同じ写真が付きます</small>', '撮影・写真を選ぶ');
+    if (!ok) { state.photoRun = false; return; }
+    pickImageFor(p.id);
+  }
+
+  // ---------- 値札・POP（商品名・種別・色ごとに1枚。価格が無ければ手書き欄） ----------
+  async function printPriceTags() {
+    const map = {}, groups = [];
+    inventoryRows().forEach(p => {
+      const k = [p.category, p.type, p.color].join('|');
+      let g = map[k];
+      if (!g) { g = map[k] = { p: p, sizes: [], prices: [], img: '' }; groups.push(g); }
+      if (p.size && p.size !== '-') g.sizes.push(p.size);
+      if (p.price !== '') g.prices.push(p.price);
+      if (!g.img && p.imageUrl) g.img = p.imageUrl;
+    });
+    if (!groups.length) return toast('印刷する商品がありません', true);
+    const tags = groups.map(g => {
+      const lo = Math.min.apply(null, g.prices), hi = Math.max.apply(null, g.prices);
+      const price = !g.prices.length ? '<span class="blank">　　　　</span>円' : lo === hi ? yen(lo) : yen(lo) + '〜';
+      return '<div class="ptag">' + (g.img ? '<img src="' + esc(imageSrc(g.img, 500)) + '" alt="" referrerpolicy="no-referrer">' : '') +
+        '<div class="ptxt"><div class="pt">' + esc(g.p.type) + '</div><div class="pn">' + esc(g.p.category) + '</div>' +
+        (g.p.color && g.p.color !== '-' ? '<div class="pc">' + esc(g.p.color) + '</div>' : '') +
+        (g.sizes.length ? '<div class="ps">' + g.sizes.map(esc).join(' / ') + '</div>' : '') +
+        '<div class="pp">' + price + '<small>（税込）</small></div></div></div>';
+    }).join('');
+    openPrint('値札・POP', '<h2 style="font-size:16px">値札・POP（' + groups.length + '件）</h2><div class="ptags">' + tags + '</div>');
   }
 
   // ---------- 在庫わずか ----------
@@ -2550,6 +2623,9 @@
     // 在庫一覧・棚卸し
     ['fCategory', 'fType', 'fColor'].forEach(id => $(id).addEventListener('change', renderInventory));
     $('showOff').addEventListener('change', renderInventory);
+    $('noPhoto').addEventListener('change', renderInventory);
+    $('btnPriceTags').addEventListener('click', printPriceTags);
+    $('btnPhotoRun').addEventListener('click', startPhotoRun);
     $('btnReloadInv').addEventListener('click', reloadInventory);
     $('invBody').addEventListener('click', onInventoryClick);
     $('btnStocktake').addEventListener('click', openStocktake);

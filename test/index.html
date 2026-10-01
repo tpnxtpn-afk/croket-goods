@@ -204,6 +204,19 @@
   .single.zero b { color: var(--zero); }
   .state { font-size: 13px; font-weight: 700; }
 
+  /* 写真で並べる（タイル表示）。売り切れは灰色 */
+  .view-seg { margin-top: 8px; }
+  body.tiles #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  body.tiles .group-title { grid-column: 1 / -1; }
+  body.tiles .empty { grid-column: 1 / -1; }
+  body.tiles .item { flex-direction: column; gap: 6px; margin: 0; padding: 8px; }
+  body.tiles .thumb { flex: none; width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  body.tiles .thumb.none { font-size: 54px; }
+  body.tiles .info { width: 100%; }
+  body.tiles .single b { font-size: 24px; }
+  body.tiles .sz { padding: 3px 7px; }
+  .item.soldout { opacity: .55; }
+  .item.soldout .thumb { filter: grayscale(1); }
   .empty { padding: 36px 16px; text-align: center; color: var(--muted); line-height: 1.9; }
   .link { border: 0; background: none; color: var(--theme); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
@@ -305,6 +318,10 @@
       </div>
       <label class="toggle-zero"><input type="checkbox" id="showZero">売り切れも表示</label>
     </div>
+    <div class="seg view-seg" id="viewSeg">
+      <button type="button" data-view="list" class="on">☰ リスト</button>
+      <button type="button" data-view="tile">▦ 写真で並べる</button>
+    </div>
   </div>
 </div>
 
@@ -377,6 +394,7 @@
     sort: 'name',
     showZero: false,
     big: false,
+    view: 'list',
     loadedAt: Date.now(),
   };
 
@@ -530,11 +548,12 @@
       if (SORTS.indexOf(saved.sort) >= 0) state.sort = saved.sort;
       state.showZero = saved.showZero === true;
       state.big = saved.big === true;
+      state.view = saved.view === 'tile' ? 'tile' : 'list';
     } catch (e) { /* 保存できない環境 */ }
   }
 
   function savePrefs() {
-    store(STORE, JSON.stringify({ pool: state.pool, sort: state.sort, showZero: state.showZero, big: state.big }));
+    store(STORE, JSON.stringify({ pool: state.pool, sort: state.sort, showZero: state.showZero, big: state.big, view: state.view }));
   }
 
   // ---------- 同じ商品のサイズ違いは1枚のカードにまとめる ----------
@@ -631,7 +650,7 @@
     const tags = (grouped ? [] : [g.type]).concat([g.color])
       .filter(v => v && v !== '-')
       .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
-    return '<button type="button" class="item" data-key="' + esc(g.key) + '">' + thumb +
+    return '<button type="button" class="item' + (g.total > 0 ? '' : ' soldout') + '" data-key="' + esc(g.key) + '">' + thumb +
       '<div class="info"><div class="name">' + esc(grouped ? g.type : g.category) +
       (g.isNew ? '<span class="new">NEW</span>' : '') + '</div>' +
       '<div class="tags">' + tags + '</div>' + counts + '</div></button>';
@@ -648,6 +667,8 @@
   }
 
   function render() {
+    document.body.classList.toggle('tiles', state.view === 'tile');
+    document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === state.view));
     renderTabs();
     renderChips();
     const groups = sortGroups(groupsOf());
@@ -824,6 +845,13 @@
       const b = e.target.closest('[data-type]');
       if (!b) return;
       state.type = b.dataset.type === state.type ? '' : b.dataset.type;
+      render();
+    });
+    $('viewSeg').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      state.view = b.dataset.view;
+      savePrefs();
       render();
     });
     $('sortSeg').addEventListener('click', e => {

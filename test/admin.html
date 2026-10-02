@@ -2545,7 +2545,7 @@
       '<select id="carryPool">' + state.config.owners.map(o => '<option' + (o === pool ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>' +
       '<button type="button" class="btn ghost mini" id="carryAll">在庫を全部持ち出す</button></div>' +
       '<table><thead><tr><th>商品</th><th class="num">在庫</th><th class="num">持ち出す数</th></tr></thead><tbody>' +
-      rows.map(p => '<tr><td><b>' + esc(p.category) + '</b><div class="sub">' + esc(describe(p)) + '</div></td><td class="num">' + (p.stock[pool] || 0) + '</td>' +
+      rows.map(p => '<tr><td><b>' + esc(p.category) + '</b><div class="sub">' + esc([p.type, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' / ')) + '</div></td><td class="num">' + (p.stock[pool] || 0) + '</td>' +
         '<td class="num"><input type="number" min="0" inputmode="numeric" data-out="' + esc(p.id) + '" data-max="' + (p.stock[pool] || 0) + '" value="' + (outs[p.id] || '') + '" placeholder="0"></td></tr>').join('') +
       '</tbody></table>', [
       { label: 'もどる', ghost: true, onClick: openCarry },

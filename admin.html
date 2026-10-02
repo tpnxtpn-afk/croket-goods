@@ -148,6 +148,7 @@
   .link-btn { border: 0; background: none; color: var(--theme); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; padding: 4px 0; }
   .btn-row { display: flex; gap: 8px; }
   .btn-row .btn { flex: 1; width: auto; }
+  .btn-row .btn.mini { flex: 1 1 auto; white-space: nowrap; }
 
   .hint { margin: 6px 0 0; min-height: 18px; font-size: 13px; color: var(--muted); line-height: 1.6; }
   .hint.err { color: var(--danger); }
@@ -381,6 +382,14 @@
   .modal-actions { display: flex; gap: 8px; }
   .modal-text { margin: 0 0 12px; font-size: 14px; line-height: 1.7; }
   .modal-text b { font-size: 15px; }
+  .bulk-box { max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; }
+  .bulk-box .hint { flex: none; }
+  .bulk-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .bulk-item { border: 1px solid #e3e6ea; border-radius: 10px; padding: 6px; display: grid; gap: 6px; }
+  .modal-box .bulk-item img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; max-height: none; }
+  .bulk-item select { width: 100%; font-size: 14px; padding: 6px; }
+  .bulk-item.done { opacity: .5; }
+  .bulk-item .st { font-size: 12px; text-align: center; color: #666; }
   #pickList .row-item { cursor: pointer; }
   #scanModal video { width: 100%; border-radius: 10px; background: #000; }
   #scanModal canvas { display: none; }
@@ -395,6 +404,17 @@
   }
   .label svg { width: 100%; height: auto; }
   .label .pid { font: 700 13px ui-monospace, Menlo, monospace; }
+  .ptags { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .ptag { border: 2px solid #222; border-radius: 10px; padding: 10px; display: flex; gap: 10px; align-items: center; page-break-inside: avoid; min-height: 62mm; }
+  .ptag img { width: 42%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 6px; }
+  .ptxt { flex: 1; min-width: 0; }
+  .ptag .pt { font-size: 13px; color: #555; }
+  .ptag .pn { font-size: 24px; font-weight: 800; line-height: 1.2; }
+  .ptag .pc { font-size: 15px; margin-top: 2px; }
+  .ptag .ps { font-size: 14px; margin-top: 4px; color: #333; }
+  .ptag .pp { font-size: 30px; font-weight: 800; margin-top: 8px; }
+  .ptag .pp small { font-size: 12px; font-weight: 400; margin-left: 4px; }
+  .ptag .blank { display: inline-block; border-bottom: 2px solid #222; min-width: 90px; }
   .poster { text-align: center; }
   .poster h2 { font-size: 26px; margin: 10px 0 4px; }
   .poster p { font-size: 15px; color: #444; margin: 4px 0; }
@@ -619,6 +639,7 @@
         </div>
         <div class="meta-row">
           <label class="hint" style="margin:0"><input type="checkbox" id="showOff"> 販売終了も表示</label>
+          <label class="hint" style="margin:0"><input type="checkbox" id="noPhoto"> 📷 写真なしだけ</label>
           <button type="button" class="link-btn" id="btnReloadInv">↻ 更新</button>
         </div>
         <div class="meta-row">
@@ -628,6 +649,9 @@
           <button type="button" class="btn ghost mini" id="btnStocktake">📋 棚卸し</button>
           <button type="button" class="btn ghost mini" id="btnTally">🖨 販売チェック表</button>
           <button type="button" class="btn ghost mini" id="btnLabels">🏷 QRラベル印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPriceTags">💴 値札・POP印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoRun">📷 写真なしを続けて登録</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoBulk">🖼 撮りためた写真を割り当て</button>
         </div>
       </div>
       <div class="card flush">
@@ -820,6 +844,7 @@
     <div class="modal-text" id="confirmText"></div>
     <div class="modal-actions">
       <button type="button" class="btn ghost" id="confirmNo">やめる</button>
+      <button type="button" class="btn ghost" id="confirmExtra" hidden></button>
       <button type="button" class="btn" id="confirmYes">実行する</button>
     </div>
   </div>
@@ -860,6 +885,18 @@
 </div>
 
 <input type="file" id="rowImageInput" accept="image/*" hidden>
+<input type="file" id="bulkImageInput" accept="image/*" multiple hidden>
+<div class="modal" id="bulkModal" hidden>
+  <div class="modal-box bulk-box">
+    <div class="modal-title">🖼 撮りためた写真を商品に割り当て</div>
+    <p class="hint">写真ごとに「どの商品か」を選んでください。サイズ違いにも同じ写真が付きます。使わない写真は「使わない」のままでOKです。</p>
+    <div class="bulk-list" id="bulkList"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="bulkCancel">やめる</button>
+      <button type="button" class="btn" id="bulkSave">登録する</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
   // GASから開いたときは BOOT（パスワードを含む）がここに埋め込まれる。
@@ -1022,6 +1059,14 @@
     return skey([p.id, p.category, p.type, p.color, p.size].join(' ')).indexOf(skey(q)) >= 0;
   }
 
+  // 数え方（Tシャツ・タオルなどは「枚」、ペンライトなどは「本」、それ以外は「個」。種類が混ざる合計は「点」）
+  const UNIT_MAI = ['Tシャツ', 'ワイシャツ', 'タオル', 'マフラータオル', 'スポーツタオル', 'ハンドタオル', '手ぬぐい',
+    'B5クリアファイル', 'クリアファイル', 'ステッカー', 'ストール'];
+  const UNIT_HON = ['ペンライト', '傘', 'ストラップ', 'ネックストラップ'];
+  function unitOf(type) {
+    return UNIT_MAI.indexOf(type) >= 0 ? '枚' : UNIT_HON.indexOf(type) >= 0 ? '本' : '個';
+  }
+
   function describe(p) {
     return [p.category, p.type, p.color, p.size].map(esc).join(' / ');
   }
@@ -1086,8 +1131,12 @@
   }
 
   /** 実行前の確認。OKなら true */
-  function confirmBox(title, html, okLabel, color) {
+  /** extraLabel を渡すと3つ目のボタンが出て、押されたら 'extra' を返す */
+  function confirmBox(title, html, okLabel, color, extraLabel) {
     return new Promise(resolve => {
+      const extra = $('confirmExtra');
+      extra.hidden = !extraLabel;
+      extra.textContent = extraLabel || '';
       $('confirmTitle').textContent = title;
       $('confirmText').innerHTML = html;
       const yes = $('confirmYes');
@@ -1098,9 +1147,11 @@
         $('confirmModal').hidden = true;
         yes.onclick = null;
         $('confirmNo').onclick = null;
+        extra.onclick = null;
         resolve(ok);
       };
       yes.onclick = () => close(true);
+      extra.onclick = () => close('extra');
       $('confirmNo').onclick = () => close(false);
     });
   }
@@ -1397,7 +1448,7 @@
       return '<div class="src-item"><div class="src-head">' +
         '<input type="checkbox" data-pick="' + i + '"' + (item.suggestions.length ? '' : ' checked') + '>' +
         '<div class="body"><b>' + esc(item.category) + '</b>　' + esc(item.type) + ' / ' + esc(item.color) + ' / ' + esc(item.size) +
-        '　<b>' + item.qty + '枚</b></div></div>' +
+        '　<b>' + item.qty + unitOf(item.type) + '</b></div></div>' +
         '<div class="src-sub">' + (suggest ? suggest + '<br>' : '') +
         '<button type="button" class="link-btn" data-link="' + i + '" data-pid="">今後この行を表示しない</button></div></div>';
     }).join('');
@@ -1449,7 +1500,7 @@
     if (!picked.length) return toast('取り込む商品にチェックを入れてください', true);
     const location = $('srcLocation').value;
     const ok = await confirmBox('この商品を登録しますか？',
-      picked.map(p => '・' + esc(p.category) + ' ' + esc(p.type) + ' ' + esc(p.color) + ' ' + esc(p.size) + '　' + p.qty + '枚').join('<br>') +
+      picked.map(p => '・' + esc(p.category) + ' ' + esc(p.type) + ' ' + esc(p.color) + ' ' + esc(p.size) + '　' + p.qty + unitOf(p.type)).join('<br>') +
       '<br>在庫は「' + esc(location) + '」に入ります。', '登録する');
     if (!ok) return;
     const btn = $('btnImport');
@@ -1553,9 +1604,9 @@
 
     const detail = '<b>' + esc(p.id) + '　' + describe(p) + '</b><br>' +
       (mode === 'transfer'
-        ? esc(from) + ' → ' + esc(to) + '　<b>' + qty + '枚</b>'
+        ? esc(from) + ' → ' + esc(to) + '　<b>' + qty + unitOf(p.type) + '</b>'
         : esc(from) + '　' + (p.stock[from] || 0) + ' → <b>' + ((p.stock[from] || 0) + (mode === 'sale' ? -qty : qty)) + '</b>（' +
-          (mode === 'sale' ? '−' : '＋') + qty + '枚）') +
+          (mode === 'sale' ? '−' : '＋') + qty + unitOf(p.type) + '）') +
       (mode === 'sale' && event ? '<br>イベント：' + esc(event) : '');
     const ok = await confirmBox(MODES[mode].verb + 'します。よろしいですか？', detail, MODES[mode].button, MODES[mode].color);
     if (!ok) return;
@@ -1587,7 +1638,7 @@
         '<div class="result-line">合計在庫：<b>' + product.total + '</b></div>';
       box.hidden = false;
       toast(MODES[mode].toast);
-      showUndo(r.opId, MODES[mode].verb + '：' + product.id + ' ' + qty + '枚');
+      showUndo(r.opId, MODES[mode].verb + '：' + product.id + ' ' + qty + unitOf(product.type));
       $('sQty').value = 1;
       updateIdHint();
       if (mode === 'sale' && event) rememberEvent(event);
@@ -1652,7 +1703,7 @@
     let n = Math.max(0, qty);
     if (state.batch.mode === 'sale' && n > (p.stock[location] || 0)) {
       n = p.stock[location] || 0;
-      toast(location + 'の在庫は' + n + '枚です', true);
+      toast(location + 'の在庫は' + n + unitOf(p.type) + 'です', true);
     }
     if (n <= 0) delete state.batch.items[id];
     else state.batch.items[id] = n;
@@ -1671,7 +1722,7 @@
       const n = batchQty(p.id);
       return '<div class="row-item' + (n ? ' picked-row' : '') + '">' + thumbHtml(p, 120) +
         '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-        '　' + esc(location) + ' ' + (p.stock[location] || 0) + '枚</small></div>' +
+        '　' + esc(location) + ' ' + (p.stock[location] || 0) + unitOf(p.type) + '</small></div>' +
         '<div class="stepper"><button type="button" data-bid="' + esc(p.id) + '" data-delta="-1">−</button>' +
         '<span class="n">' + n + '</span>' +
         '<button type="button" data-bid="' + esc(p.id) + '" data-delta="1">＋</button></div></div>';
@@ -1680,7 +1731,7 @@
     const ids = Object.keys(state.batch.items);
     const total = ids.reduce((sum, id) => sum + state.batch.items[id], 0);
     const verb = state.batch.mode === 'sale' ? '販売' : '補充';
-    $('batchInfo').innerHTML = verb + '　<b>' + ids.length + '</b>商品　<b>' + total + '</b>枚';
+    $('batchInfo').innerHTML = verb + '　<b>' + ids.length + '</b>商品　<b>' + total + '</b>点';
     updateBars();
   }
 
@@ -1694,7 +1745,7 @@
       const p = findProduct(id);
       const n = state.batch.items[id];
       const before = p.stock[location] || 0;
-      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　' + n + '枚（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）';
+      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　' + n + unitOf(p.type) + '（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）';
     }).join('<br>');
     const ok = await confirmBox((mode === 'sale' ? '販売' : '補充') + 'します。よろしいですか？',
       esc(location) + (event ? '　イベント：' + esc(event) : '') + '<br>' + lines,
@@ -1712,8 +1763,8 @@
       state.batch.items = {};
       saveBatch();
       renderBatch();
-      toast('✅ ' + res.items.length + '商品・' + res.quantity + '枚を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
-      showUndo(res.opId, (mode === 'sale' ? '販売' : '補充') + '：' + res.items.length + '商品 ' + res.quantity + '枚');
+      toast('✅ ' + res.items.length + '商品・' + res.quantity + '点を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
+      showUndo(res.opId, (mode === 'sale' ? '販売' : '補充') + '：' + res.items.length + '商品 ' + res.quantity + '点');
       if (event) rememberEvent(event);
     } catch (err) {
       toast(err.message, true);
@@ -1737,7 +1788,7 @@
     $('pickList').innerHTML = list.length ? list.map(p =>
       '<div class="row-item" data-pick-id="' + esc(p.id) + '">' + thumbHtml(p, 120) +
       '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-      '　' + esc(location) + ' ' + (p.stock[location] || 0) + '枚</small></div>' +
+      '　' + esc(location) + ' ' + (p.stock[location] || 0) + unitOf(p.type) + '</small></div>' +
       '<div class="diff">' + p.total + '</div></div>').join('') : '<div class="empty">商品が見つかりません</div>';
   }
 
@@ -1807,7 +1858,7 @@
     if (navigator.vibrate) navigator.vibrate(60);
     if (state.scanTarget === 'batch') {
       setBatchQty(id, batchQty(id) + 1);
-      $('scanHint').textContent = '✅ ' + id + ' ' + p.category + '（' + batchQty(id) + '枚）　続けて読み取れます';
+      $('scanHint').textContent = '✅ ' + id + ' ' + p.category + '（' + batchQty(id) + unitOf(p.type) + '）　続けて読み取れます';
       return;
     }
     closeScanner();
@@ -1829,7 +1880,7 @@
     const f = { category: $('fCategory').value, type: $('fType').value, color: $('fColor').value };
     return state.products.filter(p =>
       (!f.category || p.category === f.category) && (!f.type || p.type === f.type) && (!f.color || p.color === f.color) &&
-      ($('showOff').checked || !p.discontinued));
+      ($('showOff').checked || !p.discontinued) && (!$('noPhoto').checked || !p.imageUrl));
   }
 
   function renderInventory() {
@@ -1857,7 +1908,7 @@
         '</tr>').join('');
     }
     const sum = rows.reduce((s, p) => s + p.total, 0);
-    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '個';
+    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '点';
   }
 
   async function reloadInventory() {
@@ -1927,7 +1978,7 @@
       const diffText = diff === null || diff === 0 ? '' : (diff > 0 ? '+' + diff : String(diff));
       return '<div class="row-item">' + thumbHtml(p, 120) +
         '<div class="body"><b>' + esc(p.category) + '</b><small>' + esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) +
-        '　いま ' + before + '枚</small></div>' +
+        '　いま ' + before + unitOf(p.type) + '</small></div>' +
         '<div class="stepper"><input type="number" inputmode="numeric" min="0" data-count="' + esc(p.id) + '" value="' +
         (counted == null ? '' : esc(counted)) + '" placeholder="数"></div>' +
         '<div class="diff ' + (diff > 0 ? 'plus' : diff < 0 ? 'minus' : '') + '">' + diffText + '</div></div>';
@@ -2072,7 +2123,7 @@
     const tbody = rows.map(p => {
       const sub = compact
         ? esc(p.type) + '/' + esc(p.color) + '/' + esc(p.size) + ' ' + (p.stock[pool] || 0)
-        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + '枚';
+        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + unitOf(p.type);
       return '<tr><td class="name"><b>' + esc(p.category) + '</b>' + (compact ? ' ' : '') + '<small>' + sub + '</small></td>' +
         slots.map(() => '<td></td>').join('') + '<td></td><td class="memo"></td></tr>';
     }).join('');
@@ -2145,7 +2196,7 @@
     if (!p) return;
     if (!btn.classList.contains('armed')) {
       btn.classList.add('armed');
-      btn.textContent = p.total > 0 ? '本当に削除する（在庫' + p.total + '枚も消えます）' : '本当に削除する';
+      btn.textContent = p.total > 0 ? '本当に削除する（在庫' + p.total + unitOf(p.type) + 'も消えます）' : '本当に削除する';
       deleteTimer = setTimeout(resetDeleteButton, 5000);
       return;
     }
@@ -2254,16 +2305,144 @@
       const image = await readImage(file);
       const uploaded = await call('uploadImage', image);
       upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
+      // サイズ違いの同じ商品（商品名・種別・色が同じ）で写真がまだ無いものにも同じ写真を付ける
+      const base = findProduct(id);
+      const siblings = state.products.filter(p => p.id !== id && !p.imageUrl && base &&
+        p.category === base.category && p.type === base.type && p.color === base.color);
+      for (const sib of siblings) upsertProduct(await call('setProductImage', { productId: sib.id, imageUrl: uploaded.url }));
       refreshDerived();
-      toast('✅ ' + id + ' の画像を登録しました');
+      toast('✅ ' + id + (siblings.length ? ' ほか' + siblings.length + '件' : '') + ' の画像を登録しました');
+      if (state.photoRun) setTimeout(nextPhoto, 400);
     } catch (err) {
       toast(err.message, true);
+      state.photoRun = false;
     }
+  }
+
+  // ---------- 写真なしの商品を続けて登録（サイズ違いは1枚の写真でまとめて） ----------
+  function photoTargets() {
+    const seen = {};
+    return state.products.filter(p => {
+      if (p.imageUrl || p.discontinued) return false;
+      const k = [p.category, p.type, p.color].join('|');
+      if (state.photoSkip && state.photoSkip[k]) return false;
+      if (seen[k]) return false;
+      return (seen[k] = true);
+    });
+  }
+
+  function startPhotoRun() {
+    state.photoSkip = {};
+    if (!photoTargets().length) return toast('写真がない商品はありません');
+    state.photoRun = true;
+    nextPhoto();
+  }
+
+  async function nextPhoto() {
+    const list = photoTargets();
+    const skipped = Object.keys(state.photoSkip || {}).length;
+    if (!list.length) {
+      state.photoRun = false;
+      return toast(skipped ? '✅ 終わりました（とばした商品 ' + skipped + '件は写真なしのままです）' : '✅ すべての商品に写真が入りました');
+    }
+    const p = list[0];
+    const ans = await confirmBox('📷 次の商品の写真を撮ります（残り ' + list.length + '件）',
+      '<b style="font-size:18px">' + esc(p.category) + '</b><br>' + esc(p.type) + (p.color && p.color !== '-' ? ' / ' + esc(p.color) : '') +
+      '<br><small>サイズ違いにも同じ写真が付きます。写真が手元にないときは「とばす」で次の商品へ進めます。</small>',
+      '📷 撮る・選ぶ', '', '⏭ とばす');
+    if (ans === 'extra') {
+      state.photoSkip[[p.category, p.type, p.color].join('|')] = true;
+      return nextPhoto();
+    }
+    if (!ans) { state.photoRun = false; return; }
+    pickImageFor(p.id);
+  }
+
+  // ---------- 撮りためた写真をまとめて割り当てる ----------
+  function photoGroups() {
+    // 商品名・種別・色ごと。写真なしを先に、そのあと写真ありも選べる（差し替え用）
+    const map = {}, list = [];
+    state.products.filter(p => !p.discontinued).forEach(p => {
+      const k = [p.category, p.type, p.color].join('|');
+      if (!map[k]) { map[k] = { key: k, p: p, ids: [], has: false }; list.push(map[k]); }
+      map[k].ids.push(p.id);
+      if (p.imageUrl) map[k].has = true;
+    });
+    return list.sort((a, b) => a.has - b.has);
+  }
+
+  function openBulk(e) {
+    const files = [...e.target.files];
+    if (!files.length) return;
+    if (files.length > 40) return toast('一度に選べるのは40枚までです', true);
+    const groups = photoGroups();
+    const opts = '<option value="">使わない</option>' +
+      '<optgroup label="写真なし">' + groups.filter(g => !g.has).map(g => '<option value="' + esc(g.key) + '">' + esc(g.p.category + '（' + g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') + '）') + '</option>').join('') + '</optgroup>' +
+      '<optgroup label="写真あり（差し替え）">' + groups.filter(g => g.has).map(g => '<option value="' + esc(g.key) + '">' + esc(g.p.category + '（' + g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') + '）') + '</option>').join('') + '</optgroup>';
+    state.bulk = { files: files, groups: groups };
+    $('bulkList').innerHTML = files.map((f, i) => '<div class="bulk-item" id="bulk' + i + '"><img src="' + URL.createObjectURL(f) + '" alt="">' +
+      '<select data-bulk="' + i + '">' + opts + '</select><div class="st"></div></div>').join('');
+    $('bulkModal').hidden = false;
+  }
+
+  async function saveBulk() {
+    const b = state.bulk;
+    if (!b) return;
+    const jobs = [...document.querySelectorAll('[data-bulk]')].map(sel => ({ i: +sel.dataset.bulk, key: sel.value })).filter(j => j.key);
+    if (!jobs.length) return toast('商品を選んだ写真がありません', true);
+    const keys = jobs.map(j => j.key);
+    if (new Set(keys).size !== keys.length) return toast('同じ商品が2枚の写真に選ばれています', true);
+    const btn = $('bulkSave');
+    setBusy(btn, true, '登録中…');
+    let ok = 0;
+    for (const j of jobs) {
+      const box = $('bulk' + j.i);
+      box.querySelector('.st').textContent = 'アップロード中…';
+      try {
+        const g = b.groups.find(x => x.key === j.key);
+        const uploaded = await call('uploadImage', await readImage(b.files[j.i]));
+        for (const id of g.ids) upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
+        box.classList.add('done');
+        box.querySelector('.st').textContent = '✅ 登録しました';
+        ok++;
+      } catch (err) {
+        box.querySelector('.st').textContent = '⚠️ ' + err.message;
+      }
+    }
+    setBusy(btn, false);
+    refreshDerived();
+    toast('✅ ' + ok + '枚の写真を登録しました');
+    if (ok === jobs.length) { $('bulkModal').hidden = true; state.bulk = null; }
+  }
+
+  // ---------- 値札・POP（商品名・種別・色ごとに1枚。価格が無ければ手書き欄） ----------
+  async function printPriceTags() {
+    const map = {}, groups = [];
+    inventoryRows().forEach(p => {
+      const k = [p.category, p.type, p.color].join('|');
+      let g = map[k];
+      if (!g) { g = map[k] = { p: p, sizes: [], prices: [], img: '' }; groups.push(g); }
+      if (p.size && p.size !== '-') g.sizes.push(p.size);
+      if (p.price !== '') g.prices.push(p.price);
+      if (!g.img && p.imageUrl) g.img = p.imageUrl;
+    });
+    if (!groups.length) return toast('印刷する商品がありません', true);
+    const tags = groups.map(g => {
+      const lo = Math.min.apply(null, g.prices), hi = Math.max.apply(null, g.prices);
+      const price = !g.prices.length ? '<span class="blank">　　　　</span>円' : lo === hi ? yen(lo) : yen(lo) + '〜';
+      return '<div class="ptag">' + (g.img ? '<img src="' + esc(imageSrc(g.img, 500)) + '" alt="" referrerpolicy="no-referrer">' : '') +
+        '<div class="ptxt"><div class="pt">' + esc(g.p.type) + '</div><div class="pn">' + esc(g.p.category) + '</div>' +
+        (g.p.color && g.p.color !== '-' ? '<div class="pc">' + esc(g.p.color) + '</div>' : '') +
+        (g.sizes.length ? '<div class="ps">' + g.sizes.map(esc).join(' / ') + '</div>' : '') +
+        '<div class="pp">' + price + '<small>（税込）</small></div></div></div>';
+    }).join('');
+    openPrint('値札・POP', '<h2 style="font-size:16px">値札・POP（' + groups.length + '件）</h2><div class="ptags">' + tags + '</div>');
   }
 
   // ---------- 在庫わずか ----------
   function updateAlertBadge() {
-    const n = state.products.filter(p => !p.discontinued && p.total <= state.config.lowStockThreshold).length;
+    // 在庫0（売り切れ・補充待ち）は数えず、残りわずか（1〜しきい値）だけをバッジに出す
+    const n = state.products.filter(p => !p.discontinued && p.total > 0 && p.total <= state.config.lowStockThreshold).length;
     const badge = $('alertBadge');
     badge.textContent = n;
     badge.hidden = n === 0;
@@ -2280,7 +2459,7 @@
 
   function renderAlerts(list) {
     const zero = list.filter(p => p.total <= 0).length;
-    $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '個以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
+    $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '点以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
     $('alertBadge').textContent = list.length;
     $('alertBadge').hidden = list.length === 0;
     if (!list.length) {
@@ -2542,6 +2721,13 @@
     // 在庫一覧・棚卸し
     ['fCategory', 'fType', 'fColor'].forEach(id => $(id).addEventListener('change', renderInventory));
     $('showOff').addEventListener('change', renderInventory);
+    $('noPhoto').addEventListener('change', renderInventory);
+    $('btnPriceTags').addEventListener('click', printPriceTags);
+    $('btnPhotoRun').addEventListener('click', startPhotoRun);
+    $('btnPhotoBulk').addEventListener('click', () => { $('bulkImageInput').value = ''; $('bulkImageInput').click(); });
+    $('bulkImageInput').addEventListener('change', openBulk);
+    $('bulkCancel').addEventListener('click', () => { $('bulkModal').hidden = true; state.bulk = null; });
+    $('bulkSave').addEventListener('click', saveBulk);
     $('btnReloadInv').addEventListener('click', reloadInventory);
     $('invBody').addEventListener('click', onInventoryClick);
     $('btnStocktake').addEventListener('click', openStocktake);

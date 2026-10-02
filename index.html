@@ -204,6 +204,19 @@
   .single.zero b { color: var(--zero); }
   .state { font-size: 13px; font-weight: 700; }
 
+  /* 写真で並べる（タイル表示）。売り切れは灰色 */
+  .view-seg { margin-top: 8px; }
+  body.tiles #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  body.tiles .group-title { grid-column: 1 / -1; }
+  body.tiles .empty { grid-column: 1 / -1; }
+  body.tiles .item { flex-direction: column; gap: 6px; margin: 0; padding: 8px; }
+  body.tiles .thumb { flex: none; width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  body.tiles .thumb.none { font-size: 54px; }
+  body.tiles .info { width: 100%; }
+  body.tiles .single b { font-size: 24px; }
+  body.tiles .sz { padding: 3px 7px; }
+  .item.soldout { opacity: .55; }
+  .item.soldout .thumb { filter: grayscale(1); }
   .empty { padding: 36px 16px; text-align: center; color: var(--muted); line-height: 1.9; }
   .link { border: 0; background: none; color: var(--theme); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
@@ -305,6 +318,10 @@
       </div>
       <label class="toggle-zero"><input type="checkbox" id="showZero">売り切れも表示</label>
     </div>
+    <div class="seg view-seg" id="viewSeg">
+      <button type="button" data-view="list" class="on">☰ リスト</button>
+      <button type="button" data-view="tile">▦ 写真で並べる</button>
+    </div>
   </div>
 </div>
 
@@ -377,6 +394,7 @@
     sort: 'name',
     showZero: false,
     big: false,
+    view: 'list',
     loadedAt: Date.now(),
   };
 
@@ -530,11 +548,12 @@
       if (SORTS.indexOf(saved.sort) >= 0) state.sort = saved.sort;
       state.showZero = saved.showZero === true;
       state.big = saved.big === true;
+      state.view = saved.view === 'tile' ? 'tile' : 'list';
     } catch (e) { /* 保存できない環境 */ }
   }
 
   function savePrefs() {
-    store(STORE, JSON.stringify({ pool: state.pool, sort: state.sort, showZero: state.showZero, big: state.big }));
+    store(STORE, JSON.stringify({ pool: state.pool, sort: state.sort, showZero: state.showZero, big: state.big, view: state.view }));
   }
 
   // ---------- 同じ商品のサイズ違いは1枚のカードにまとめる ----------
@@ -585,7 +604,7 @@
     $('tabs').innerHTML = owners.map(o => {
       const total = state.products.reduce((sum, p) => sum + (p.stock[o] || 0), 0);
       return '<button type="button" class="tab' + (o === state.pool ? ' active' : '') + '" data-pool="' + esc(o) +
-        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '枚</small></button>';
+        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '点</small></button>';
     }).join('');
     const note = ownerNotes[owners.indexOf(state.pool)] || '';
     $('poolNote').textContent = note;
@@ -604,11 +623,19 @@
     $('typeChips').innerHTML = chip('', 'すべて') + types.map(t => chip(t, t)).join('') + (hasNew ? chip('__new__', '🆕 新着') : '');
   }
 
+  // 数え方（Tシャツ・タオルなどは「枚」、ペンライトなどは「本」、それ以外は「個」。種類が混ざる合計は「点」）
+  const UNIT_MAI = ['Tシャツ', 'ワイシャツ', 'タオル', 'マフラータオル', 'スポーツタオル', 'ハンドタオル', '手ぬぐい',
+    'B5クリアファイル', 'クリアファイル', 'ステッカー', 'ストール'];
+  const UNIT_HON = ['ペンライト', '傘', 'ストラップ', 'ネックストラップ'];
+  function unitOf(type) {
+    return UNIT_MAI.indexOf(type) >= 0 ? '枚' : UNIT_HON.indexOf(type) >= 0 ? '本' : '個';
+  }
+
   function sizeChipsHtml(g) {
     return g.items.map(x => {
       const st = stateOf(x.n);
       const label = x.p.size && x.p.size !== '-' ? esc(x.p.size) + ' ' : '';
-      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>枚</span>';
+      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>' + unitOf(g.type) + '</span>';
     }).join('');
   }
 
@@ -618,12 +645,12 @@
       ? '<img class="thumb" src="' + esc(imageSrc(g.imageUrl, 260)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
       : '<div class="thumb none" aria-hidden="true">' + typeIcon(g.type) + '</div>';
     const counts = g.items.length === 1
-      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>枚<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
+      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>' + unitOf(g.type) + '<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
       : '<div class="sizes">' + sizeChipsHtml(g) + '</div>';
     const tags = (grouped ? [] : [g.type]).concat([g.color])
       .filter(v => v && v !== '-')
       .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
-    return '<button type="button" class="item" data-key="' + esc(g.key) + '">' + thumb +
+    return '<button type="button" class="item' + (g.total > 0 ? '' : ' soldout') + '" data-key="' + esc(g.key) + '">' + thumb +
       '<div class="info"><div class="name">' + esc(grouped ? g.type : g.category) +
       (g.isNew ? '<span class="new">NEW</span>' : '') + '</div>' +
       '<div class="tags">' + tags + '</div>' + counts + '</div></button>';
@@ -640,12 +667,14 @@
   }
 
   function render() {
+    document.body.classList.toggle('tiles', state.view === 'tile');
+    document.querySelectorAll('#viewSeg button').forEach(b => b.classList.toggle('on', b.dataset.view === state.view));
     renderTabs();
     renderChips();
     const groups = sortGroups(groupsOf());
     const total = groups.reduce((sum, g) => sum + g.total, 0);
     const items = groups.reduce((sum, g) => sum + g.items.length, 0);
-    $('summary').innerHTML = '<b>' + items + '</b>件 ／ 合計 <b>' + total + '</b>枚' +
+    $('summary').innerHTML = '<b>' + items + '</b>件 ／ 合計 <b>' + total + '</b>点' +
       (state.q ? '（「' + esc(state.q) + '」で検索中）' : '');
 
     if (!groups.length) {
@@ -664,7 +693,7 @@
     });
     $('list').innerHTML = blocks.map(b =>
       '<h2 class="group-title">' + esc(b.category) +
-      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '枚</span></h2>' +
+      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '点</span></h2>' +
       b.groups.map(g => groupHtml(g, true)).join('')).join('');
   }
 
@@ -693,7 +722,7 @@
       .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
     $('detailSizes').innerHTML = sizeChipsHtml(g);
     const st = stateOf(g.total);
-    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + '枚（' + st.word + '）';
+    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
     $('detail').hidden = false;
   }
 
@@ -816,6 +845,13 @@
       const b = e.target.closest('[data-type]');
       if (!b) return;
       state.type = b.dataset.type === state.type ? '' : b.dataset.type;
+      render();
+    });
+    $('viewSeg').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      state.view = b.dataset.view;
+      savePrefs();
       render();
     });
     $('sortSeg').addEventListener('click', e => {

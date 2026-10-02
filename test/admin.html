@@ -382,6 +382,14 @@
   .modal-actions { display: flex; gap: 8px; }
   .modal-text { margin: 0 0 12px; font-size: 14px; line-height: 1.7; }
   .modal-text b { font-size: 15px; }
+  .bulk-box { max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; }
+  .bulk-box .hint { flex: none; }
+  .bulk-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .bulk-item { border: 1px solid #e3e6ea; border-radius: 10px; padding: 6px; display: grid; gap: 6px; }
+  .modal-box .bulk-item img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; max-height: none; }
+  .bulk-item select { width: 100%; font-size: 14px; padding: 6px; }
+  .bulk-item.done { opacity: .5; }
+  .bulk-item .st { font-size: 12px; text-align: center; color: #666; }
   #pickList .row-item { cursor: pointer; }
   #scanModal video { width: 100%; border-radius: 10px; background: #000; }
   #scanModal canvas { display: none; }
@@ -643,6 +651,7 @@
           <button type="button" class="btn ghost mini" id="btnLabels">🏷 QRラベル印刷</button>
           <button type="button" class="btn ghost mini" id="btnPriceTags">💴 値札・POP印刷</button>
           <button type="button" class="btn ghost mini" id="btnPhotoRun">📷 写真なしを続けて登録</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoBulk">🖼 撮りためた写真を割り当て</button>
         </div>
       </div>
       <div class="card flush">
@@ -835,6 +844,7 @@
     <div class="modal-text" id="confirmText"></div>
     <div class="modal-actions">
       <button type="button" class="btn ghost" id="confirmNo">やめる</button>
+      <button type="button" class="btn ghost" id="confirmExtra" hidden></button>
       <button type="button" class="btn" id="confirmYes">実行する</button>
     </div>
   </div>
@@ -875,6 +885,18 @@
 </div>
 
 <input type="file" id="rowImageInput" accept="image/*" hidden>
+<input type="file" id="bulkImageInput" accept="image/*" multiple hidden>
+<div class="modal" id="bulkModal" hidden>
+  <div class="modal-box bulk-box">
+    <div class="modal-title">🖼 撮りためた写真を商品に割り当て</div>
+    <p class="hint">写真ごとに「どの商品か」を選んでください。サイズ違いにも同じ写真が付きます。使わない写真は「使わない」のままでOKです。</p>
+    <div class="bulk-list" id="bulkList"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn ghost" id="bulkCancel">やめる</button>
+      <button type="button" class="btn" id="bulkSave">登録する</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
   // GASから開いたときは BOOT（パスワードを含む）がここに埋め込まれる。
@@ -1109,8 +1131,12 @@
   }
 
   /** 実行前の確認。OKなら true */
-  function confirmBox(title, html, okLabel, color) {
+  /** extraLabel を渡すと3つ目のボタンが出て、押されたら 'extra' を返す */
+  function confirmBox(title, html, okLabel, color, extraLabel) {
     return new Promise(resolve => {
+      const extra = $('confirmExtra');
+      extra.hidden = !extraLabel;
+      extra.textContent = extraLabel || '';
       $('confirmTitle').textContent = title;
       $('confirmText').innerHTML = html;
       const yes = $('confirmYes');
@@ -1121,9 +1147,11 @@
         $('confirmModal').hidden = true;
         yes.onclick = null;
         $('confirmNo').onclick = null;
+        extra.onclick = null;
         resolve(ok);
       };
       yes.onclick = () => close(true);
+      extra.onclick = () => close('extra');
       $('confirmNo').onclick = () => close(false);
     });
   }
@@ -2297,12 +2325,14 @@
     return state.products.filter(p => {
       if (p.imageUrl || p.discontinued) return false;
       const k = [p.category, p.type, p.color].join('|');
+      if (state.photoSkip && state.photoSkip[k]) return false;
       if (seen[k]) return false;
       return (seen[k] = true);
     });
   }
 
   function startPhotoRun() {
+    state.photoSkip = {};
     if (!photoTargets().length) return toast('写真がない商品はありません');
     state.photoRun = true;
     nextPhoto();
@@ -2310,13 +2340,79 @@
 
   async function nextPhoto() {
     const list = photoTargets();
-    if (!list.length) { state.photoRun = false; return toast('✅ すべての商品に写真が入りました'); }
+    const skipped = Object.keys(state.photoSkip || {}).length;
+    if (!list.length) {
+      state.photoRun = false;
+      return toast(skipped ? '✅ 終わりました（とばした商品 ' + skipped + '件は写真なしのままです）' : '✅ すべての商品に写真が入りました');
+    }
     const p = list[0];
-    const ok = await confirmBox('📷 次の商品の写真を撮ります（残り ' + list.length + '件）',
-      '<b style="font-size:18px">' + esc(p.category) + '</b><br>' + esc(p.type) + ' / ' + esc(p.color) +
-      '<br><small>サイズ違いにも同じ写真が付きます</small>', '撮影・写真を選ぶ');
-    if (!ok) { state.photoRun = false; return; }
+    const ans = await confirmBox('📷 次の商品の写真を撮ります（残り ' + list.length + '件）',
+      '<b style="font-size:18px">' + esc(p.category) + '</b><br>' + esc(p.type) + (p.color && p.color !== '-' ? ' / ' + esc(p.color) : '') +
+      '<br><small>サイズ違いにも同じ写真が付きます。写真が手元にないときは「とばす」で次の商品へ進めます。</small>',
+      '📷 撮る・選ぶ', '', '⏭ とばす');
+    if (ans === 'extra') {
+      state.photoSkip[[p.category, p.type, p.color].join('|')] = true;
+      return nextPhoto();
+    }
+    if (!ans) { state.photoRun = false; return; }
     pickImageFor(p.id);
+  }
+
+  // ---------- 撮りためた写真をまとめて割り当てる ----------
+  function photoGroups() {
+    // 商品名・種別・色ごと。写真なしを先に、そのあと写真ありも選べる（差し替え用）
+    const map = {}, list = [];
+    state.products.filter(p => !p.discontinued).forEach(p => {
+      const k = [p.category, p.type, p.color].join('|');
+      if (!map[k]) { map[k] = { key: k, p: p, ids: [], has: false }; list.push(map[k]); }
+      map[k].ids.push(p.id);
+      if (p.imageUrl) map[k].has = true;
+    });
+    return list.sort((a, b) => a.has - b.has);
+  }
+
+  function openBulk(e) {
+    const files = [...e.target.files];
+    if (!files.length) return;
+    if (files.length > 40) return toast('一度に選べるのは40枚までです', true);
+    const groups = photoGroups();
+    const opts = '<option value="">使わない</option>' +
+      '<optgroup label="写真なし">' + groups.filter(g => !g.has).map(g => '<option value="' + esc(g.key) + '">' + esc(g.p.category + '（' + g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') + '）') + '</option>').join('') + '</optgroup>' +
+      '<optgroup label="写真あり（差し替え）">' + groups.filter(g => g.has).map(g => '<option value="' + esc(g.key) + '">' + esc(g.p.category + '（' + g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') + '）') + '</option>').join('') + '</optgroup>';
+    state.bulk = { files: files, groups: groups };
+    $('bulkList').innerHTML = files.map((f, i) => '<div class="bulk-item" id="bulk' + i + '"><img src="' + URL.createObjectURL(f) + '" alt="">' +
+      '<select data-bulk="' + i + '">' + opts + '</select><div class="st"></div></div>').join('');
+    $('bulkModal').hidden = false;
+  }
+
+  async function saveBulk() {
+    const b = state.bulk;
+    if (!b) return;
+    const jobs = [...document.querySelectorAll('[data-bulk]')].map(sel => ({ i: +sel.dataset.bulk, key: sel.value })).filter(j => j.key);
+    if (!jobs.length) return toast('商品を選んだ写真がありません', true);
+    const keys = jobs.map(j => j.key);
+    if (new Set(keys).size !== keys.length) return toast('同じ商品が2枚の写真に選ばれています', true);
+    const btn = $('bulkSave');
+    setBusy(btn, true, '登録中…');
+    let ok = 0;
+    for (const j of jobs) {
+      const box = $('bulk' + j.i);
+      box.querySelector('.st').textContent = 'アップロード中…';
+      try {
+        const g = b.groups.find(x => x.key === j.key);
+        const uploaded = await call('uploadImage', await readImage(b.files[j.i]));
+        for (const id of g.ids) upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
+        box.classList.add('done');
+        box.querySelector('.st').textContent = '✅ 登録しました';
+        ok++;
+      } catch (err) {
+        box.querySelector('.st').textContent = '⚠️ ' + err.message;
+      }
+    }
+    setBusy(btn, false);
+    refreshDerived();
+    toast('✅ ' + ok + '枚の写真を登録しました');
+    if (ok === jobs.length) { $('bulkModal').hidden = true; state.bulk = null; }
   }
 
   // ---------- 値札・POP（商品名・種別・色ごとに1枚。価格が無ければ手書き欄） ----------
@@ -2628,6 +2724,10 @@
     $('noPhoto').addEventListener('change', renderInventory);
     $('btnPriceTags').addEventListener('click', printPriceTags);
     $('btnPhotoRun').addEventListener('click', startPhotoRun);
+    $('btnPhotoBulk').addEventListener('click', () => { $('bulkImageInput').value = ''; $('bulkImageInput').click(); });
+    $('bulkImageInput').addEventListener('change', openBulk);
+    $('bulkCancel').addEventListener('click', () => { $('bulkModal').hidden = true; state.bulk = null; });
+    $('bulkSave').addEventListener('click', saveBulk);
     $('btnReloadInv').addEventListener('click', reloadInventory);
     $('invBody').addEventListener('click', onInventoryClick);
     $('btnStocktake').addEventListener('click', openStocktake);

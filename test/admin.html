@@ -148,6 +148,7 @@
   .link-btn { border: 0; background: none; color: var(--theme); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; padding: 4px 0; }
   .btn-row { display: flex; gap: 8px; }
   .btn-row .btn { flex: 1; width: auto; }
+  .btn-row .btn.mini { flex: 1 1 auto; white-space: nowrap; }
 
   .hint { margin: 6px 0 0; min-height: 18px; font-size: 13px; color: var(--muted); line-height: 1.6; }
   .hint.err { color: var(--danger); }
@@ -1879,7 +1880,7 @@
         '</tr>').join('');
     }
     const sum = rows.reduce((s, p) => s + p.total, 0);
-    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '個';
+    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '点';
   }
 
   async function reloadInventory() {
@@ -2344,7 +2345,8 @@
 
   // ---------- 在庫わずか ----------
   function updateAlertBadge() {
-    const n = state.products.filter(p => !p.discontinued && p.total <= state.config.lowStockThreshold).length;
+    // 在庫0（売り切れ・補充待ち）は数えず、残りわずか（1〜しきい値）だけをバッジに出す
+    const n = state.products.filter(p => !p.discontinued && p.total > 0 && p.total <= state.config.lowStockThreshold).length;
     const badge = $('alertBadge');
     badge.textContent = n;
     badge.hidden = n === 0;
@@ -2361,7 +2363,7 @@
 
   function renderAlerts(list) {
     const zero = list.filter(p => p.total <= 0).length;
-    $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '個以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
+    $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '点以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
     $('alertBadge').textContent = list.length;
     $('alertBadge').hidden = list.length === 0;
     if (!list.length) {

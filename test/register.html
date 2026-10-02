@@ -13,225 +13,278 @@
 <link rel="apple-touch-icon" href="../icon-180.png">
 <link rel="icon" type="image/png" href="../icon-192.png">
 <title>【テスト】販売レジ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap">
 <style>
+  /* 劇場の物販ブース：ジャンルは虹の7色の見出しタブ、在庫はハンガーの札、カゴはレシート */
   :root {
-    --bg: #eef1f5; --panel: #fff; --ink: #1f2a37; --muted: #6b7684; --line: #dde3ea;
-    --accent: #e67e22; --accent-d: #c8650f; --sale: #e74c3c; --ok: #27ae60; --navy: #121418;
+    --ground: #e9ecf0; --panel: #fff; --ink: #14171d; --sub: #5d6571; --rule: #d0d5dc; --hatch: #c9ced6;
+    --low: #d97a00; --low-soft: #fff1dc; --out: #9aa2ad; --bad: #d23a2f; --good: #1d8a52;
+    --g-t: #e0352b; --g-towel: #ef7a14; --g-file: #d9a400; --g-knit: #23945a; --g-key: #1d74d0; --g-goods: #6a4fd0; --g-mag: #b0409a;
+    --display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    --body: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    --num: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
     --safe-b: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; }
-  body { font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif; background: var(--bg); color: var(--ink);
+  body { font-family: var(--body); background: var(--ground); color: var(--ink);
     -webkit-user-select: none; user-select: none; overscroll-behavior: none; }
-  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
-  input { font: inherit; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; padding: 0; }
+  input, select { font: inherit; }
+  .n { font-family: var(--num); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-  /* ---------- 画面の骨組み（横向きiPad：ジャンル｜商品｜カゴ） ---------- */
+  /* ---------- 骨組み（横向きiPad：ジャンル｜商品｜レシート） ---------- */
   .app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
-  header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top, 0px));
-    background: var(--navy); color: #fff; }
-  header h1 { margin: 0; font-size: 20px; letter-spacing: .04em; white-space: nowrap; }
-  header .badge { white-space: nowrap; flex: none; background: var(--sale); color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
-  .hfield { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.1); border-radius: 10px; padding: 6px 10px; }
-  .hfield span { font-size: 12px; opacity: .75; white-space: nowrap; }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    background: var(--ink); color: #fff; }
+  header h1 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 21px; white-space: nowrap; }
+  header .badge { white-space: nowrap; flex: none; background: var(--bad); color: #fff; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; }
+  .hfield { display: flex; align-items: center; gap: 6px; border: 1px solid rgba(255,255,255,.22); border-radius: 10px; padding: 6px 10px; }
+  .hfield span { font-size: 12px; opacity: .7; white-space: nowrap; }
   .hfield input, .hfield select { background: transparent; border: none; color: #fff; font-size: 16px; width: 150px; min-width: 0; outline: none; }
-  @media (max-width: 1250px) { .hfield input, .hfield select { width: 120px; } .net { font-size: 12px; } }
+  .hfield input::placeholder { color: rgba(255,255,255,.45); }
+  @media (max-width: 1250px) { .hfield input, .hfield select { width: 118px; } .net { font-size: 12px; } }
   .hfield select option { color: #000; }
   .spacer { flex: 1; }
-  .net { font-size: 13px; padding: 6px 10px; border-radius: 999px; background: rgba(39,174,96,.25); white-space: nowrap; }
-  .net.off { background: rgba(231,76,60,.35); }
-  .hbtn { background: rgba(255,255,255,.12); color: #fff; border-radius: 10px; padding: 8px 12px; font-size: 15px; white-space: nowrap; }
+  .net { font-size: 13px; padding: 6px 10px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .net::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #3ccf7f; }
+  .net.off { color: #ffd2cc; }
+  .net.off::before { background: #ff6b5e; }
+  .hbtn { border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 10px; padding: 8px 12px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .hbtn:active { background: rgba(255,255,255,.15); }
 
-  .main { display: grid; grid-template-columns: 180px minmax(0, 1fr) 350px; min-height: 0; }
-  .cart h2 { gap: 8px; }
-  .genre { word-break: keep-all; overflow-wrap: anywhere; }
-  nav.genres { overflow-y: auto; padding: 10px 8px; background: #f7f8fa; border-right: 1px solid var(--line); }
-  .genre { display: block; width: 100%; text-align: left; padding: 14px 12px; margin-bottom: 6px; border-radius: 12px;
-    font-size: 16px; font-weight: 700; color: var(--muted); }
-  .genre small { display: block; font-size: 12px; font-weight: 400; }
-  .genre.on { background: var(--accent); color: #fff; }
+  .main { display: grid; grid-template-columns: 186px minmax(0, 1fr) 340px; min-height: 0; }
+
+  /* ジャンル：色の札 */
+  nav.genres { overflow-y: auto; padding: 12px 0 12px 10px; background: var(--panel); border-right: 1px solid var(--rule); }
+  .genre { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 12px 10px; margin-bottom: 4px; border-radius: 10px 0 0 10px;
+    font-size: 15px; font-weight: 700; color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
+  .genre i { width: 12px; height: 12px; border-radius: 3px; background: var(--gc, var(--ink)); flex: none; }
+  .genre.on { background: var(--gc, var(--ink)); color: #fff; margin-right: -1px; }
+  .genre.on i { background: #fff; }
+  .genre small { display: none; }
 
   section.items { overflow-y: auto; padding: 14px; min-height: 0; }
-  .search { display: flex; gap: 10px; margin-bottom: 12px; }
-  .search input { flex: 1; font-size: 18px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
-  .tile { position: relative; background: var(--panel); border-radius: 16px; overflow: hidden; text-align: left;
-    box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; transition: transform .08s; }
-  .tile:active { transform: scale(.97); }
-  .tile .ph { aspect-ratio: 1 / 1; background: #e9edf2 center/cover no-repeat; display: grid; place-items: center; font-size: 54px; }
-  .tile .tx { padding: 8px 10px 10px; }
-  .tile b { display: block; font-size: 17px; line-height: 1.25; word-break: keep-all; overflow-wrap: anywhere; }
-  .tile .sub { font-size: 13px; color: var(--muted); margin-top: 2px; word-break: keep-all; overflow-wrap: anywhere; }
-  .tile .stk { font-size: 13px; margin-top: 4px; color: var(--ok); font-weight: 700; }
-  .tile .stk.low { color: var(--accent-d); }
-  .tile.zero { opacity: .45; }
-  .tile.zero .stk { color: var(--sale); }
-  .tile .incart { position: absolute; top: 8px; right: 8px; min-width: 34px; height: 34px; border-radius: 17px; padding: 0 8px;
-    background: var(--sale); color: #fff; font-weight: 800; font-size: 18px; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
-  .empty { text-align: center; color: var(--muted); padding: 60px 0; font-size: 17px; }
+  .search { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search input { flex: 1; font-size: 17px; padding: 11px 18px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--panel); outline: none; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 24px 12px; align-content: start; }
 
-  /* ---------- カゴ ---------- */
-  aside.cart { display: flex; flex-direction: column; background: var(--panel); border-left: 1px solid var(--line); min-height: 0; }
-  .cart h2 { margin: 0; padding: 14px 16px 10px; font-size: 19px; display: flex; justify-content: space-between; align-items: baseline; }
-  .cart h2 button { font-size: 14px; color: var(--muted); }
-  .lines { flex: 1; overflow-y: auto; padding: 0 12px; }
-  .line { display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; padding: 10px 4px; border-bottom: 1px solid var(--line); }
-  .line .th { width: 48px; height: 48px; border-radius: 8px; background: #e9edf2 center/cover; display: grid; place-items: center; font-size: 22px; }
-  .line b { display: block; font-size: 16px; }
-  .line small { color: var(--muted); font-size: 13px; word-break: keep-all; overflow-wrap: anywhere; }
-  .qty { display: flex; align-items: center; gap: 4px; }
-  .qty button { width: 44px; height: 44px; border-radius: 12px; background: #f0f2f5; font-size: 24px; font-weight: 700; }
-  .qty span { min-width: 34px; text-align: center; font-size: 20px; font-weight: 800; }
-  .cart-empty { color: var(--muted); text-align: center; padding: 40px 10px; line-height: 1.8; }
-  .sum { padding: 12px 16px; border-top: 2px solid var(--ink); }
-  .sum .row { display: flex; justify-content: space-between; font-size: 17px; margin: 2px 0; }
-  .sum .row.big { font-size: 26px; font-weight: 800; }
-  .sum .note { font-size: 12px; color: var(--muted); }
-  .pay { margin: 0 16px calc(14px + var(--safe-b)); padding: 18px; border-radius: 16px; background: var(--sale); color: #fff;
-    font-size: 22px; font-weight: 800; letter-spacing: .05em; }
-  .pay:disabled { background: #c9cfd6; }
-  .log { border-top: 1px solid var(--line); max-height: 34%; overflow-y: auto; padding: 8px 16px 10px; font-size: 13px; }
-  .log h3 { margin: 4px 0 6px; font-size: 14px; color: var(--muted); }
-  .log .ent { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
-  .log .ent.pending { color: var(--accent-d); }
-  .log .ent.undone { color: var(--muted); text-decoration: line-through; }
+  /* 商品の札：上に色の見出しタブ、写真、名前、サイズのハンガー */
+  .tile { position: relative; display: flex; flex-direction: column; min-width: 0; text-align: left; }
+  .gtab { align-self: flex-start; background: var(--gc, var(--ink)); color: #fff; font-weight: 700; font-size: 12px; padding: 3px 10px; border-radius: 7px 7px 0 0; line-height: 1.4; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .tcard { border: 1.5px solid var(--ink); border-radius: 0 10px 10px 10px; overflow: hidden; background: var(--panel); display: flex; flex-direction: column; flex: 1; }
+  .tpic { display: block; width: 100%; text-align: left; position: relative; }
+  .tpic:active { opacity: .85; }
+  .tile .ph { aspect-ratio: 1 / 1; background: #eef0f3 center/cover no-repeat; display: grid; place-items: center; width: 100%; }
+  .ph.txt { background: color-mix(in srgb, var(--gc, var(--ink)) 13%, #fff); color: color-mix(in srgb, var(--gc, var(--ink)) 82%, #000);
+    font-family: var(--display); font-weight: 900; font-size: 22px; line-height: 1.2; padding: 10px; text-align: center; word-break: keep-all; overflow-wrap: anywhere; }
+  .tile .tx { padding: 8px 10px 4px; border-top: 1.5px solid var(--ink); }
+  .tile b { display: block; font-size: 17px; line-height: 1.25; word-break: keep-all; overflow-wrap: anywhere; }
+  .tile .sub { font-size: 13px; color: var(--sub); margin-top: 2px; word-break: keep-all; overflow-wrap: anywhere; }
+  .tile .incart { position: absolute; top: 8px; right: 8px; min-width: 36px; height: 36px; border-radius: 18px; padding: 0 9px;
+    background: var(--ink); color: #fff; font-family: var(--num); font-weight: 700; font-size: 22px; display: grid; place-items: center; box-shadow: 0 0 0 3px #fff; }
+  .tile.zero .tpic { filter: grayscale(1); opacity: .5; }
+  .empty { text-align: center; color: var(--sub); padding: 60px 0; font-size: 17px; grid-column: 1 / -1; }
+
+  /* サイズのハンガー札（押すとそのままカゴへ） */
+  .rack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 5px; padding: 12px 10px 10px; }
+  .rack.wide { grid-template-columns: minmax(0, 1fr); }
+  .tag { position: relative; border: 1.5px solid var(--ink); border-radius: 7px; padding: 3px 0 4px; text-align: center; background: var(--panel); min-width: 0; }
+  .tag::before { content: ""; position: absolute; left: 50%; top: -8px; width: 11px; height: 7px; border: 1.5px solid var(--ink); border-bottom: none; border-radius: 7px 7px 0 0; transform: translateX(-50%); background: var(--panel); }
+  .tag i { display: block; font-style: normal; font-size: 11px; font-weight: 700; line-height: 1.2; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tag b { display: block; font-family: var(--num); font-weight: 700; font-size: 23px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .rack.wide .tag { display: flex; align-items: baseline; justify-content: center; gap: 6px; padding: 6px 0; }
+  .rack.wide .tag i { display: inline; font-size: 13px; }
+  .tag.low { border-color: var(--low); background: var(--low-soft); }
+  .tag.low::before { border-color: var(--low); background: var(--low-soft); }
+  .tag.low b { color: var(--low); }
+  .tag.out, .tag:disabled { border-color: var(--hatch); background: repeating-linear-gradient(-45deg, transparent 0 4px, var(--hatch) 4px 5px); cursor: default; }
+  .tag.out::before, .tag:disabled::before { border-color: var(--hatch); background: var(--panel); }
+  .tag.out b, .tag.out i, .tag:disabled b, .tag:disabled i { color: var(--out); }
+  .tag.out b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  button.tag:not(:disabled):active { background: var(--ink); color: #fff; }
+  button.tag:not(:disabled):active b, button.tag:not(:disabled):active i { color: #fff; }
+  .tag .c { position: absolute; top: -10px; right: -6px; background: var(--ink); color: #fff; font-family: var(--num); font-weight: 700; font-size: 14px; min-width: 20px; height: 20px; line-height: 20px; border-radius: 10px; padding: 0 5px; z-index: 1; }
+  .settile .tcard { border-style: dashed; }
+  .settile .price { padding: 6px 10px 12px; font-family: var(--num); font-weight: 700; font-size: 26px; }
+
+  /* ---------- レシート（カゴ） ---------- */
+  aside.cart { display: flex; flex-direction: column; background: var(--ground); border-left: 1px solid var(--rule); min-height: 0; padding: 14px 14px 0; }
+  .receipt { background: var(--panel); display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; padding-bottom: 14px;
+    -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%; }
+  .cart h2 { margin: 0; padding: 14px 14px 8px; font-family: var(--display); font-weight: 900; font-size: 19px; letter-spacing: .14em; display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1.5px dashed var(--rule); }
+  .cart h2 button { font-family: var(--body); letter-spacing: 0; font-size: 13px; font-weight: 700; color: var(--sub); }
+  .lines { flex: 1; overflow-y: auto; padding: 0 12px; min-height: 60px; }
+  .line { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px dotted var(--rule); }
+  .line .th { width: 44px; height: 44px; border-radius: 6px; background: #eef0f3 center/cover; }
+  .line .th.txt { display: grid; place-items: center; font-family: var(--display); font-weight: 900; font-size: 10px; line-height: 1.1; text-align: center; padding: 2px;
+    background: color-mix(in srgb, var(--gc, var(--ink)) 13%, #fff); color: color-mix(in srgb, var(--gc, var(--ink)) 82%, #000); overflow: hidden; }
+  .line b { display: block; font-size: 15px; }
+  .line small { color: var(--sub); font-size: 12px; word-break: keep-all; overflow-wrap: anywhere; }
+  .qty { display: flex; align-items: center; gap: 2px; }
+  .qty button { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--ink); font-size: 22px; font-weight: 700; line-height: 1; }
+  .qty button:active { background: var(--ink); color: #fff; }
+  .qty span { min-width: 30px; text-align: center; font-family: var(--num); font-size: 24px; font-weight: 700; }
+  .cart-empty { color: var(--sub); text-align: center; padding: 34px 10px; line-height: 1.8; font-size: 14px; }
+  .sum { padding: 10px 14px 0; border-top: 2px solid var(--ink); margin: 0 12px; padding-inline: 0; }
+  .sum .row { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; margin: 2px 0; }
+  .sum .row b { font-family: var(--num); font-size: 20px; }
+  .sum .row.big { font-weight: 700; }
+  .sum .row.big #sumYen { font-family: var(--num); font-weight: 700; font-size: 46px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .sum .note { font-size: 12px; color: var(--sub); }
+  .pay { margin: 12px 0 calc(12px + var(--safe-b)); padding: 17px; border-radius: 12px; background: var(--ink); color: #fff;
+    font-family: var(--display); font-weight: 900; font-size: 21px; letter-spacing: .06em; flex: none; }
+  .pay:active { transform: translateY(1px); }
+  .pay:disabled { opacity: .3; }
+  .log { border-top: 1px solid var(--rule); max-height: 30%; overflow-y: auto; padding: 8px 2px 10px; font-size: 13px; flex: none; }
+  .log h3 { margin: 4px 0 6px; font-size: 13px; color: var(--sub); }
+  .log .ent { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--rule); align-items: flex-start; }
+  .log .ent.pending { color: var(--low); }
+  .log .ent.undone { color: var(--out); text-decoration: line-through; }
   .log .ent span { min-width: 0; }
-  .log .ent .what { display: block; color: var(--ink); font-size: 13px; line-height: 1.5; margin-top: 2px; }
-  .log .ent.undone .what { color: var(--muted); }
-  .log .ent { align-items: flex-start; }
-  .log .ent button { color: var(--sale); font-size: 13px; white-space: nowrap; }
+  .log .ent .what { display: block; color: var(--ink); font-size: 12px; line-height: 1.5; margin-top: 2px; }
+  .log .ent.undone .what { color: var(--out); }
+  .log .ent button { color: var(--bad); font-size: 13px; font-weight: 700; white-space: nowrap; }
 
   /* ---------- サイズを選ぶ画面 ---------- */
-  .sheet-bg { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: grid; place-items: center; z-index: 20; }
-  .sheet { background: #fff; border-radius: 22px; width: min(620px, 92vw); padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
-  .sheet .hd { display: flex; gap: 16px; align-items: center; margin-bottom: 16px; }
-  .sheet .hd .ph { width: 96px; height: 96px; border-radius: 14px; background: #e9edf2 center/cover; display: grid; place-items: center; font-size: 40px; flex: none; }
-  .sheet .hd b { font-size: 22px; display: block; }
-  .sheet .hd small { color: var(--muted); font-size: 15px; }
-  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
-  .size { border: 2px solid var(--line); border-radius: 16px; padding: 14px 8px; text-align: center; }
-  .size b { display: block; font-size: 30px; }
-  .size small { font-size: 14px; color: var(--muted); }
-  .size:active { background: #fff4e8; border-color: var(--accent); }
-  .size:disabled { opacity: .35; }
-  .size .c { display: inline-block; margin-top: 4px; background: var(--sale); color: #fff; border-radius: 10px; padding: 0 8px; font-weight: 700; font-size: 14px; }
-  .sheet .close { margin-top: 18px; width: 100%; padding: 14px; border-radius: 14px; background: #f0f2f5; font-size: 18px; font-weight: 700; }
+  .sheet-bg { position: fixed; inset: 0; background: rgba(15,18,24,.5); display: grid; place-items: center; z-index: 20; }
+  .sheet { background: var(--panel); border-radius: 18px; width: min(640px, 92vw); max-height: 88vh; overflow: auto; padding: 22px; border: 2px solid var(--ink); }
+  .sheet .hd { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; }
+  .sheet .hd .ph { width: 92px; height: 92px; border-radius: 10px; background: #eef0f3 center/cover; flex: none; }
+  .sheet .hd .ph.txt { font-size: 14px; }
+  .sheet .hd b { font-family: var(--display); font-weight: 900; font-size: 23px; display: block; line-height: 1.25; }
+  .sheet .hd small { color: var(--sub); font-size: 15px; }
+  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 18px 12px; }
+  .sizes .tag { padding: 10px 0 12px; border-radius: 12px; border-width: 2px; }
+  .sizes .tag::before { top: -10px; width: 16px; height: 9px; border-width: 2px; }
+  .sizes .tag i { font-size: 15px; }
+  .sizes .tag b { font-size: 34px; }
+  .sizes .tag .c { font-size: 16px; height: 24px; line-height: 24px; min-width: 24px; border-radius: 12px; top: -12px; }
+  .sheet .close { margin-top: 20px; width: 100%; padding: 14px; border-radius: 12px; border: 1.5px solid var(--ink); font-size: 17px; font-weight: 700; }
 
   /* ---------- おつり・セット・締め ---------- */
-  .change { padding: 8px 16px 4px; border-top: 1px dashed var(--line); }
-  .change .crow { display: flex; align-items: center; gap: 8px; font-size: 15px; }
-  .change .crow input { flex: 1; min-width: 0; font-size: 20px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; text-align: right; }
-  .change .crow button { font-size: 13px; color: var(--muted); }
-  .change .cbtns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
-  .change .cbtns button { padding: 8px 2px; border-radius: 10px; background: #f0f2f5; font-size: 14px; font-weight: 700; }
-  .change .cout { min-height: 30px; text-align: right; font-size: 18px; margin-top: 4px; }
-  .change .cout b { font-size: 26px; color: var(--ok); }
-  .change .cout .short { color: var(--sale); font-weight: 700; }
-  .tile.settile { background: #fff7ee; border: 2px dashed var(--accent); }
-  .tile.settile .ph { background: #fde9d3; }
-  .setpick .size { display: grid; justify-items: center; gap: 2px; padding: 8px; }
-  .setpick .sph { width: 72px; height: 72px; border-radius: 10px; background: #e9edf2 center/cover; }
+  .change { padding: 8px 0 2px; margin: 0 12px; border-top: 1px dashed var(--rule); flex: none; }
+  .change .crow { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .change .crow input { flex: 1; min-width: 0; font-family: var(--num); font-weight: 700; font-size: 24px; padding: 4px 10px; border: 1.5px solid var(--ink); border-radius: 8px; text-align: right; }
+  .change .crow button { font-size: 13px; color: var(--sub); }
+  .change .cbtns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 6px; }
+  .change .cbtns button { white-space: nowrap; letter-spacing: -.02em; padding: 7px 0; border-radius: 8px; border: 1px solid var(--rule); font-size: 13px; font-weight: 700; }
+  .change .cbtns button:active { background: var(--ink); color: #fff; }
+  .change .cout { min-height: 30px; text-align: right; font-size: 15px; margin-top: 4px; }
+  .change .cout b { font-family: var(--num); font-size: 30px; color: var(--good); }
+  .change .cout .short { color: var(--bad); font-weight: 700; }
+  .setpick .size { display: grid; justify-items: center; gap: 2px; padding: 8px; border: 1.5px solid var(--ink); border-radius: 12px; text-align: center; }
+  .setpick .size:disabled { opacity: .35; }
+  .setpick .size small { font-size: 12px; color: var(--sub); }
+  .setpick .size .c { display: inline-block; margin-top: 2px; background: var(--ink); color: #fff; border-radius: 10px; padding: 0 8px; font-weight: 700; font-size: 13px; }
+  .setpick .sph { width: 72px; height: 72px; border-radius: 8px; background: #eef0f3 center/cover; }
   .setpick .sn { font-size: 15px !important; }
   .setbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .setbtns .ok { background: var(--sale); color: #fff; }
-  .setbtns .ok:disabled { background: #c9cfd6; }
-  .shime { background: #fff; border: 2px solid var(--ink); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
-  .shime .shrow { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 6px; font-size: 16px; }
-  .shime input { width: 140px; font-size: 18px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; text-align: right; }
-  .shime .ok { color: var(--ok); font-weight: 800; }
-  .shime .ng { color: var(--sale); font-weight: 800; }
+  .setbtns .ok { background: var(--ink); color: #fff; }
+  .setbtns .ok:disabled { opacity: .3; }
+  .shime { background: var(--panel); border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+  .shime .shrow { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 6px; font-size: 15px; }
+  .shime input { width: 150px; font-family: var(--num); font-weight: 700; font-size: 22px; padding: 4px 10px; border: 1.5px solid var(--ink); border-radius: 8px; text-align: right; }
+  .shime .ok { color: var(--good); font-weight: 700; }
+  .shime .ng { color: var(--bad); font-weight: 700; }
 
   /* ---------- 売れたもの ---------- */
-  .sales { position: fixed; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
-  .sales-hd { background: #fff; padding: 12px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
-  .sales-hd h2 { margin: 0; font-size: 22px; }
-  .sales-hd .back { justify-self: start; color: var(--accent-d); font-weight: 700; font-size: 16px; }
+  .sales { position: fixed; inset: 0; z-index: 30; background: var(--ground); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+  .sales-hd { background: var(--panel); padding: 12px 16px; border-bottom: 1.5px solid var(--ink); display: grid; gap: 10px; }
+  .sales-hd h2 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 22px; }
+  .sales-hd .back { justify-self: start; font-weight: 700; font-size: 15px; }
   .sales-filter { display: flex; gap: 8px; }
-  .sales-filter select { flex: 1; font-size: 17px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
-  .hbtn2 { padding: 0 16px; border-radius: 10px; background: #f0f2f5; font-size: 20px; }
-  .seg2 { display: grid; grid-template-columns: 1fr 1fr; background: #f0f2f5; border-radius: 12px; padding: 4px; }
-  .seg2 button { padding: 10px; border-radius: 9px; font-size: 16px; font-weight: 700; color: var(--muted); }
-  .seg2 button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-  .sales-sum { display: flex; gap: 18px; font-size: 16px; color: var(--muted); }
-  .sales-sum b { color: var(--ink); font-size: 22px; margin-right: 2px; }
-  .sales-body { flex: 1; overflow-y: auto; padding: 12px 16px calc(20px + var(--safe-b)); }
-  .sale { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
-  .sale .top { display: flex; gap: 10px; align-items: baseline; font-size: 15px; color: var(--muted); }
-  .sale .top b { color: var(--ink); font-size: 18px; }
-  .sale .top .amt { margin-left: auto; color: var(--ink); font-weight: 700; }
-  .sale ul { margin: 6px 0 0; padding: 0; list-style: none; font-size: 16px; line-height: 1.7; }
-  .sale ul li span { color: var(--muted); }
-  .sale.undone { opacity: .5; }
+  .sales-filter select { flex: 1; font-size: 16px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid var(--ink); background: var(--panel); }
+  .hbtn2 { padding: 0 16px; border-radius: 10px; border: 1.5px solid var(--ink); font-size: 14px; font-weight: 700; }
+  .seg2 { display: grid; grid-template-columns: 1fr 1fr; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; }
+  .seg2 button { padding: 10px; font-size: 15px; font-weight: 700; color: var(--sub); }
+  .seg2 button.on { background: var(--ink); color: #fff; }
+  .sales-sum { display: flex; gap: 20px; font-size: 14px; color: var(--sub); align-items: baseline; }
+  .sales-sum b { color: var(--ink); font-family: var(--num); font-size: 28px; margin-right: 3px; }
+  .sales-body { flex: 1; overflow-y: auto; padding: 14px 16px calc(20px + var(--safe-b)); }
+  .sale { background: var(--panel); border-left: 4px solid var(--ink); padding: 10px 14px; margin-bottom: 8px; }
+  .sale .top { display: flex; gap: 10px; align-items: baseline; font-size: 14px; color: var(--sub); }
+  .sale .top b { color: var(--ink); font-family: var(--num); font-size: 22px; }
+  .sale .top .amt { margin-left: auto; color: var(--ink); font-family: var(--num); font-weight: 700; font-size: 20px; }
+  .sale ul { margin: 4px 0 0; padding: 0; list-style: none; font-size: 15px; line-height: 1.7; }
+  .sale ul li span { color: var(--sub); }
+  .sale.undone { opacity: .5; border-left-color: var(--out); }
   .sale.undone ul { text-decoration: line-through; }
-  .rank { background: #fff; border-radius: 14px; overflow: hidden; }
-  .rank .r { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 17px; }
-  .rank .r .no { color: var(--muted); font-weight: 700; text-align: center; }
-  .rank .r small { display: block; color: var(--muted); font-size: 13px; }
-  .rank .r .n { font-size: 24px; font-weight: 800; }
-  .rank .r .n small { display: inline; font-size: 14px; font-weight: 400; margin-left: 2px; }
-  .rank .gh { padding: 8px 14px; background: #f7f8fa; font-weight: 700; font-size: 14px; color: var(--muted); }
+  .rank { background: var(--panel); }
+  .rank .r { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); font-size: 16px; }
+  .rank .r .no { color: var(--sub); font-family: var(--num); font-weight: 700; font-size: 18px; text-align: center; }
+  .rank .r small { display: block; color: var(--sub); font-size: 13px; }
+  .rank .r .n { font-family: var(--num); font-size: 28px; font-weight: 700; }
+  .rank .r .n small { display: inline; font-family: var(--body); font-size: 13px; font-weight: 400; margin-left: 2px; }
+  .rank .gh { padding: 6px 14px; background: var(--gc, var(--ink)); color: #fff; font-weight: 700; font-size: 14px; }
   @media (min-width: 900px) { .sales-hd { grid-template-columns: auto 1fr auto; align-items: center; } .sales-hd .seg2, .sales-hd .sales-sum { grid-column: 1 / -1; } }
 
-  /* ---------- お知らせ ---------- */
+  /* ---------- お知らせ・ログイン ---------- */
   .toast { position: fixed; left: 50%; bottom: calc(26px + var(--safe-b)); transform: translateX(-50%); background: var(--ink); color: #fff;
-    padding: 14px 22px; border-radius: 14px; font-size: 17px; z-index: 40; box-shadow: 0 8px 24px rgba(0,0,0,.3); max-width: 90vw; }
-  .toast.err { background: var(--sale); }
-  .login { position: fixed; inset: 0; background: var(--bg); display: grid; place-items: center; z-index: 50; }
-  .login form { background: #fff; padding: 28px; border-radius: 20px; width: min(420px, 90vw); box-shadow: 0 10px 30px rgba(0,0,0,.12); }
-  .login h2 { margin: 0 0 6px; }
-  .login p { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
-  .login input { width: 100%; font-size: 18px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 12px; }
-  .login button { width: 100%; padding: 14px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 18px; font-weight: 700; }
+    padding: 14px 22px; border-radius: 12px; font-size: 16px; font-weight: 700; z-index: 40; box-shadow: 0 10px 28px rgba(0,0,0,.3); max-width: 90vw; }
+  .toast.err { background: var(--bad); }
+  .login { position: fixed; inset: 0; background: var(--ground); display: grid; place-items: center; z-index: 50; padding: 16px; }
+  .login form { background: var(--panel); padding: 28px; border-radius: 16px; width: min(420px, 100%); border: 2px solid var(--ink); }
+  .login h2 { margin: 0 0 6px; font-family: var(--display); font-weight: 900; }
+  .login p { color: var(--sub); margin: 0 0 16px; font-size: 14px; }
+  .login input { width: 100%; font-size: 18px; padding: 12px; border: 1.5px solid var(--ink); border-radius: 10px; margin-bottom: 12px; }
+  .login button { width: 100%; padding: 14px; border-radius: 10px; background: var(--ink); color: #fff; font-size: 18px; font-weight: 700; }
 
   .hsets { display: contents; }
   .phone-only { display: none !important; }
 
-  /* ---------- iPhone（幅600px以下）：写真2列、お会計は下のバーから開く ---------- */
+  /* ---------- iPhone（幅600px以下）：札2列、レシートは下のバーから開く ---------- */
   @media (max-width: 600px) {
     .phone-only { display: inline-flex !important; }
     header { flex-wrap: wrap; gap: 8px; padding: 8px 12px; padding-top: calc(8px + env(safe-area-inset-top, 0px)); }
     header h1 { font-size: 18px; }
     header .spacer, #reload { display: none; }
     #salesBtn { font-size: 13px; padding: 6px 10px; }
-    .net { font-size: 11px; padding: 4px 8px; margin-left: auto; }
+    .net { font-size: 11px; margin-left: auto; padding: 4px 4px; }
     .hsets { display: none; width: 100%; flex-direction: column; gap: 6px; }
     .hsets.open { display: flex; }
     .hfield input, .hfield select { width: 100%; flex: 1; }
     .main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
-    nav.genres { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--line); padding: 8px; }
-    .genre { width: auto; white-space: nowrap; margin: 0; padding: 8px 12px; font-size: 15px; }
-    .genre small { display: none; }
+    nav.genres { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--rule); padding: 8px 10px; }
+    .genre { width: auto; white-space: nowrap; margin: 0; padding: 7px 12px; font-size: 14px; border-radius: 999px; border: 1.5px solid var(--gc, var(--ink)); }
+    .genre.on { margin: 0; }
     section.items { padding: 10px 10px calc(84px + var(--safe-b)); }
-    .search input { font-size: 16px; padding: 10px 12px; }
-    .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .search input { font-size: 16px; padding: 9px 14px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 8px; }
     .tile b { font-size: 15px; }
     .tile .sub { font-size: 12px; }
+    .rack { gap: 11px 3px; padding: 11px 6px 8px; }
+    .tag b { font-size: 19px; }
+    .tag i { font-size: 10px; }
+    .ph.txt { font-size: 17px; }
     .cartbar { position: fixed; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 15; align-items: center; gap: 12px;
-      padding: 14px 18px; border-radius: 16px; background: var(--sale); color: #fff; font-size: 17px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
-    .cartbar b { margin-left: auto; font-size: 18px; }
-    .cartbar.empty { background: #9aa3ad; }
-    aside.cart { position: fixed; inset: 0; z-index: 25; max-height: none; border: none; transform: translateY(100%); transition: transform .2s; padding-top: env(safe-area-inset-top, 0px); }
+      padding: 13px 18px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 16px; font-weight: 700; box-shadow: 0 8px 22px rgba(0,0,0,.3); }
+    .cartbar #barYen { font-family: var(--num); font-size: 22px; }
+    .cartbar b { margin-left: auto; font-size: 16px; }
+    .cartbar.empty { background: #7b838f; }
+    aside.cart { position: fixed; inset: 0; z-index: 25; max-height: none; border: none; transform: translateY(100%); transition: transform .2s; padding-top: calc(10px + env(safe-area-inset-top, 0px)); }
     aside.cart.open { transform: none; }
-    .cart h2 { flex-wrap: wrap; gap: 6px; }
-    .cart h2 .back { width: 100%; font-size: 16px; color: var(--accent-d); font-weight: 700; padding: 4px 0 8px; }
+    .cart .back { font-size: 15px; font-weight: 700; padding: 0 2px 10px; }
     .log { display: block; max-height: 22%; }
     .sizes { grid-template-columns: repeat(2, 1fr); }
     .sheet { padding: 16px; }
   }
 
-  /* ---------- 縦向き（幅が狭いとき）：ジャンルを上、カゴを下に ---------- */
+  /* ---------- iPad縦（幅が狭いとき）：ジャンルを上、レシートを下に ---------- */
   @media (min-width: 601px) and (max-width: 900px) {
     header { flex-wrap: wrap; }
     header .spacer { display: none; }
     .hfield { flex: 1 1 200px; }
     .hfield input, .hfield select { width: 100%; }
-    .main { min-width: 0; }
-    .main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; }
-    nav.genres { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--line); padding: 8px; }
-    .genre { width: auto; white-space: nowrap; margin: 0; padding: 10px 14px; }
-    .genre small { display: inline; margin-left: 4px; }
-    aside.cart { border-left: none; border-top: 1px solid var(--line); max-height: 46vh; }
+    .main { min-width: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; }
+    nav.genres { display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; border-right: none; border-bottom: 1px solid var(--rule); padding: 8px 10px; }
+    .genre { width: auto; white-space: nowrap; margin: 0; padding: 9px 14px; border-radius: 999px; border: 1.5px solid var(--gc, var(--ink)); }
+    .genre.on { margin: 0; }
+    aside.cart { border-left: none; border-top: 1px solid var(--rule); max-height: 46vh; padding-top: 10px; }
     .log { display: none; }
     .hfield input { width: 110px; }
   }
@@ -240,8 +293,8 @@
 <body>
 <div class="app">
   <header>
-    <h1>🧾 販売レジ</h1>
-    <button class="hbtn phone-only" id="setBtn">⚙︎ 公演・担当</button>
+    <h1>販売レジ</h1>
+    <button class="hbtn phone-only" id="setBtn">公演・担当</button>
     <span class="badge" id="envBadge" hidden>テスト版</span>
     <div class="hsets" id="hsets">
     <label class="hfield"><span>公演</span><input id="event" placeholder="例：10/5 大阪 昼" autocomplete="off"></label>
@@ -249,19 +302,21 @@
     <label class="hfield"><span>在庫</span><select id="pool"></select></label>
     </div>
     <div class="spacer"></div>
-    <div class="net" id="net">● オンライン</div>
-    <button class="hbtn" id="salesBtn">📊 売上を見る</button>
-    <button class="hbtn" id="reload">↻ 在庫更新</button>
+    <div class="net" id="net">オンライン</div>
+    <button class="hbtn" id="salesBtn">売れたもの</button>
+    <button class="hbtn" id="reload">在庫を更新</button>
   </header>
   <div class="main">
     <nav class="genres" id="genres"></nav>
     <section class="items">
-      <div class="search"><input id="q" placeholder="🔍 商品名・色で探す" autocomplete="off"></div>
+      <div class="search"><input id="q" placeholder="商品名・色で探す" autocomplete="off"></div>
       <div class="grid" id="grid"></div>
     </section>
     <button class="cartbar phone-only" id="cartBar"><span id="barQty">0点</span><span id="barYen"></span><b>お会計へ ›</b></button>
     <aside class="cart" id="cart">
-      <h2><button class="phone-only back" id="cartClose">‹ 商品にもどる</button>お会計 <button id="clear">すべて消す</button></h2>
+      <button class="phone-only back" id="cartClose">‹ 商品にもどる</button>
+      <div class="receipt">
+      <h2>お会計 <button id="clear">すべて消す</button></h2>
       <div class="lines" id="lines"></div>
       <div class="sum">
         <div class="row"><span>点数</span><b id="sumQty">0点</b></div>
@@ -273,7 +328,8 @@
         <div class="cbtns"><button data-paid="exact">ちょうど</button><button data-paid="1000">＋1,000</button><button data-paid="5000">＋5,000</button><button data-paid="10000">＋10,000</button></div>
         <div class="cout" id="changeOut"></div>
       </div>
-      <button class="pay" id="pay" disabled>会計する（販売を記録）</button>
+      </div>
+      <button class="pay" id="pay" disabled>会計する</button>
       <div class="log"><h3>この端末の記録（今日）</h3><div id="log"></div></div>
     </aside>
   </div>
@@ -282,14 +338,14 @@
 <div class="sales" id="sales" hidden>
   <div class="sales-hd">
     <button class="back" id="salesClose">‹ レジにもどる</button>
-    <h2>📊 売れたもの</h2>
+    <h2>売れたもの</h2>
     <div class="sales-filter">
       <select id="salesWhen"></select>
-      <button class="hbtn2" id="salesReload">↻</button>
+      <button class="hbtn2" id="salesReload">更新</button>
     </div>
     <div class="seg2" id="salesSeg">
-      <button data-v="list" class="on">🕒 会計の順番</button>
-      <button data-v="items">📦 商品ごとの個数</button>
+      <button data-v="list" class="on">会計の順番</button>
+      <button data-v="items">商品ごとの個数</button>
     </div>
     <div class="sales-sum" id="salesSum"></div>
   </div>
@@ -337,8 +393,15 @@
     const id = m && (m[1] || m[2]);
     return id ? 'https://lh3.googleusercontent.com/d/' + id + '=w' + w : url;
   }
-  const icon = t => /タオル|手ぬぐい|ストール/.test(t) ? '🧣' : /シャツ/.test(t) ? '👕' : /クリア/.test(t) ? '📁' : /キー|ストラップ/.test(t) ? '🔑'
-    : /帽/.test(t) ? '🧢' : /ペンライト/.test(t) ? '🔦' : /傘/.test(t) ? '☂️' : /グラス/.test(t) ? '🥃' : /マグネット/.test(t) ? '🧲' : '🎁';
+  // ジャンルの色（虹の7色。管理画面・在庫確認ページと同じ）
+  const FAMILY = [['t', /シャツ/], ['towel', /タオル|手ぬぐい/], ['file', /ファイル/], ['knit', /ニット|ストール|帽/],
+    ['key', /キー|ストラップ/], ['mag', /マグネット|ステッカー/], ['goods', /./]];
+  const famOf = t => (FAMILY.find(f => f[1].test(t || '')) || FAMILY[6])[0];
+  const famRank = t => FAMILY.findIndex(f => f[0] === famOf(t));
+  const gc = t => '--gc:var(--g-' + famOf(t) + ')';
+  // 写真：あれば写真、なければ商品名を大きく
+  const pic = (img, t, name, cls) => img ? '<div class="' + cls + '" style="background-image:url(\'' + esc(imageSrc(img, 400)) + '\')"></div>'
+    : '<div class="' + cls + ' txt" style="' + gc(t) + '">' + esc(name) + '</div>';
 
   function toast(msg, err) {
     const t = document.createElement('div');
@@ -450,28 +513,41 @@
   const inCart = ids => ids.reduce((n, id) => n + qtyIn(id), 0);
   const byId = id => state.products.find(p => p.id === id);
 
+  // サイズのハンガー札（押すとそのままカゴへ）。残りは「在庫 − カゴの数」
+  function tag(p, pool, wide) {
+    const s = p.stock[pool] || 0, c = qtyIn(p.id), left = s - c;
+    const cls = s === 0 ? ' out' : left <= 3 ? ' low' : '';
+    return '<button class="tag' + cls + '" data-add="' + esc(p.id) + '"' + (left > 0 ? '' : ' disabled') + ' aria-label="' + esc((p.size !== '-' ? p.size + ' ' : '') + '残り' + left) + '">' +
+      '<i>' + (wide ? '在庫' : esc(p.size)) + '</i><b>' + left + '</b>' + (wide ? '<i>' + unitOf(p.type) + '</i>' : '') + (c ? '<span class="c">' + c + '</span>' : '') + '</button>';
+  }
+  function rack(items, pool, one) {
+    return '<div class="rack' + (one ? ' wide' : '') + '"' + (!one && items.length > 4 ? ' style="grid-template-columns:repeat(' + Math.min(items.length, 5) + ',minmax(0,1fr))"' : '') + '>' +
+      items.map(p => tag(p, pool, one)).join('') + '</div>';
+  }
+
   function render() {
     // ジャンル
     const counts = {};
     state.products.forEach(p => { counts[p.type] = (counts[p.type] || 0) + 1; });
-    const types = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    const types = Object.keys(counts).sort((a, b) => famRank(a) - famRank(b) || counts[b] - counts[a]);
     $('genres').innerHTML = ['', ...types].map(t =>
-      '<button class="genre' + (state.genre === t ? ' on' : '') + '" data-genre="' + esc(t) + '">' + (t ? esc(t) : 'すべて') +
+      '<button class="genre' + (state.genre === t ? ' on' : '') + '" data-genre="' + esc(t) + '"' + (t ? ' style="' + gc(t) + '"' : '') + '><i></i>' + (t ? esc(t) : 'すべて') +
       '</button>').join('');
     // 商品
     const gs = groups();
     const setTiles = state.q ? [] : state.sets.map((x, i) => ({ x: x, i: i })).filter(o => !state.genre || state.genre === o.x.type);
-    $('grid').innerHTML = setTiles.map(o => '<button class="tile settile" data-set="' + o.i + '"><div class="ph">🎁</div><div class="tx"><b>' + esc(o.x.name) +
-      '</b><div class="sub">' + esc(o.x.type) + 'から好きな' + o.x.count + unitOf(o.x.type) + '</div><div class="stk">' + yen(o.x.price) + '</div></div></button>').join('') +
+    const pool = $('pool').value;
+    $('grid').innerHTML = setTiles.map(o => '<div class="tile settile" style="' + gc(o.x.type) + '"><span class="gtab">セット</span><div class="tcard">' +
+      '<button class="tpic" data-set="' + o.i + '"><div class="ph txt" style="' + gc(o.x.type) + '">' + esc(o.x.name) + '</div></button>' +
+      '<div class="tx"><b>' + esc(o.x.name) + '</b><div class="sub">' + esc(o.x.type) + 'から好きな' + o.x.count + unitOf(o.x.type) + '</div></div>' +
+      '<div class="price">' + yen(o.x.price) + '</div></div></div>').join('') +
       (gs.length ? gs.map(g => {
       const n = inCart(g.items.map(p => p.id));
-      const ph = g.img ? '<div class="ph" style="background-image:url(\'' + esc(imageSrc(g.img, 400)) + '\')"></div>' : '<div class="ph">' + icon(g.type) + '</div>';
-      const sizes = g.items.length > 1 || (g.items[0].size && g.items[0].size !== '-') ? g.items.map(p => p.size).join('・') : '';
-      const stk = g.stock > 0 ? '在庫 ' + g.stock + unitOf(g.type) : '売り切れ';
-      return '<button class="tile' + (g.stock > 0 ? '' : ' zero') + '" data-key="' + esc(g.key) + '">' + ph +
-        (n ? '<span class="incart">' + n + '</span>' : '') +
-        '<div class="tx"><b>' + esc(g.category) + '</b><div class="sub">' + esc([g.type, g.color !== '-' ? g.color : '', sizes].filter(Boolean).join(' / ')) +
-        '</div><div class="stk' + (g.stock > 0 && g.stock <= 3 ? ' low' : '') + '">' + stk + '</div></div></button>';
+      const one = g.items.length === 1 && (!g.items[0].size || g.items[0].size === '-');
+      return '<div class="tile' + (g.stock > 0 ? '' : ' zero') + '" style="' + gc(g.type) + '"><span class="gtab">' + esc(g.type) + '</span><div class="tcard">' +
+        '<button class="tpic" data-key="' + esc(g.key) + '">' + pic(g.img, g.type, g.category, 'ph') + (n ? '<span class="incart">' + n + '</span>' : '') + '</button>' +
+        '<div class="tx"><b>' + esc(g.category) + '</b><div class="sub">' + esc(g.color !== '-' ? g.color : '') + '</div></div>' +
+        rack(g.items, pool, one) + '</div></div>';
     }).join('') : '<div class="empty">商品が見つかりません</div>');
     renderCart();
   }
@@ -482,14 +558,14 @@
     let qty = 0, total = 0, unpriced = 0;
     const bundleHtml = state.bundles.map((b, i) => {
       qty += b.ids.length; total += b.price;
-      return '<div class="line"><div class="th">🎁</div><div><b>' + esc(b.name) + '</b><small>' + b.ids.map(id => { const p = byId(id); return p ? esc([p.category, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ')) : esc(id); }).join('<br>') +
+      return '<div class="line"><div class="th txt" style="' + gc(byId(b.ids[0]) ? byId(b.ids[0]).type : '') + '">セット</div><div><b>' + esc(b.name) + '</b><small>' + b.ids.map(id => { const p = byId(id); return p ? esc([p.category, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ')) : esc(id); }).join('<br>') +
         '　' + yen(b.price) + '</small></div><div class="qty"><button data-unbundle="' + i + '">✕</button></div></div>';
     }).join('');
     $('lines').innerHTML = (ids.length || state.bundles.length) ? bundleHtml + ids.map(id => {
       const p = byId(id); const n = state.cart[id];
       qty += n;
       if (p.price === '' || p.price == null) unpriced += n; else total += p.price * n;
-      const th = p.imageUrl ? '<div class="th" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 400)) + '\')"></div>' : '<div class="th">' + icon(p.type) + '</div>';
+      const th = pic(p.imageUrl, p.type, p.category, 'th');
       const desc = [p.type, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' / ');
       const price = p.price === '' || p.price == null ? '' : '　' + yen(p.price * n);
       return '<div class="line">' + th + '<div><b>' + esc(p.category) + '</b><small>' + esc(desc) + '　残り' + (p.stock[pool] || 0) + price + '</small></div>' +
@@ -497,7 +573,7 @@
     }).join('') : '<div class="cart-empty">商品の写真をタップすると<br>ここに入ります</div>';
     state.total = unpriced === qty ? 0 : total;
     $('sumQty').textContent = qty + '点';
-    $('barQty').textContent = qty ? '🧾 ' + qty + '点' : '🧾 まだ空です';
+    $('barQty').textContent = qty ? qty + '点' : 'まだ空です';
     $('barYen').textContent = qty && unpriced < qty ? yen(total) : '';
     $('cartBar').classList.toggle('empty', !qty);
     $('sumYen').textContent = qty ? (unpriced === qty ? '価格未設定' : yen(total)) : '—';
@@ -529,14 +605,9 @@
 
   function openSizes(g) {
     const pool = $('pool').value;
-    const ph = g.img ? '<div class="ph" style="background-image:url(\'' + esc(imageSrc(g.img, 400)) + '\')"></div>' : '<div class="ph">' + icon(g.type) + '</div>';
-    $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd">' + ph +
+    $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd">' + pic(g.img, g.type, g.category, 'ph') +
       '<div><b>' + esc(g.category) + '</b><small>' + esc([g.type, g.color !== '-' ? g.color : ''].filter(Boolean).join(' / ')) + '</small></div></div>' +
-      '<div class="sizes">' + g.items.map(p => {
-        const s = p.stock[pool] || 0, c = qtyIn(p.id);
-        return '<button class="size" data-add="' + esc(p.id) + '"' + (s - c > 0 ? '' : ' disabled') + '><b>' + esc(p.size) + '</b><small>残り ' + (s - c) + '</small>' +
-          (c ? '<br><span class="c">カゴ ' + c + '</span>' : '') + '</button>';
-      }).join('') + '</div><button class="close" data-close="1">閉じる</button></div></div>';
+      '<div class="sizes">' + g.items.map(p => tag(p, pool, false)).join('') + '</div><button class="close" data-close="1">閉じる</button></div></div>';
     $('sheet').hidden = false;
     $('sheet').dataset.key = g.key;
   }
@@ -554,7 +625,7 @@
       (!e.pending && !e.undone && e.opId ? '<button data-undo="' + esc(e.opId) + '">取り消す</button>' : '') + '</div>').join('')
       : '<div style="color:var(--muted)">まだありません</div>';
     const n = q.length;
-    $('net').textContent = !navigator.onLine ? '● オフライン' + (n ? '（未送信 ' + n + '件）' : '') : n ? '● 未送信 ' + n + '件' : '● オンライン';
+    $('net').textContent = !navigator.onLine ? 'オフライン' + (n ? '（未送信 ' + n + '件）' : '') : n ? '未送信 ' + n + '件' : 'オンライン';
     $('net').className = 'net' + (!navigator.onLine || n ? ' off' : '');
   }
 
@@ -584,7 +655,7 @@
     state.bundles.forEach(b => {
       const each = Math.floor(b.price / b.ids.length);
       b.ids.forEach((id, k) => items.push({ id: id, qty: 1, unitPrice: each + (k === 0 ? b.price - each * b.ids.length : 0) }));
-      names.unshift('🎁 ' + b.name + '（' + itemNames(b.ids.map(id => ({ id: id, qty: 1 }))).map(n => n.replace(/ ×1$/, '')).join('・') + '）');
+      names.unshift('セット ' + b.name + '（' + itemNames(b.ids.map(id => ({ id: id, qty: 1 }))).map(n => n.replace(/ ×1$/, '')).join('・') + '）');
     });
     if (!items.length) return;
     const entry = { at: new Date(Date.now() + 9 * 3600e3).toISOString().replace('Z', ''), pool: $('pool').value, event: $('event').value.trim(),
@@ -597,7 +668,7 @@
         const res = await send(entry);
         state.cart = {}; state.bundles = []; state.paid = '';
         $('cart').classList.remove('open');
-        toast('✅ ' + res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
+        toast(res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
       } catch (e) {
         if (e.server) { toast(e.message, true); }
         else if (e.name === 'AbortError') { toast('通信が途中で切れました。下の記録と在庫を確認してからやり直してください', true); }
@@ -651,12 +722,16 @@
     if (t.dataset.setDone) return finishSet();
     if (t.dataset.unbundle !== undefined) { state.bundles.splice(+t.dataset.unbundle, 1); return render(); }
     if (t.dataset.paid !== undefined) { state.paid = t.dataset.paid === 'exact' ? String(state.total) : String((Number(state.paid) || 0) + Number(t.dataset.paid)); return renderChange(); }
-    if (t.classList.contains('tile')) {
+    if (t.classList.contains('tpic') && t.dataset.key) {
       const g = groups().find(x => x.key === t.dataset.key); if (!g) return;
       if (g.items.length === 1) add(g.items[0].id, 1); else openSizes(g);
       return;
     }
-    if (t.dataset.add) { add(t.dataset.add, 1); const g = groups().find(x => x.key === $('sheet').dataset.key); if (g) openSizes(g); return; }
+    if (t.dataset.add) {
+      add(t.dataset.add, 1);
+      if (!$('sheet').hidden) { const g = groups().find(x => x.key === $('sheet').dataset.key); if (g) openSizes(g); }
+      return;
+    }
     if (t.dataset.close && (e.target === t || t.tagName === 'BUTTON')) { $('sheet').hidden = true; return; }
     if (t.dataset.inc) return add(t.dataset.inc, 1);
     if (t.dataset.dec) return add(t.dataset.dec, -1);
@@ -677,7 +752,7 @@
     const { set, ids } = state.picking;
     const pool = $('pool').value;
     const list = state.products.filter(p => p.type === set.type);
-    $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd"><div class="ph">🎁</div><div><b>' + esc(set.name) + '　' + yen(set.price) +
+    $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd"><div class="ph txt" style="' + gc(set.type) + '">セット</div><div><b>' + esc(set.name) + '　' + yen(set.price) +
       '</b><small>好きな' + set.count + unitOf(set.type) + 'を選んでください（' + ids.length + ' / ' + set.count + '）</small></div></div>' +
       '<div class="sizes setpick">' + list.map(p => {
         const left = (p.stock[pool] || 0) - qtyIn(p.id) - ids.filter(x => x === p.id).length;
@@ -735,7 +810,7 @@
     document.querySelectorAll('#salesSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === salesState.view));
     if (!sales.length) { $('salesBody').innerHTML = '<div class="empty">この日の販売はまだありません</div>'; return; }
     const label = i => [i.category, i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' ');
-    const shime = (salesState.data && !salesState.data.event) ? '<div class="shime"><b>🧮 締め（精算チェック）</b><div class="shrow">記録の合計 <b>' + (amt ? yen(amt) : '価格未設定') + '</b>' +
+    const shime = (salesState.data && !salesState.data.event) ? '<div class="shime"><b>締め（精算チェック）</b><div class="shrow">記録の合計 <b>' + (amt ? yen(amt) : '価格未設定') + '</b>' +
       '<label>実際の金額（レシート・現金） <input id="realYen" inputmode="numeric" placeholder="円" value="' + esc(salesState.real || '') + '"></label><span id="shimeDiff"></span></div></div>' : '';
     if (salesState.view === 'list') {
       $('salesBody').innerHTML = shime + sales.map((x, k) => '<div class="sale' + (x.undone ? ' undone' : '') + '"><div class="top"><b>' + esc(x.at.slice(6)) + '</b>' +
@@ -757,7 +832,7 @@
     const order = Object.keys(types).sort((a, b) => types[b].reduce((n, i) => n + i.n, 0) - types[a].reduce((n, i) => n + i.n, 0));
     $('salesBody').innerHTML = shime + '<div class="rank">' + order.map(t => {
       const items = types[t].sort((a, b) => b.n - a.n);
-      return '<div class="gh">' + esc(t) + '　計 ' + items.reduce((n, i) => n + i.n, 0) + unitOf(t) + '</div>' +
+      return '<div class="gh" style="' + gc(t) + '">' + esc(t) + '　計 ' + items.reduce((n, i) => n + i.n, 0) + unitOf(t) + '</div>' +
         items.map((i, k) => '<div class="r"><span class="no">' + (k + 1) + '</span><span>' + esc(i.category) +
           '<small>' + esc([i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' / ')) + '</small></span>' +
           '<span class="n">' + i.n + '<small>' + unitOf(i.type) + '</small></span></div>').join('');
@@ -773,7 +848,7 @@
     const live = ((salesState.data && salesState.data.sales) || []).filter(x => !x.undone);
     const amt = live.reduce((n, x) => n + x.amount, 0);
     const real = Number(String(salesState.real || '').replace(/[^0-9]/g, ''));
-    el.innerHTML = !salesState.real ? '' : real === amt ? '<span class="ok">✅ ぴったりです</span>' : '<span class="ng">差額 ' + (real > amt ? '＋' : '−') + yen(Math.abs(real - amt)) + (real > amt ? '（多い）' : '（足りない）') + '</span>';
+    el.innerHTML = !salesState.real ? '' : real === amt ? '<span class="ok">ぴったりです</span>' : '<span class="ng">差額 ' + (real > amt ? '＋' : '−') + yen(Math.abs(real - amt)) + (real > amt ? '（多い）' : '（足りない）') + '</span>';
   }
   $('salesBody').addEventListener('input', e => { if (e.target.id === 'realYen') { salesState.real = e.target.value; shimeDiff(); } });
   $('salesSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; salesState.view = b.dataset.v; renderSales(); });

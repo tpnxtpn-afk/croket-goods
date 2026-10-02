@@ -364,7 +364,36 @@
     }
   }
 
+  // 端末に保存した在庫で表示する（オフラインのとき・読み込めなかったとき）
+  function useCached() {
+    const cached = load(STORE + '.registerProducts', null);
+    const cc = load(STORE + '.registerConfig', {});
+    state.sets = cc.sets || []; state.order = cc.order || [];
+    if (cached && !state.products.length) { state.products = cached; state.owners = cc.owners || ['現場用', 'ファンクラブ用', '販売在庫']; applyPending(); fillPools(); render(); }
+    return !!cached;
+  }
+
+  // まだ送れていない会計の分だけ、表示の在庫を減らす
+  function applyPending() {
+    load(QUEUE_STORE, []).forEach(entry => entry.items.forEach(i => {
+      const p = byId(i.id); if (p) p.stock[entry.pool] = Math.max(0, (p.stock[entry.pool] || 0) - i.qty);
+    }));
+  }
+
+  // 商品写真を前もって端末に保存しておく（オフラインでも写真が出るように）
+  let prefetched = false;
+  function prefetchImages() {
+    if (prefetched || !('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+    prefetched = true;
+    const urls = [...new Set(state.products.filter(p => p.imageUrl).map(p => imageSrc(p.imageUrl, 400)))];
+    let i = 0;
+    const next = () => { if (i >= urls.length || !navigator.onLine) return; fetch(urls[i++], { mode: 'no-cors' }).catch(() => {}).then(next); };
+    next(); next(); next();
+  }
+
   async function loadProducts(quiet) {
+    if (!navigator.onLine && !quiet) { toast('オフラインです。端末に保存した在庫で表示しています', true); }
+    if (!navigator.onLine) { useCached(); return; }
     try {
       const d = await api('getBootData', {}, 20000);
       state.products = d.products.filter(p => !p.discontinued);
@@ -372,16 +401,15 @@
       state.sets = d.config.sets || [];
       state.order = d.config.displayOrder || [];
       save(STORE + '.registerProducts', state.products);
-      save(STORE + '.registerConfig', { sets: state.sets, order: state.order });
+      save(STORE + '.registerConfig', { sets: state.sets, order: state.order, owners: state.owners });
+      applyPending();
       fillPools();
       render();
+      prefetchImages();
       if (!quiet) toast('在庫を最新にしました');
     } catch (e) {
       if (e.server && /パスワード/.test(e.message)) return showLogin();
-      const cached = load(STORE + '.registerProducts', null);
-      const cc = load(STORE + '.registerConfig', {});
-      state.sets = cc.sets || []; state.order = cc.order || [];
-      if (cached && !state.products.length) { state.products = cached; state.owners = ['現場用', 'ファンクラブ用', '販売在庫']; fillPools(); render(); }
+      useCached();
       toast('在庫を読み込めませんでした（前回の在庫で表示）', true);
     }
   }
@@ -461,7 +489,7 @@
       const p = byId(id); const n = state.cart[id];
       qty += n;
       if (p.price === '' || p.price == null) unpriced += n; else total += p.price * n;
-      const th = p.imageUrl ? '<div class="th" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 120)) + '\')"></div>' : '<div class="th">' + icon(p.type) + '</div>';
+      const th = p.imageUrl ? '<div class="th" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 400)) + '\')"></div>' : '<div class="th">' + icon(p.type) + '</div>';
       const desc = [p.type, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' / ');
       const price = p.price === '' || p.price == null ? '' : '　' + yen(p.price * n);
       return '<div class="line">' + th + '<div><b>' + esc(p.category) + '</b><small>' + esc(desc) + '　残り' + (p.stock[pool] || 0) + price + '</small></div>' +
@@ -501,7 +529,7 @@
 
   function openSizes(g) {
     const pool = $('pool').value;
-    const ph = g.img ? '<div class="ph" style="background-image:url(\'' + esc(imageSrc(g.img, 300)) + '\')"></div>' : '<div class="ph">' + icon(g.type) + '</div>';
+    const ph = g.img ? '<div class="ph" style="background-image:url(\'' + esc(imageSrc(g.img, 400)) + '\')"></div>' : '<div class="ph">' + icon(g.type) + '</div>';
     $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd">' + ph +
       '<div><b>' + esc(g.category) + '</b><small>' + esc([g.type, g.color !== '-' ? g.color : ''].filter(Boolean).join(' / ')) + '</small></div></div>' +
       '<div class="sizes">' + g.items.map(p => {
@@ -654,7 +682,7 @@
       '<div class="sizes setpick">' + list.map(p => {
         const left = (p.stock[pool] || 0) - qtyIn(p.id) - ids.filter(x => x === p.id).length;
         const c = ids.filter(x => x === p.id).length;
-        const ph = p.imageUrl ? '<span class="sph" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 200)) + '\')"></span>' : '';
+        const ph = p.imageUrl ? '<span class="sph" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 400)) + '\')"></span>' : '';
         return '<button class="size" data-pick="' + esc(p.id) + '"' + (left > 0 && ids.length < set.count ? '' : ' disabled') + '>' + ph + '<b class="sn">' + esc(p.category) + '</b><small>' +
           esc([p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ')) + '　残り ' + Math.max(0, left) + '</small>' + (c ? '<br><span class="c">選択 ' + c + '</span>' : '') + '</button>';
       }).join('') + '</div><div class="setbtns"><button class="close" data-close="1">やめる</button>' +
@@ -771,6 +799,13 @@
 
   if (ENV) $('envBadge').hidden = false;
   if (!state.key) showLogin(); else { loadProducts(true); flush(); }
+  // GitHub Pages 版だけ：画面と写真を端末に保存して、オフラインでも開けるようにする
+  if ('serviceWorker' in navigator && /github\.io$|^(127\.0\.0\.1|localhost)$/.test(location.hostname)) {
+    navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(() => {
+      if (!navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', prefetchImages, { once: true });
+      else prefetchImages();
+    }).catch(() => {});
+  }
   renderLog();
 })();
 </script>

@@ -590,7 +590,16 @@
     state.products.slice().sort((a, b) => cmp(a.id, b.id)).forEach(p => {
       if (!(p.category in rank)) rank[p.category] = Object.keys(rank).length;
     });
-    const byName = (a, b) => (rank[a.category] - rank[b.category]) || cmp(a.type, b.type) || cmp(a.color, b.color);
+    // 管理画面で「売り場の並び順」を決めていればその順（商品名ごとのまとまりは崩さない）
+    const order = (BOOT && BOOT.config && BOOT.config.displayOrder) || [];
+    const pos = {};
+    order.forEach((k, i) => { pos[k] = i; });
+    if (order.length) {
+      Object.keys(rank).forEach(c => { rank[c] = 1e6 + rank[c]; });
+      order.forEach((k, i) => { const c = k.split('|')[0]; if (c in rank && rank[c] >= 1e6) rank[c] = i; });
+    }
+    const gpos = g => { const k = [g.category, g.type, g.color].join('|'); return k in pos ? pos[k] : 1e6; };
+    const byName = (a, b) => (rank[a.category] - rank[b.category]) || (gpos(a) - gpos(b)) || cmp(a.type, b.type) || cmp(a.color, b.color);
     const sorters = {
       name: byName,
       stockDesc: (a, b) => (b.total - a.total) || byName(a, b),

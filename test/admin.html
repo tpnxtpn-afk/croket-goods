@@ -1324,7 +1324,8 @@
     state.lastOp = { opId: opId, label: label };
     $('undoText').innerHTML = esc(label) + '<br><small>まちがえたら取り消せます' + (hideAfterMs ? '（' + Math.round(hideAfterMs / 1000) + '秒で消えます）' : '') + '</small>';
     $('undoBar').hidden = false;
-    if (hideAfterMs) undoTimer = setTimeout(() => { if (!state.undoAsking && state.lastOp && state.lastOp.opId === opId) hideUndo(); }, hideAfterMs);
+    state.undoExpired = false;
+    if (hideAfterMs) undoTimer = setTimeout(() => { if (state.undoAsking) state.undoExpired = true; else if (state.lastOp && state.lastOp.opId === opId) hideUndo(); }, hideAfterMs);
   }
 
   function hideUndo() {
@@ -1338,7 +1339,7 @@
     state.undoAsking = true;
     const ok = await confirmBox('取り消しますか？', esc(state.lastOp.label) + '<br>在庫を元に戻します。', '取り消す', 'var(--danger)');
     state.undoAsking = false;
-    if (!ok) { if (!$('undoBar').hidden && /秒で消えます/.test($('undoText').innerHTML)) hideUndo(); return; }
+    if (!ok) { if (state.undoExpired) hideUndo(); return; }
     const btn = $('undoBtn');
     setBusy(btn, true, '取消中…');
     try {

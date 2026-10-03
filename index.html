@@ -16,274 +16,166 @@
 <title>コロッケ グッズ在庫</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
+  /* 劇場の物販ブース：ジャンルは虹の7色、在庫はハンガーの札（販売レジ・管理画面と同じ） */
   :root {
-    --theme: #e67e22;
-    --bg: #f4f5f7;
-    --card: #fff;
-    --text: #2c3e50;
-    --muted: #7f8c8d;
-    --line: #e3e6ea;
-    --zero: #b0b6bb;
-    --low: #e67e22;
-    --ok: #27ae60;
-    --rainbow: linear-gradient(90deg, #ff4d4d, #ff9f1a, #ffd93d, #3ddc84, #29b6f6, #7c4dff, #e056fd);
+    --theme: #14171d;
+    --bg: #e9ecf0; --card: #fff; --text: #14171d; --muted: #5d6571; --line: #d0d5dc; --hatch: #c9ced6;
+    --zero: #9aa2ad; --low: #d97a00; --low-soft: #fff1dc; --ok: #14171d; --bad: #d23a2f;
+    --g-t: #e0352b; --g-towel: #ef7a14; --g-file: #d9a400; --g-knit: #23945a; --g-key: #1d74d0; --g-goods: #6a4fd0; --g-mag: #b0409a;
+    --rainbow: linear-gradient(90deg, var(--g-t) 0 14.3%, var(--g-towel) 0 28.6%, var(--g-file) 0 42.9%, var(--g-knit) 0 57.2%, var(--g-key) 0 71.5%, var(--g-goods) 0 85.8%, var(--g-mag) 0);
+    --display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    --num: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    font-size: 15px;
+    font-family: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 15px;
     -webkit-text-size-adjust: 100%;
   }
-  /* 文字を大きくする（ヘッダーの「大」ボタン） */
   body.big { zoom: 1.18; }
 
-  .top { position: sticky; top: 0; z-index: 10; background: var(--card); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  .app-header {
-    position: relative;
-    display: flex; align-items: center; gap: 6px;
-    padding: 7px 8px 10px 14px;
-    background: radial-gradient(120% 140% at 0% 0%, #343a46 0%, #1d2027 55%, #121418 100%);
-    color: #fff;
-  }
-  .app-header::after {
-    content: "";
-    position: absolute; left: 0; right: 0; bottom: 0; height: 4px;
-    background: var(--rainbow);
-  }
+  .top { position: sticky; top: 0; z-index: 10; background: var(--card); border-bottom: 1px solid var(--line); }
+  .app-header { position: relative; display: flex; align-items: center; gap: 6px; padding: 10px 10px 12px 16px; background: var(--text); color: #fff; }
+  .app-header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--rainbow); }
   .brand { flex: 1; min-width: 0; }
-  .brand h1 {
-    margin: 0;
-    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-weight: 400;
-    font-size: 19px; line-height: 1.2; letter-spacing: .04em;
-    background: var(--rainbow);
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .brand .sub { font-size: 9px; font-weight: 700; letter-spacing: .3em; color: rgba(255,255,255,.55); }
-  .hbtn {
-    flex: 0 0 auto;
-    min-width: 34px; height: 34px; padding: 0 6px;
-    border: 1px solid rgba(255,255,255,.25); border-radius: 17px;
-    background: rgba(255,255,255,.08); color: #fff;
-    font: inherit; font-size: 15px; font-weight: 700;
-    cursor: pointer;
-  }
-  .hbtn.on { background: #fff; color: #1d2027; }
-  .hbtn.spin { animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .brand h1 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 20px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand .sub { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 1px; }
+  .hbtn { flex: 0 0 auto; min-width: 36px; height: 36px; padding: 0 8px; border: 1px solid rgba(255,255,255,.35); border-radius: 18px;
+    background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .hbtn.on { background: #fff; color: var(--text); }
+  .hbtn.spin { opacity: .5; }
 
-  .updated-bar {
-    display: flex; align-items: center; gap: 8px;
-    padding: 5px 12px;
-    background: #fdf6ec;
-    border-bottom: 1px solid var(--line);
-    font-size: 12px; color: #8a6d3b;
-  }
-  .updated-bar .test { margin-left: auto; padding: 1px 8px; border-radius: 9px; background: #e74c3c; color: #fff; font-weight: 700; }
+  .updated-bar { display: flex; align-items: center; gap: 8px; padding: 5px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .updated-bar .test { margin-left: auto; padding: 1px 8px; border-radius: 9px; background: var(--bad); color: #fff; font-weight: 700; }
 
   .tabs { display: flex; border-bottom: 1px solid var(--line); }
-  .tab {
-    flex: 1;
-    padding: 9px 4px 7px;
-    border: 0; border-bottom: 3px solid transparent;
-    background: none; color: var(--muted);
-    font: inherit; font-size: 14px; font-weight: 700;
-    cursor: pointer;
-  }
-  .tab small { display: block; margin-top: 1px; font-size: 11px; font-weight: 400; }
-  .tab.active { color: var(--tab-color); border-bottom-color: var(--tab-color); }
-  .pool-note { margin: 0; padding: 6px 14px; background: #fafbfc; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .tab { flex: 1; padding: 8px 4px 6px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted);
+    font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .tab small { display: block; font-family: var(--num); font-size: 24px; line-height: 1; font-weight: 700; color: inherit; order: -1; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .pool-note { margin: 0; padding: 6px 16px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 
-  .controls { padding: 10px 12px 8px; }
+  .controls { padding: 10px 14px 10px; max-width: 760px; margin: 0 auto; }
   .search { position: relative; }
-  .search input {
-    width: 100%;
-    padding: 11px 38px 11px 12px;
-    border: 1px solid var(--line); border-radius: 10px;
-    background: #f8f9fa; color: var(--text);
-    font: inherit; font-size: 16px;
-    -webkit-appearance: none; appearance: none;
-  }
+  .search input { width: 100%; padding: 10px 40px 10px 16px; border: 1.5px solid var(--text); border-radius: 999px; background: #fff; color: var(--text);
+    font: inherit; font-size: 16px; -webkit-appearance: none; appearance: none; }
   .search input::-webkit-search-cancel-button { -webkit-appearance: none; }
-  .search input:focus { outline: none; border-color: var(--theme); background: #fff; }
-  .search .clear {
-    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-    width: 34px; height: 34px;
-    border: 0; background: none; color: var(--muted);
-    font-size: 16px; cursor: pointer;
-  }
-  .chips {
-    display: flex; gap: 6px;
-    margin: 8px -12px 0; padding: 0 12px 2px;
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
+  .search input:focus { outline: none; box-shadow: 0 0 0 3px rgba(20,23,29,.15); }
+  .search .clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border: 0; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+  .chips { display: flex; gap: 6px; margin: 10px -14px 0; padding: 0 14px 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .chips::-webkit-scrollbar { display: none; }
-  .chips button {
-    flex: 0 0 auto;
-    padding: 7px 14px;
-    border: 1px solid var(--line); border-radius: 18px;
-    background: #fff; color: var(--text);
-    font: inherit; font-size: 14px;
-    cursor: pointer;
-  }
-  .chips button.on { background: var(--theme); border-color: var(--theme); color: #fff; font-weight: 700; }
-  .row2 { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-  .seg { display: flex; flex: 1; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
-  .seg button {
-    flex: 1; padding: 8px 2px;
-    border: 0; border-left: 1px solid var(--line);
-    background: #fff; color: var(--muted);
-    font: inherit; font-size: 13px;
-    cursor: pointer;
-  }
+  .chips button { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border: 1.5px solid var(--gc, var(--text)); border-radius: 999px;
+    background: #fff; color: var(--text); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .chips button i { width: 10px; height: 10px; border-radius: 3px; background: var(--gc, var(--text)); }
+  .chips button.on { background: var(--gc, var(--text)); color: #fff; }
+  .chips button.on i { background: #fff; }
+  .row2 { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .seg { display: flex; flex: 1; border: 1.5px solid var(--text); border-radius: 10px; overflow: hidden; }
+  .seg button { flex: 1; padding: 8px 2px; border: 0; border-left: 1px solid var(--line); background: #fff; color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
   .seg button:first-child { border-left: 0; }
-  .seg button.on { background: var(--theme); color: #fff; font-weight: 700; }
+  .seg button.on { background: var(--text); color: #fff; }
   .toggle-zero { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); white-space: nowrap; }
-  .toggle-zero input { width: 20px; height: 20px; margin: 0; accent-color: var(--theme); }
+  .toggle-zero input { width: 20px; height: 20px; margin: 0; accent-color: var(--text); }
 
-  main { max-width: 760px; margin: 0 auto; padding: 10px 12px 70px; }
-  .summary { margin: 2px 2px 10px; font-size: 13px; color: var(--muted); }
-  .summary b { color: var(--text); font-size: 15px; }
+  main { max-width: 760px; margin: 0 auto; padding: 12px 14px 70px; }
+  .summary { margin: 2px 2px 12px; font-size: 13px; color: var(--muted); }
+  .summary b { color: var(--text); font-family: var(--num); font-size: 22px; margin-right: 1px; }
 
-  .group-title {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin: 16px 4px 8px;
-    font-size: 14px;
-  }
+  /* 商品名ごとのまとまり：色の見出しタブ */
+  .group-title { display: flex; justify-content: space-between; align-items: flex-end; margin: 22px 0 0; font-size: 15px; border-bottom: 3px solid var(--gc, var(--text)); }
   .group-title:first-child { margin-top: 4px; }
-  .group-title span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .group-title b { background: var(--gc, var(--text)); color: #fff; padding: 4px 12px 3px; border-radius: 8px 8px 0 0; font-family: var(--display); font-weight: 900; }
+  .group-title span { font-size: 13px; color: var(--muted); padding-bottom: 3px; }
+  .group-title span .n { font-family: var(--num); font-size: 20px; color: var(--text); }
 
-  .item {
-    display: flex; align-items: flex-start; gap: 12px;
-    width: 100%;
-    margin-bottom: 8px; padding: 10px 12px;
-    border: 0; border-radius: 12px;
-    background: var(--card);
-    box-shadow: 0 1px 2px rgba(0,0,0,.06);
-    font: inherit; color: inherit; text-align: left;
-    cursor: pointer;
-  }
-  .thumb {
-    flex: 0 0 88px; width: 88px; height: 88px;
-    border-radius: 10px;
-    background: #eef0f2;
-    object-fit: cover;
-  }
-  .thumb.none { display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .item { display: flex; align-items: flex-start; gap: 14px; width: 100%; padding: 14px 2px; border: 0; border-bottom: 1px solid var(--line);
+    background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+  #list > .item { background: var(--card); padding: 12px; border: 1.5px solid var(--text); border-radius: 10px; margin-bottom: 10px; }
+  .thumb { flex: 0 0 76px; width: 76px; height: 76px; border-radius: 8px; background: #eef0f3; object-fit: cover; }
+  .thumb.none { display: grid; place-items: center; padding: 4px; text-align: center; overflow: hidden;
+    background: color-mix(in srgb, var(--gc, var(--text)) 13%, #fff); color: color-mix(in srgb, var(--gc, var(--text)) 82%, #000);
+    font-family: var(--display); font-weight: 900; font-size: 12px; line-height: 1.15; word-break: keep-all; overflow-wrap: anywhere; }
   .info { flex: 1; min-width: 0; }
-  .name { font-size: 16px; font-weight: 700; line-height: 1.3; }
-  .new {
-    display: inline-block; margin-left: 6px; padding: 1px 6px; vertical-align: 2px;
-    border-radius: 8px; background: #e74c3c; color: #fff; font-size: 10px; font-weight: 700;
-  }
-  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 6px; }
-  .tag { padding: 1px 8px; border-radius: 10px; background: #f0f2f4; font-size: 12px; color: #5b6670; }
-  .sizes { display: flex; flex-wrap: wrap; gap: 6px; }
-  .sz {
-    display: flex; align-items: baseline; gap: 4px;
-    padding: 4px 9px;
-    border: 1px solid; border-radius: 8px;
-    font-size: 13px;
-  }
-  .sz b { font-size: 17px; }
-  .sz.ok { border-color: #bfe6cc; background: #f0faf3; color: #1e8449; }
-  .sz.low { border-color: #f6d8b4; background: #fdf6ec; color: #b9651a; }
-  .sz.zero { border-color: var(--line); background: #f7f8f9; color: var(--zero); }
-  .single { display: flex; align-items: center; gap: 8px; }
-  .single b { font-size: 30px; line-height: 1; }
-  .single.ok b { color: var(--ok); }
-  .single.low b { color: var(--low); }
-  .single.zero b { color: var(--zero); }
-  .state { font-size: 13px; font-weight: 700; }
+  .name { font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .new { display: inline-block; margin-left: 6px; padding: 1px 6px; vertical-align: 2px; border-radius: 4px; background: var(--bad); color: #fff; font-size: 10px; font-weight: 700; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 3px 0 4px; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); }
+  .tag i { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line); background: var(--cc, transparent); }
+
+  /* サイズのハンガー札 */
+  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 62px)); gap: 13px 6px; padding-top: 9px; }
+  .sz { position: relative; border: 1.5px solid var(--text); border-radius: 7px; padding: 3px 0 4px; text-align: center; background: #fff; }
+  .sz::before { content: ""; position: absolute; left: 50%; top: -8px; width: 11px; height: 7px; border: 1.5px solid var(--text); border-bottom: none; border-radius: 7px 7px 0 0; transform: translateX(-50%); background: #fff; }
+  .sz i { display: block; font-style: normal; font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+  .sz b { display: block; font-family: var(--num); font-weight: 700; font-size: 23px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .sz.wide { grid-column: 1 / -1; max-width: 180px; display: flex; align-items: baseline; justify-content: center; gap: 5px; padding: 6px 10px; }
+  .sz.wide i { display: inline; font-size: 12px; }
+  .sz.low { border-color: var(--low); background: var(--low-soft); }
+  .sz.low::before { border-color: var(--low); background: var(--low-soft); }
+  .sz.low b { color: var(--low); }
+  .sz.zero { border-color: var(--hatch); background: repeating-linear-gradient(-45deg, transparent 0 4px, var(--hatch) 4px 5px); }
+  .sz.zero::before { border-color: var(--hatch); background: #fff; }
+  .sz.zero b, .sz.zero i { color: var(--zero); }
+  .sz.zero b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .state { font-size: 12px; font-weight: 700; color: var(--low); margin-top: 6px; display: block; }
 
   /* 写真で並べる（タイル表示）。売り切れは灰色 */
   .view-seg { margin-top: 8px; }
-  body.tiles #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  body.tiles #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
   body.tiles .group-title { grid-column: 1 / -1; }
   body.tiles .empty { grid-column: 1 / -1; }
-  body.tiles .item { flex-direction: column; gap: 6px; margin: 0; padding: 8px; }
-  body.tiles .thumb { flex: none; width: 100%; height: auto; aspect-ratio: 1 / 1; }
-  body.tiles .thumb.none { font-size: 54px; }
-  body.tiles .info { width: 100%; }
-  body.tiles .single b { font-size: 24px; }
-  body.tiles .sz { padding: 3px 7px; }
-  .item.soldout { opacity: .55; }
-  .item.soldout .thumb { filter: grayscale(1); }
+  body.tiles .item { flex-direction: column; gap: 8px; margin: 0; padding: 0 0 10px; background: var(--card); border: 1.5px solid var(--text); border-radius: 10px; overflow: hidden; }
+  body.tiles .thumb { flex: none; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 0; border-bottom: 1.5px solid var(--text); }
+  body.tiles .thumb.none { font-size: 20px; padding: 10px; }
+  body.tiles #list > .item { padding: 0 0 10px; }
+  body.tiles .info { width: 100%; padding: 0 10px; }
+  body.tiles .name { font-size: 15px; word-break: keep-all; overflow-wrap: anywhere; }
+  body.tiles .sizes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 4px; }
+  body.tiles .sz b { font-size: 20px; }
+  .item.soldout .thumb { filter: grayscale(1); opacity: .5; }
+  .item.soldout .name { color: var(--muted); }
   .empty { padding: 36px 16px; text-align: center; color: var(--muted); line-height: 1.9; }
-  .link { border: 0; background: none; color: var(--theme); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+  .link { border: 0; background: none; color: var(--text); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
-  .modal {
-    position: fixed; inset: 0; z-index: 50;
-    display: flex; align-items: center; justify-content: center;
-    padding: 16px;
-    background: rgba(0,0,0,.7);
-  }
-  .modal-box {
-    width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto;
-    padding: 16px;
-    border-radius: 14px;
-    background: #fff;
-  }
-  .modal-box img.big { display: block; width: 100%; max-height: 46vh; object-fit: contain; border-radius: 10px; background: #f4f5f7; }
-  .modal-title { margin: 12px 0 6px; font-size: 18px; font-weight: 700; text-align: center; }
-  .modal .sizes { justify-content: center; margin-top: 10px; }
-  .noimg { padding: 26px; text-align: center; font-size: 60px; background: #f4f5f7; border-radius: 10px; }
-  .btn {
-    display: block; width: 100%; margin-top: 14px; padding: 13px;
-    border: 0; border-radius: 10px;
-    background: var(--theme); color: #fff;
-    font: inherit; font-size: 16px; font-weight: 700;
-    cursor: pointer;
-  }
-  .btn.ghost { background: #eef0f2; color: var(--text); }
+  .modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(15,18,24,.6); }
+  .modal-box { width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; padding: 18px; border-radius: 16px; background: #fff; border: 2px solid var(--text); }
+  .modal-box img.big { display: block; width: 100%; max-height: 46vh; object-fit: contain; border-radius: 10px; background: #eef0f3; }
+  .modal-title { margin: 14px 0 4px; font-family: var(--display); font-weight: 900; font-size: 22px; text-align: center; }
+  .modal .sz.wide { max-width: none; }
+  .modal .sizes { justify-content: center; grid-template-columns: repeat(auto-fit, minmax(60px, 74px)); margin-top: 6px; }
+  .modal .sz b { font-size: 28px; }
+  .noimg { padding: 30px; text-align: center; border-radius: 10px; font-family: var(--display); font-weight: 900; font-size: 26px;
+    background: color-mix(in srgb, var(--gc, var(--text)) 13%, #fff); color: color-mix(in srgb, var(--gc, var(--text)) 82%, #000); }
+  .btn { display: block; width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 10px; background: var(--text); color: #fff;
+    font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .btn.ghost { background: #fff; border: 1.5px solid var(--text); color: var(--text); }
 
-  .guide h2 { margin: 0 0 4px; font-size: 19px; text-align: center; }
-  .guide p.lead { margin: 0 0 14px; text-align: center; font-size: 13px; color: var(--muted); }
+  .guide h2 { margin: 0 0 4px; font-family: var(--display); font-weight: 900; font-size: 21px; text-align: center; }
+  .guide p.lead { margin: 0 0 16px; text-align: center; font-size: 13px; color: var(--muted); }
   .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
-  .step .n {
-    flex: 0 0 30px; height: 30px;
-    border-radius: 50%; background: var(--theme); color: #fff;
-    font-weight: 700; text-align: center; line-height: 30px;
-  }
+  .step .n { flex: 0 0 30px; height: 30px; border-radius: 50%; background: var(--text); color: #fff; font-family: var(--num); font-weight: 700; font-size: 18px; text-align: center; line-height: 30px; }
   .step div { flex: 1; line-height: 1.55; }
   .step b { display: block; font-size: 15px; }
   .step small { color: var(--muted); font-size: 13px; }
+  .legend { display: flex; gap: 10px; margin-top: 8px; }
+  .legend .sz { width: 56px; }
 
-  .banner {
-    position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 40;
-    display: flex; gap: 10px; align-items: center;
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: #1d2027; color: #fff;
-    box-shadow: 0 6px 20px rgba(0,0,0,.25);
-    font-size: 13px; line-height: 1.5;
-  }
+  .banner { position: fixed; left: 10px; right: 10px; bottom: 10px; z-index: 40; display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px;
+    background: var(--text); color: #fff; box-shadow: 0 8px 22px rgba(0,0,0,.28); font-size: 13px; line-height: 1.5; }
   .banner .body { flex: 1; }
   .banner b { display: block; font-size: 14px; }
-  .banner button { border: 0; border-radius: 8px; padding: 8px 12px; background: #fff; color: #1d2027; font: inherit; font-weight: 700; cursor: pointer; }
+  .banner button { border: 0; border-radius: 8px; padding: 8px 12px; background: #fff; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
   .banner .x { background: none; color: rgba(255,255,255,.6); padding: 4px 6px; font-size: 18px; }
 
-  .toast {
-    position: fixed; left: 50%; bottom: 20px; z-index: 100;
-    max-width: 90%;
-    padding: 12px 18px;
-    border-radius: 10px;
-    background: #2c3e50; color: #fff;
-    font-size: 14px;
-    opacity: 0; transform: translate(-50%, 20px);
-    transition: opacity .25s, transform .25s;
-    pointer-events: none;
-  }
+  .toast { position: fixed; left: 50%; bottom: 20px; z-index: 100; max-width: 90%; padding: 12px 18px; border-radius: 10px; background: var(--text); color: #fff;
+    font-size: 14px; font-weight: 700; opacity: 0; transform: translate(-50%, 20px); transition: opacity .25s, transform .25s; pointer-events: none; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
-  .toast.error { background: #e74c3c; }
+  .toast.error { background: var(--bad); }
 </style>
 </head>
 <body>
@@ -292,11 +184,11 @@
   <header class="app-header">
     <div class="brand">
       <h1>コロッケ グッズ在庫</h1>
-      <div class="sub">GOODS STOCK</div>
+      <div class="sub">在庫確認</div>
     </div>
     <button type="button" class="hbtn" id="btnFont" aria-label="文字の大きさを変える">大</button>
     <button type="button" class="hbtn" id="btnHelp" aria-label="使い方">？</button>
-    <button type="button" class="hbtn" id="reload" aria-label="最新の在庫に更新">↻</button>
+    <button type="button" class="hbtn" id="reload" aria-label="最新の在庫に更新">更新</button>
   </header>
   <div class="updated-bar">
     <span id="updated"></span>
@@ -306,7 +198,7 @@
   <p class="pool-note" id="poolNote"></p>
   <div class="controls">
     <div class="search">
-      <input type="search" id="q" placeholder="🔍 名前・色・サイズで探す" autocomplete="off" enterkeyhint="search">
+      <input type="search" id="q" placeholder="名前・色・サイズで探す" autocomplete="off" enterkeyhint="search">
       <button type="button" class="clear" id="qClear" aria-label="消す" hidden>✕</button>
     </div>
     <div class="chips" id="typeChips"></div>
@@ -319,8 +211,8 @@
       <label class="toggle-zero"><input type="checkbox" id="showZero">売り切れも表示</label>
     </div>
     <div class="seg view-seg" id="viewSeg">
-      <button type="button" data-view="list" class="on">☰ リスト</button>
-      <button type="button" data-view="tile">▦ 写真で並べる</button>
+      <button type="button" data-view="list" class="on">リスト</button>
+      <button type="button" data-view="tile">写真で並べる</button>
     </div>
   </div>
 </div>
@@ -333,7 +225,7 @@
 <div class="modal" id="detail" hidden>
   <div class="modal-box">
     <img class="big" id="detailImg" alt="" referrerpolicy="no-referrer" hidden>
-    <div class="noimg" id="detailNoImg" hidden>👕</div>
+    <div class="noimg" id="detailNoImg" hidden></div>
     <div class="modal-title" id="detailTitle"></div>
     <div class="tags" id="detailTags" style="justify-content:center"></div>
     <div class="sizes" id="detailSizes"></div>
@@ -348,7 +240,7 @@
     <p class="lead">3つだけ覚えれば大丈夫です</p>
     <div class="step"><div class="n">1</div><div><b>上のタブで場所をえらぶ</b><small id="guidePools"></small></div></div>
     <div class="step"><div class="n">2</div><div><b>商品をタップすると大きく見られます</b><small>写真とサイズごとの残りが出ます</small></div></div>
-    <div class="step"><div class="n">3</div><div><b>右上の ↻ で最新の在庫になります</b><small>🟢 あり　🟡 のこりわずか　⚪ 売り切れ</small></div></div>
+    <div class="step"><div class="n">3</div><div><b>右上の「更新」で最新の在庫になります</b><small>札の見方</small><span class="legend"><span class="sz"><i>M</i><b>12</b></span><span class="sz low"><i>のこり少</i><b>2</b></span><span class="sz zero"><i>売り切れ</i><b>0</b></span></span></div></div>
     <button type="button" class="btn" id="guideClose">わかりました</button>
   </div>
 </div>
@@ -504,9 +396,9 @@
 
   /** 在庫の状態（色と言葉） */
   function stateOf(n) {
-    if (n <= 0) return { cls: 'zero', word: '売り切れ', mark: '⚪' };
-    if (n <= threshold) return { cls: 'low', word: 'のこりわずか', mark: '🟡' };
-    return { cls: 'ok', word: 'あり', mark: '🟢' };
+    if (n <= 0) return { cls: 'zero', word: '売り切れ' };
+    if (n <= threshold) return { cls: 'low', word: 'のこりわずか' };
+    return { cls: 'ok', word: 'あり' };
   }
 
   function isNew(p) {
@@ -525,11 +417,15 @@
     return id ? 'https://lh3.googleusercontent.com/d/' + id + '=w' + width : url;
   }
 
-  function typeIcon(type) {
-    if (/タオル/.test(type)) return '🧣';
-    if (/キーホルダー|ストラップ|バッジ/.test(type)) return '🔑';
-    return '👕';
-  }
+  // ジャンルの色（虹の7色。販売レジ・管理画面と同じ）
+  const FAMILY = [['t', /シャツ/], ['towel', /タオル|手ぬぐい/], ['file', /ファイル/], ['knit', /ニット|ストール|帽/],
+    ['key', /キー|ストラップ/], ['mag', /マグネット|ステッカー/], ['goods', /./]];
+  const famOf = t => (FAMILY.find(f => f[1].test(t || '')) || FAMILY[6])[0];
+  const gc = t => '--gc:var(--g-' + famOf(t) + ')';
+  const SWATCH = { 'ゴールド': '#d4ae4a', 'シルバー': '#c3c8cf', 'ピンク': '#f19cbb', '緑': '#3d9a5b', '黄': '#f2d14b', '黄緑': '#a6d151', '白': '#fff', '青': '#2f63d6',
+    '赤': '#d8392f', '黒': '#1b1b1b', 'グレー': '#9ea4ab', 'オレンジ': '#f08a24', '青白': 'linear-gradient(90deg,#2f63d6 50%,#fff 50%)',
+    'レインボー': 'conic-gradient(#e53935,#fb8c00,#fdd835,#43a047,#1e88e5,#8e24aa,#e53935)' };
+  const swatch = c => { const k = Object.keys(SWATCH).find(x => c.indexOf(x) === 0); return k ? SWATCH[k] : ''; };
 
   let toastTimer = null;
   function toast(message, isError) {
@@ -629,7 +525,10 @@
     const hasNew = state.products.some(p => isNew(p) && ((p.stock[state.pool] || 0) > 0 || state.showZero));
     const chip = (value, label) => '<button type="button" data-type="' + esc(value) + '"' +
       (state.type === value ? ' class="on"' : '') + '>' + esc(label) + '</button>';
-    $('typeChips').innerHTML = chip('', 'すべて') + types.map(t => chip(t, t)).join('') + (hasNew ? chip('__new__', '🆕 新着') : '');
+    types.sort((a, b) => FAMILY.findIndex(f => f[0] === famOf(a)) - FAMILY.findIndex(f => f[0] === famOf(b)));
+    const chipC = (value, label, style) => '<button type="button" data-type="' + esc(value) + '"' + (style ? ' style="' + style + '"' : '') +
+      (state.type === value ? ' class="on"' : '') + '><i></i>' + esc(label) + '</button>';
+    $('typeChips').innerHTML = chip('', 'すべて') + types.map(t => chipC(t, t, gc(t))).join('') + (hasNew ? chip('__new__', '新着') : '');
   }
 
   // 数え方（Tシャツ・タオルなどは「枚」、ペンライトなどは「本」、それ以外は「個」。種類が混ざる合計は「点」）
@@ -640,25 +539,25 @@
     return UNIT_MAI.indexOf(type) >= 0 ? '枚' : UNIT_HON.indexOf(type) >= 0 ? '本' : '個';
   }
 
+  // サイズのハンガー札（サイズがない商品は「在庫 ○個」の横長の札）
   function sizeChipsHtml(g) {
     return g.items.map(x => {
       const st = stateOf(x.n);
-      const label = x.p.size && x.p.size !== '-' ? esc(x.p.size) + ' ' : '';
-      return '<span class="sz ' + st.cls + '">' + label + '<b>' + x.n + '</b>' + unitOf(g.type) + '</span>';
+      const hasSize = x.p.size && x.p.size !== '-';
+      return hasSize ? '<span class="sz ' + st.cls + '"><i>' + esc(x.p.size) + '</i><b>' + x.n + '</b></span>'
+        : '<span class="sz wide ' + st.cls + '"><i>在庫</i><b>' + x.n + '</b><i>' + unitOf(g.type) + '</i></span>';
     }).join('');
   }
+  const thumbNone = (g, cls) => '<div class="' + cls + ' none" style="' + gc(g.type) + '">' + esc(g.category) + '</div>';
 
   function groupHtml(g, grouped) {
     const st = stateOf(g.total);
     const thumb = g.imageUrl
       ? '<img class="thumb" src="' + esc(imageSrc(g.imageUrl, 260)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
-      : '<div class="thumb none" aria-hidden="true">' + typeIcon(g.type) + '</div>';
-    const counts = g.items.length === 1
-      ? '<div class="single ' + st.cls + '"><b>' + g.items[0].n + '</b>' + unitOf(g.type) + '<span class="state">' + st.mark + ' ' + st.word + '</span></div>'
-      : '<div class="sizes">' + sizeChipsHtml(g) + '</div>';
-    const tags = (grouped ? [] : [g.type]).concat([g.color])
-      .filter(v => v && v !== '-')
-      .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
+      : thumbNone(g, 'thumb');
+    const counts = '<div class="sizes">' + sizeChipsHtml(g) + '</div>' + (st.cls === 'low' ? '<span class="state">のこりわずか</span>' : '');
+    const tags = (grouped ? [] : [g.type]).map(v => '<span class="tag">' + esc(v) + '</span>').join('') +
+      (g.color && g.color !== '-' ? '<span class="tag"' + (swatch(g.color) ? ' style="--cc:' + swatch(g.color) + '"' : '') + '><i></i>' + esc(g.color) + '</span>' : '');
     return '<button type="button" class="item' + (g.total > 0 ? '' : ' soldout') + '" data-key="' + esc(g.key) + '">' + thumb +
       '<div class="info"><div class="name">' + esc(grouped ? g.type : g.category) +
       (g.isNew ? '<span class="new">NEW</span>' : '') + '</div>' +
@@ -701,8 +600,8 @@
       else blocks.push({ category: g.category, groups: [g] });
     });
     $('list').innerHTML = blocks.map(b =>
-      '<h2 class="group-title">' + esc(b.category) +
-      '<span>' + b.groups.reduce((sum, g) => sum + g.total, 0) + '点</span></h2>' +
+      '<h2 class="group-title" style="' + gc(b.groups[0].type) + '"><b>' + esc(b.category) + '</b>' +
+      '<span><span class="n">' + b.groups.reduce((sum, g) => sum + g.total, 0) + '</span>点</span></h2>' +
       b.groups.map(g => groupHtml(g, true)).join('')).join('');
   }
 
@@ -715,7 +614,7 @@
     else if (diff < 3600000) when = Math.floor(diff / 60000) + '分前';
     else if (diff < 12 * 3600000) when = Math.floor(diff / 3600000) + '時間前';
     else when = (d.getMonth() + 1) + '月' + d.getDate() + '日';
-    $('updated').textContent = '🕒 ' + when + 'の在庫です（↻ で最新に）';
+    $('updated').textContent = when + 'の在庫です（「更新」で最新に）';
   }
 
   // ---------- くわしく見る ----------
@@ -725,13 +624,13 @@
     $('detailImg').hidden = !g.imageUrl;
     $('detailNoImg').hidden = !!g.imageUrl;
     if (g.imageUrl) $('detailImg').src = imageSrc(g.imageUrl, 900);
-    else $('detailNoImg').textContent = typeIcon(g.type);
+    else { $('detailNoImg').textContent = g.category; $('detailNoImg').setAttribute('style', gc(g.type)); }
     $('detailTitle').innerHTML = esc(g.category) + (g.isNew ? '<span class="new">NEW</span>' : '');
     $('detailTags').innerHTML = [g.type, g.color].filter(v => v && v !== '-')
-      .map(v => '<span class="tag">' + esc(v) + '</span>').join('');
+      .map(v => '<span class="tag">' + esc(v) + '</span>').join('　');
     $('detailSizes').innerHTML = sizeChipsHtml(g);
     const st = stateOf(g.total);
-    $('detailNote').textContent = st.mark + ' ' + state.pool + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
+    $('detailNote').textContent = state.pool + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
     $('detail').hidden = false;
   }
 
@@ -755,7 +654,7 @@
       })
       .catch(err => {
         done();
-        toast('最新の在庫を読み込めませんでした（' + (err && err.message ? err.message : err) + '）。電波の良い場所で ↻ を押してください', true);
+        toast('最新の在庫を読み込めませんでした（' + (err && err.message ? err.message : err) + '）。電波の良い場所で「更新」を押してください', true);
       });
   }
 

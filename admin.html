@@ -14,6 +14,8 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>コロッケ グッズ在庫 管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --theme: #8e44ad;
@@ -458,26 +460,112 @@
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   .toast.error { background: var(--danger); }
+
+  /* ===== 新デザイン（販売レジ・在庫確認ページと同じ：インクの黒・ジャンルの虹7色・ハンガーの札） ===== */
+  :root {
+    --theme: #14171d; --text: #14171d; --muted: #5d6571; --line: #d0d5dc; --bg: #e9ecf0; --card: #fff; --hatch: #c9ced6;
+    --sale: #d23a2f; --replenish: #1d8a52; --transfer: #1d74d0; --danger: #d23a2f; --warn: #d97a00; --ok: #1d8a52; --low-soft: #fff1dc;
+    --g-t: #e0352b; --g-towel: #ef7a14; --g-file: #d9a400; --g-knit: #23945a; --g-key: #1d74d0; --g-goods: #6a4fd0; --g-mag: #b0409a;
+    --rainbow: linear-gradient(90deg, var(--g-t) 0 14.3%, var(--g-towel) 0 28.6%, var(--g-file) 0 42.9%, var(--g-knit) 0 57.2%, var(--g-key) 0 71.5%, var(--g-goods) 0 85.8%, var(--g-mag) 0);
+    --display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    --num: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
+  }
+  body { font-family: "BIZ UDPGothic", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif; }
+  .app-header { background: var(--text); padding: 12px 14px 8px; }
+  .app-header .title { font-family: var(--display); font-weight: 900; font-size: 19px; }
+  .header-links { background: var(--text); position: relative; padding: 0 14px 14px; }
+  .header-links::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--rainbow); }
+  .header-links a, .op-chip { background: transparent; border-color: rgba(255,255,255,.35); }
+  .test-badge { background: var(--danger); color: #fff; font-weight: 700; }
+  .tabs { box-shadow: none; border-bottom: 1.5px solid var(--text); }
+  .tab { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .tab .ico { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .badge { font-family: var(--num); font-size: 12px; }
+  main { padding-top: 16px; }
+  .card { border-radius: 10px; box-shadow: none; border: 1px solid var(--line); }
+  .card h2 { border-left: none; padding-left: 0; font-family: var(--display); font-weight: 900; font-size: 17px; }
+  input[type=text], input[type=number], input[type=password], input[type=search], select { border: 1.5px solid #b9c0c9; }
+  input:focus, select:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(20,23,29,.12); }
+  .btn { border-radius: 10px; }
+  .btn.ghost { background: #fff; border: 1.5px solid var(--text); color: var(--text); }
+  .btn.outline { border-style: solid; border-width: 1.5px; }
+  .seg { border: 1.5px solid var(--text); }
+  .pick-chips button { border-width: 1.5px; border-color: #b9c0c9; }
+  .stat { background: #fff; border: 1px solid var(--line); }
+  .stat b, .alert-item .count b, .bar .info b, .stepper .n { font-family: var(--num); font-size: 26px; }
+  .modal-box { border: 2px solid var(--text); border-radius: 16px; }
+  .toast { background: var(--text); font-weight: 700; }
+  .undo-bar { background: var(--text); }
+  .loading::before { border-top-color: var(--text); }
+  .thumb-empty.txt { border: none; color: color-mix(in srgb, var(--gc, var(--text)) 82%, #000); background: color-mix(in srgb, var(--gc, var(--text)) 13%, #fff);
+    font-family: var(--display); font-weight: 900; font-size: 9px; line-height: 1.1; text-align: center; padding: 2px; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
+
+  .card.alert-item { border-left: 5px solid var(--warn); }
+  .off-check { display: flex; align-items: center; padding: 6px; margin: -6px 0 -6px -6px; cursor: pointer; }
+  .off-check input { width: 24px; height: 24px; margin: 0; accent-color: var(--danger); }
+  .off-bar { position: sticky; top: 64px; z-index: 5; display: grid; gap: 8px; }
+  .off-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .off-pick .btn.mini { flex: 1 1 auto; white-space: nowrap; }
+  .card.alert-item.zero { border-left-color: var(--danger); }
+  .alert-item .count b { font-size: 30px; }
+
+  /* 在庫一覧：商品ごとの札 */
+  .inv-list { display: flex; flex-direction: column; }
+  .inv-gh { display: flex; justify-content: space-between; align-items: flex-end; margin: 18px 0 0; border-bottom: 3px solid var(--gc); }
+  .inv-gh:first-child { margin-top: 0; }
+  .inv-gh b { background: var(--gc); color: #fff; padding: 4px 12px 3px; border-radius: 8px 8px 0 0; font-family: var(--display); font-weight: 900; font-size: 15px; }
+  .inv-gh span { font-size: 12px; color: var(--muted); padding-bottom: 3px; }
+  .inv-gh span .n { font-family: var(--num); font-weight: 700; font-size: 19px; color: var(--text); }
+  .inv-g { display: grid; grid-template-columns: 68px minmax(0, 1fr); gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+  .inv-g.off { opacity: .55; }
+  .inv-g .thumb, .inv-g .thumb-empty { width: 68px; height: 68px; border-radius: 8px; }
+  .inv-g .thumb-empty:not(.txt) { font-size: 22px; }
+  .inv-g .thumb-empty.txt { font-size: 11px; }
+  .inv-nm { font-size: 16px; font-weight: 700; line-height: 1.3; display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+  .inv-nm small { font-weight: 400; font-size: 13px; color: var(--muted); }
+  .inv-nm .pr { font-family: var(--num); font-weight: 700; font-size: 17px; margin-left: auto; }
+  .inv-nm .pr.none { font-family: inherit; font-size: 12px; font-weight: 400; color: var(--muted); }
+  .rack { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 13px 5px; padding-top: 11px; max-width: 300px; }
+  .rack .tg { position: relative; border: 1.5px solid var(--text); border-radius: 7px; padding: 3px 0 4px; text-align: center; background: #fff; font: inherit; color: inherit; cursor: pointer; min-width: 0; }
+  .rack .tg::before { content: ""; position: absolute; left: 50%; top: -8px; width: 11px; height: 7px; border: 1.5px solid var(--text); border-bottom: none; border-radius: 7px 7px 0 0; transform: translateX(-50%); background: #fff; }
+  .rack .tg i { display: block; font-style: normal; font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+  .rack .tg b { display: block; font-family: var(--num); font-weight: 700; font-size: 22px; line-height: 1; }
+  .rack .tg.wide { grid-column: span 2; }
+  .rack .tg.low { border-color: var(--warn); background: var(--low-soft); }
+  .rack .tg.low::before { border-color: var(--warn); background: var(--low-soft); }
+  .rack .tg.low b { color: var(--warn); }
+  .rack .tg.zero { border-color: var(--hatch); background: repeating-linear-gradient(-45deg, transparent 0 4px, var(--hatch) 4px 5px); }
+  .rack .tg.zero::before { border-color: var(--hatch); background: #fff; }
+  .rack .tg.zero b, .rack .tg.zero i { color: #9aa2ad; }
+  .rack .tg.zero b { text-decoration: line-through; text-decoration-thickness: 2px; }
+  .rack .tg:active { background: var(--text); }
+  .rack .tg:active b, .rack .tg:active i { color: #fff; }
+  .inv-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .inv-acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 9px; font-size: 12px; color: var(--muted); }
+  .inv-acts button { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--text); border-radius: 7px; background: #fff; color: var(--text); padding: 3px 9px; cursor: pointer; }
+  .inv-acts button.cam { border-style: dashed; color: var(--muted); border-color: var(--muted); }
+  .inv-acts .ids { font-family: var(--num); font-size: 13px; letter-spacing: .03em; }
 </style>
 </head>
 <body>
 
 <header class="app-header">
-  <span class="title">📦 コロッケ グッズ在庫管理</span>
+  <span class="title">コロッケ グッズ在庫管理</span>
   <span class="test-badge" id="testBadge" hidden>テスト版</span>
-  <button type="button" class="op-chip" id="opChip">👤 担当者</button>
+  <button type="button" class="op-chip" id="opChip">担当者</button>
 </header>
 <nav class="header-links" aria-label="ほかのページ">
-  <a id="linkClient" href="https://tpnxtpn-afk.github.io/croket-goods/" target="_blank" rel="noopener">👀 在庫確認ページ ↗</a>
-  <a id="linkGuide" href="https://tpnxtpn-afk.github.io/croket-goods/guide/" target="_blank" rel="noopener">📖 説明書 ↗</a>
+  <a id="linkClient" href="https://tpnxtpn-afk.github.io/croket-goods/" target="_blank" rel="noopener">在庫確認ページ ↗</a>
+  <a id="linkGuide" href="https://tpnxtpn-afk.github.io/croket-goods/guide/" target="_blank" rel="noopener">説明書 ↗</a>
 </nav>
 
 <nav class="tabs" id="tabs">
-  <button class="tab" data-tab="product" style="--tab-color:#8e44ad"><span class="ico">📝</span>商品登録</button>
-  <button class="tab" data-tab="sales" style="--tab-color:#e74c3c"><span class="ico">🛒</span>販売・補充</button>
-  <button class="tab" data-tab="inventory" style="--tab-color:#e67e22"><span class="ico">📋</span>在庫一覧</button>
-  <button class="tab" data-tab="alerts" style="--tab-color:#e67e22"><span class="ico">🔔</span>在庫わずか<span class="badge" id="alertBadge" hidden></span></button>
-  <button class="tab" data-tab="monthly" style="--tab-color:#3498db"><span class="ico">📊</span>集計・他</button>
+  <button class="tab" data-tab="product"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>商品登録</button>
+  <button class="tab" data-tab="sales"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l-2 11H6z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>販売・補充</button>
+  <button class="tab" data-tab="inventory"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>在庫一覧</button>
+  <button class="tab" data-tab="alerts"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10"/><circle cx="12" cy="19" r="1.3"/></svg>在庫わずか<span class="badge" id="alertBadge" hidden></span></button>
+  <button class="tab" data-tab="monthly"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-6"/></svg>集計・他</button>
 </nav>
 
 <main>
@@ -513,8 +601,8 @@
     <div class="card">
       <h2>② 商品画像</h2>
       <div class="btn-row">
-        <label class="btn outline" for="pCamera">📷 撮影する</label>
-        <label class="btn outline" for="pImage">🖼 写真から</label>
+        <label class="btn outline" for="pCamera">撮影する</label>
+        <label class="btn outline" for="pImage">写真から</label>
       </div>
       <input type="file" id="pImage" accept="image/*" hidden>
       <input type="file" id="pCamera" accept="image/*" capture="environment" hidden>
@@ -560,7 +648,7 @@
         <label class="lbl" for="srcUrl">在庫表（スプレッドシート）のURL</label>
         <input type="text" id="srcUrl" placeholder="https://docs.google.com/spreadsheets/..." autocomplete="off">
       </div>
-      <button class="btn ghost" id="btnCompare">🔍 いまの在庫表と比べる</button>
+      <button class="btn ghost" id="btnCompare">いまの在庫表と比べる</button>
       <div id="sourceResult"></div>
     </div>
   </section>
@@ -587,8 +675,8 @@
           <label class="lbl" for="sId">商品</label>
           <div class="id-row">
             <input type="text" id="sId" placeholder="商品IDまたは右のボタンで選ぶ" autocapitalize="characters" autocomplete="off" spellcheck="false">
-            <button type="button" id="btnPick">🔍 選ぶ</button>
-            <button type="button" id="btnScan">📷</button>
+            <button type="button" id="btnPick">選ぶ</button>
+            <button type="button" id="btnScan"></button>
           </div>
           <p class="hint" id="sIdHint"></p>
         </div>
@@ -636,7 +724,7 @@
           <label class="lbl" for="bSearch">商品をさがす</label>
           <div class="id-row">
             <input type="search" id="bSearch" placeholder="名前・色・サイズ" autocomplete="off">
-            <button type="button" id="btnScanBatch">📷</button>
+            <button type="button" id="btnScanBatch"></button>
           </div>
         </div>
         <p class="hint">＋ − で数を入れて、下の「確認へ」を押すとまとめて記録します</p>
@@ -656,35 +744,28 @@
         </div>
         <div class="meta-row">
           <label class="hint" style="margin:0"><input type="checkbox" id="showOff"> 販売終了も表示</label>
-          <label class="hint" style="margin:0"><input type="checkbox" id="noPhoto"> 📷 写真なしだけ</label>
-          <button type="button" class="link-btn" id="btnReloadInv">↻ 更新</button>
+          <label class="hint" style="margin:0"><input type="checkbox" id="noPhoto"> 写真なしだけ</label>
+          <button type="button" class="link-btn" id="btnReloadInv">更新</button>
         </div>
         <div class="meta-row">
           <span id="invSummary"></span>
         </div>
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-          <button type="button" class="btn ghost mini" id="btnStocktake">📋 棚卸し</button>
-          <button type="button" class="btn ghost mini" id="btnTally">🖨 販売チェック表</button>
-          <button type="button" class="btn ghost mini" id="btnLabels">🏷 QRラベル印刷</button>
-          <button type="button" class="btn ghost mini" id="btnPriceTags">💴 値札・POP印刷</button>
-          <button type="button" class="btn ghost mini" id="btnPhotoRun">📷 写真なしを続けて登録</button>
-          <button type="button" class="btn ghost mini" id="btnPhotoBulk">🖼 撮りためた写真を割り当て</button>
+          <button type="button" class="btn ghost mini" id="btnStocktake">棚卸し</button>
+          <button type="button" class="btn ghost mini" id="btnTally">販売チェック表</button>
+          <button type="button" class="btn ghost mini" id="btnLabels">QRラベル印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPriceTags">値札・POP印刷</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoRun">写真なしを続けて登録</button>
+          <button type="button" class="btn ghost mini" id="btnPhotoBulk">撮りためた写真を割り当て</button>
         </div>
       </div>
-      <div class="card flush">
-        <div class="table-wrap">
-          <table>
-            <thead id="invHead"></thead>
-            <tbody id="invBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <p class="hint">商品IDをタップ → 販売・補充へ ／ ✏️ → 商品情報の編集 ／ 画像をタップ → 表示・変更</p>
+      <div class="card"><div class="inv-list" id="invBody"></div></div>
+      <p class="hint">サイズの札をタップ → 販売・補充へ ／「直す」→ 商品情報の編集 ／ 写真をタップ → 表示・変更</p>
     </div>
 
     <div id="stocktakePanel" hidden>
       <div class="card">
-        <h2>📋 棚卸し（数え直し）</h2>
+        <h2>棚卸し（数え直し）</h2>
         <div class="field">
           <label class="lbl" for="stLocation">数える在庫区分</label>
           <select id="stLocation"></select>
@@ -705,9 +786,17 @@
     <div class="card">
       <div class="meta-row top">
         <span id="alertSummary"></span>
-        <button type="button" class="link-btn" id="btnReloadAlerts">↻ 更新</button>
+        <button type="button" class="link-btn" id="btnReloadAlerts">更新</button>
       </div>
       <p class="hint">販売終了にした商品は出ません（もう仕入れない商品は「販売終了」にしてください）</p>
+    </div>
+    <div class="card off-bar" id="offBar" hidden>
+      <div class="off-pick">
+        <button type="button" class="btn ghost mini" id="offAll">すべて選ぶ</button>
+        <button type="button" class="btn ghost mini" id="offZero">在庫切れだけ選ぶ</button>
+        <button type="button" class="btn ghost mini" id="offNone">選ぶのをやめる</button>
+      </div>
+      <button type="button" class="btn" id="offGo" style="background:var(--danger)" disabled>選んだ商品を販売終了にする</button>
     </div>
     <div id="alertList"></div>
   </section>
@@ -739,7 +828,7 @@
     </div>
 
     <div class="card" id="eventCard">
-      <h2>🎪 イベント別</h2>
+      <h2>イベント別</h2>
       <div class="field">
         <label class="lbl" for="evSelect">イベント</label>
         <select id="evSelect"></select>
@@ -758,19 +847,19 @@
     </div>
 
     <div class="card">
-      <h2>🔧 その他</h2>
+      <h2>その他</h2>
       <p class="hint" id="backupInfo">バックアップ：確認中…</p>
       <div class="btn-row" style="margin-top:10px">
-        <button type="button" class="btn ghost mini" id="btnBackup">🗂 今すぐバックアップ</button>
-        <button type="button" class="btn ghost mini" id="btnPoster">🖨 お客さま用QR</button>
+        <button type="button" class="btn ghost mini" id="btnBackup">今すぐバックアップ</button>
+        <button type="button" class="btn ghost mini" id="btnPoster">お客さま用QR</button>
       </div>
       <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-        <button type="button" class="btn ghost mini" id="btnReport">📄 売上レポート</button>
-        <button type="button" class="btn ghost mini" id="btnCarry">🚚 持ち出し・残数チェック</button>
-        <button type="button" class="btn ghost mini" id="btnPrices">💴 価格・セット販売</button>
+        <button type="button" class="btn ghost mini" id="btnReport">売上レポート</button>
+        <button type="button" class="btn ghost mini" id="btnCarry">持ち出し・残数チェック</button>
+        <button type="button" class="btn ghost mini" id="btnPrices">価格・セット販売</button>
         <button type="button" class="btn ghost mini" id="btnOrder">↕ 売り場の並び順</button>
       </div>
-      <button type="button" class="btn ghost mini" id="btnResetTest" style="margin-top:10px;width:100%" hidden>♻️ テストデータを本番の最新に戻す</button>
+      <button type="button" class="btn ghost mini" id="btnResetTest" style="margin-top:10px;width:100%" hidden>テストデータを本番の最新に戻す</button>
       <p class="hint">バックアップは週1回、管理画面を開いたときに自動で作られます（Driveの「コロッケ在庫 バックアップ」）</p>
     </div>
   </section>
@@ -833,9 +922,9 @@
       <button type="button" class="btn ghost" id="editCancel">キャンセル</button>
       <button type="button" class="btn" id="editSave">保存する</button>
     </div>
-    <button type="button" class="btn status" id="editStatus">🚫 販売終了にする</button>
+    <button type="button" class="btn status" id="editStatus">販売終了にする</button>
     <p class="hint">販売終了にすると、クライアント用ページと「在庫わずか」に出なくなります（データは残ります）</p>
-    <button type="button" class="btn delete" id="editDelete">🗑 この商品を削除</button>
+    <button type="button" class="btn delete" id="editDelete">この商品を削除</button>
     <p class="hint">販売履歴は残ります。削除した商品IDは再利用されません</p>
   </div>
 </div>
@@ -853,7 +942,7 @@
 
 <div class="modal" id="scanModal" hidden>
   <div class="modal-box">
-    <div class="modal-title">📷 商品のQRを読み取る</div>
+    <div class="modal-title">商品のQRを読み取る</div>
     <video id="scanVideo" playsinline muted></video>
     <canvas id="scanCanvas"></canvas>
     <p class="hint" id="scanHint">カメラをQRコードに向けてください</p>
@@ -875,7 +964,7 @@
 
 <div class="modal" id="opModal" hidden>
   <div class="modal-box">
-    <div class="modal-title">👤 担当者のお名前</div>
+    <div class="modal-title">担当者のお名前</div>
     <p class="modal-text">だれが操作したかを販売履歴に残します。この端末に保存され、次からは聞きません。</p>
     <div class="field">
       <input type="text" id="opInput" placeholder="例：田中" autocomplete="off">
@@ -889,7 +978,7 @@
 
 <div class="modal" id="keyGate" hidden>
   <div class="modal-box">
-    <div class="modal-title">🔑 管理画面のパスワード</div>
+    <div class="modal-title">管理画面のパスワード</div>
     <div class="field">
       <input type="password" id="keyGateInput" placeholder="パスワードを入力" autocomplete="current-password">
     </div>
@@ -900,7 +989,7 @@
 
 <div id="printArea" hidden>
   <div class="print-bar">
-    <button type="button" class="btn" id="printGo">🖨 印刷する</button>
+    <button type="button" class="btn" id="printGo">印刷する</button>
     <button type="button" class="btn ghost" id="printAlt" hidden></button>
     <button type="button" class="btn ghost" id="printClose">閉じる</button>
   </div>
@@ -918,7 +1007,7 @@
 </div>
 <div class="modal" id="bulkModal" hidden>
   <div class="modal-box bulk-box">
-    <div class="modal-title">🖼 撮りためた写真を商品に割り当て</div>
+    <div class="modal-title">撮りためた写真を商品に割り当て</div>
     <p class="hint">写真ごとに「どの商品か」を選んでください。サイズ違いにも同じ写真が付きます。使わない写真は「使わない」のままでOKです。</p>
     <div class="bulk-list" id="bulkList"></div>
     <div class="modal-actions">
@@ -944,12 +1033,13 @@
   const BATCH_STORE = STORE + '.batch';
   const ST_STORE = STORE + '.stocktake';
 
-  const TAB_COLORS = { product: '#8e44ad', sales: '#e74c3c', inventory: '#e67e22', alerts: '#e67e22', monthly: '#3498db' };
+  const TAB_COLORS = { product: '#14171d', sales: '#14171d', inventory: '#14171d', alerts: '#14171d', monthly: '#14171d' };
   const MAX_IMAGE_PX = 1200;
   const QR_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
   const SCAN_LIB = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
 
   const state = {
+    offPicked: {},
     config: null,
     products: [],
     mode: 'sale',
@@ -1105,6 +1195,59 @@
     return n === '' || n == null ? '' : Number(n).toLocaleString('ja-JP') + '円';
   }
 
+  // ジャンルの色（虹の7色。販売レジ・在庫確認ページと同じ）
+  const FAMILY = [['t', /シャツ/], ['towel', /タオル|手ぬぐい/], ['file', /ファイル/], ['knit', /ニット|ストール|帽/],
+    ['key', /キー|ストラップ/], ['mag', /マグネット|ステッカー/], ['goods', /./]];
+  const famOf = t => (FAMILY.find(f => f[1].test(t || '')) || FAMILY[6])[0];
+  const gc = t => '--gc:var(--g-' + famOf(t) + ')';
+
+  // 在庫一覧：商品名ごとに見出し、同じ商品のサイズ違いは1つの札の列にまとめる
+  function renderInventory() {
+    const owners = state.config.owners;
+    const rows = inventoryRows();
+    const sum = rows.reduce((s, p) => s + p.total, 0);
+    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '点';
+    if (!rows.length) {
+      $('invBody').innerHTML = '<div class="empty">' + (state.products.length ? '条件に合う商品がありません' : '商品が登録されていません') + '</div>';
+      return;
+    }
+    const groups = [], byKey = {};
+    rows.forEach(p => {
+      const k = [p.category, p.type, p.color].join('|');
+      if (!byKey[k]) { byKey[k] = { category: p.category, type: p.type, color: p.color, items: [] }; groups.push(byKey[k]); }
+      byKey[k].items.push(p);
+    });
+    const sizeIdx = s => { const i = (state.config.sizes || []).indexOf(s); return i < 0 ? 99 : i; };
+    groups.forEach(g => g.items.sort((a, b) => sizeIdx(a.size) - sizeIdx(b.size)));
+    let html = '', lastCat = null;
+    groups.forEach((g, gi) => {
+      if (g.category !== lastCat) {
+        lastCat = g.category;
+        const catTotal = groups.filter(x => x.category === g.category).reduce((n, x) => n + x.items.reduce((m, p) => m + p.total, 0), 0);
+        html += '<div class="inv-gh" style="' + gc(g.type) + '"><b>' + esc(g.category) + '</b><span><span class="n">' + catTotal + '</span>点</span></div>';
+      }
+      const first = g.items[0], img = g.items.find(p => p.imageUrl);
+      const pic = img ? '<img class="thumb" data-img="' + esc(img.id) + '" src="' + esc(imageSrc(img.imageUrl, 160)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
+        : '<button type="button" class="thumb-empty txt" style="' + gc(g.type) + '" data-img="' + esc(first.id) + '" aria-label="写真を登録">' + esc(g.category) + '</button>';
+      const prices = unique(g.items.map(p => p.price === '' ? '' : String(p.price)));
+      const price = prices.length === 1 && prices[0] !== '' ? '<span class="pr">' + esc(yen(Number(prices[0]))) + '</span>' : prices.every(x => x === '') ? '<span class="pr none">価格未設定</span>' : '';
+      const one = g.items.length === 1 && (!first.size || first.size === '-');
+      const tags = g.items.map(p => '<button type="button" class="tg ' + totalClass(p.total) + (one ? ' wide' : '') + '" data-id="' + esc(p.id) + '" aria-label="' + esc(p.id) + ' 販売・補充へ">' +
+        '<i>' + (one ? '在庫' : esc(p.size)) + '</i><b>' + p.total + '</b></button>').join('');
+      // 在庫区分が2つ以上に分かれているときだけ内訳を出す
+      const split = owners.filter(o => g.items.some(p => p.stock[o]));
+      const sub = split.length > 1 ? '<div class="inv-sub">' + split.map(o => esc(o) + ' ' + g.items.reduce((n, p) => n + (p.stock[o] || 0), 0)).join('　') + '</div>' : '';
+      const off = g.items.every(p => p.discontinued);
+      html += '<div class="inv-g' + (off ? ' off' : '') + '">' + pic + '<div><div class="inv-nm">' + esc(g.type) +
+        (g.color && g.color !== '-' ? '<small>' + esc(g.color) + '</small>' : '') + (off ? '<span class="off-tag">終了</span>' : '') + price + '</div>' +
+        '<div class="rack">' + tags + '</div>' + sub +
+        '<div class="inv-acts"><span>直す</span>' + g.items.map(p => '<button type="button" data-edit="' + esc(p.id) + '">' + (one ? esc(p.id) : esc(p.size)) + '</button>').join('') +
+        (img ? '' : '<button type="button" class="cam" data-img="' + esc(first.id) + '">写真を登録</button>') +
+        '<span class="ids">' + esc(first.id) + (g.items.length > 1 ? '–' + esc(g.items[g.items.length - 1].id) : '') + '</span></div></div></div>';
+    });
+    $('invBody').innerHTML = html;
+  }
+
   function totalClass(total) {
     return total <= 0 ? 'zero' : total <= state.config.lowStockThreshold ? 'low' : 'ok';
   }
@@ -1139,7 +1282,7 @@
   function thumbHtml(p, size) {
     return p.imageUrl
       ? '<img class="thumb" src="' + esc(imageSrc(p.imageUrl, size || 120)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
-      : '<div class="thumb-empty">' + (/タオル/.test(p.type) ? '🧣' : '👕') + '</div>';
+      : '<div class="thumb-empty txt" style="' + gc(p.type) + '">' + esc(p.category) + '</div>';
   }
 
   function fillSelect(select, values, placeholder) {
@@ -1187,22 +1330,30 @@
   }
 
   // ---------- 取り消し ----------
-  function showUndo(opId, label) {
+  // hideAfterMs を渡すと、その時間で取り消しの札を自動で消す（取り消すか確認中のときは消さない）
+  let undoTimer = null;
+  function showUndo(opId, label, hideAfterMs) {
     if (!opId) return;
+    clearTimeout(undoTimer);
     state.lastOp = { opId: opId, label: label };
-    $('undoText').innerHTML = esc(label) + '<br><small>まちがえたら取り消せます</small>';
+    $('undoText').innerHTML = esc(label) + '<br><small>まちがえたら取り消せます' + (hideAfterMs ? '（' + Math.round(hideAfterMs / 1000) + '秒で消えます）' : '') + '</small>';
     $('undoBar').hidden = false;
+    state.undoExpired = false;
+    if (hideAfterMs) undoTimer = setTimeout(() => { if (state.undoAsking) state.undoExpired = true; else if (state.lastOp && state.lastOp.opId === opId) hideUndo(); }, hideAfterMs);
   }
 
   function hideUndo() {
+    clearTimeout(undoTimer);
     state.lastOp = null;
     $('undoBar').hidden = true;
   }
 
   async function onUndo() {
     if (!state.lastOp) return hideUndo();
+    state.undoAsking = true;
     const ok = await confirmBox('取り消しますか？', esc(state.lastOp.label) + '<br>在庫を元に戻します。', '取り消す', 'var(--danger)');
-    if (!ok) return;
+    state.undoAsking = false;
+    if (!ok) { if (state.undoExpired) hideUndo(); return; }
     const btn = $('undoBtn');
     setBusy(btn, true, '取消中…');
     try {
@@ -1322,7 +1473,7 @@
       return;
     }
     el.className = 'hint warn';
-    el.innerHTML = '⚠ 同じ商品がもう登録されています：' +
+    el.innerHTML = '同じ商品がもう登録されています：' +
       dups.map(p => '<b>' + esc(p.id) + '</b>（' + esc(p.size) + '・在庫' + p.total + '）').join('、') +
       '<br>在庫を増やすときは「販売・補充 → ▲ 補充」を使ってください';
   }
@@ -1388,7 +1539,7 @@
       setBusy(btn, true, '登録中…');
       const added = await call('registerProducts', data);
       upsertMany(added);
-      toast('✅ ' + added.length + '商品を登録しました');
+      toast('' + added.length + '商品を登録しました');
       $('registerHint').innerHTML = '登録しました：' + added.map(p => '<b>' + esc(p.id) + '</b> ' + esc(p.size)).join('、');
       // 同じカテゴリの色違いを続けて登録しやすいよう、商品情報は残す
       clearImage();
@@ -1430,7 +1581,7 @@
       const res = await call('addOption', { kind: kind, value: value });
       applyOptions(res.options);
       input.value = '';
-      toast('✅ 「' + res.value + '」を追加しました');
+      toast('「' + res.value + '」を追加しました');
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -1467,7 +1618,7 @@
   function renderSource() {
     const s = state.source;
     if (!s) return;
-    const head = '<p class="hint" style="margin-top:12px">📄 <b>' + esc(s.title) + '</b>（' + esc(s.sheetName) + '）<br>' +
+    const head = '<p class="hint" style="margin-top:12px"><b>' + esc(s.title) + '</b>（' + esc(s.sheetName) + '）<br>' +
       '在庫表の商品 ' + s.total + '件　／　登録済み ' + s.matched + '件　／　未登録 <b>' + s.newItems.length + '件</b>' +
       (s.ignored ? '　／　取り込まない ' + s.ignored + '件' : '') + '</p>';
 
@@ -1488,7 +1639,7 @@
         '<div class="field" style="margin-top:12px"><label class="lbl" for="srcLocation">在庫を入れる区分</label>' +
         '<select id="srcLocation"></select></div>' +
         '<button class="btn" id="btnImport">チェックした商品を登録する</button></div>'
-      : '<p class="hint">✅ 在庫表にあって未登録の商品はありません</p>';
+      : '<p class="hint">在庫表にあって未登録の商品はありません</p>';
 
     const diffs = s.diffs.length
       ? '<details class="more"><summary>在庫数が違う商品（参考）' + s.diffs.length + '件</summary><div>' +
@@ -1514,7 +1665,7 @@
     if (!item) return;
     try {
       await call('linkSourceItem', { sourceKey: item.key, productId: productId });
-      toast(productId ? '✅ ' + productId + ' と同じ商品にしました' : '今後この行は表示しません');
+      toast(productId ? '' + productId + ' と同じ商品にしました' : '今後この行は表示しません');
       state.source = await call('compareSource', { url: state.source.url });
       renderSource();
     } catch (err) {
@@ -1538,7 +1689,7 @@
     try {
       const added = await call('importSourceItems', { items: picked, location: location });
       upsertMany(added);
-      toast('✅ ' + added.length + '商品を登録しました');
+      toast('' + added.length + '商品を登録しました');
       state.source = await call('compareSource', { url: state.source.url });
       renderSource();
     } catch (err) {
@@ -1593,7 +1744,7 @@
     const p = findProduct(id);
     if (!id) {
       hint.className = 'hint';
-      hint.innerHTML = '「🔍 選ぶ」で写真から探せます';
+      hint.innerHTML = '「選ぶ」で写真から探せます';
       return;
     }
     if (!p) {
@@ -1662,7 +1813,7 @@
       refreshDerived();
       const box = $('sResult');
       box.innerHTML =
-        '<div class="result-title ' + mode + '">✅ ' + MODES[mode].done + '</div>' +
+        '<div class="result-title ' + mode + '">' + MODES[mode].done + '</div>' +
         '<div class="result-line"><b>' + esc(product.id) + '</b>　' + describe(product) + '</div>' +
         lines.map(line => '<div class="result-line">' + line + '</div>').join('') +
         '<div class="result-line">合計在庫：<b>' + product.total + '</b></div>';
@@ -1793,7 +1944,7 @@
       state.batch.items = {};
       saveBatch();
       renderBatch();
-      toast('✅ ' + res.items.length + '商品・' + res.quantity + '点を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
+      toast('' + res.items.length + '商品・' + res.quantity + '点を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
       showUndo(res.opId, (mode === 'sale' ? '販売' : '補充') + '：' + res.items.length + '商品 ' + res.quantity + '点');
       if (event) rememberEvent(event);
     } catch (err) {
@@ -1888,14 +2039,14 @@
     if (navigator.vibrate) navigator.vibrate(60);
     if (state.scanTarget === 'batch') {
       setBatchQty(id, batchQty(id) + 1);
-      $('scanHint').textContent = '✅ ' + id + ' ' + p.category + '（' + batchQty(id) + unitOf(p.type) + '）　続けて読み取れます';
+      $('scanHint').textContent = '' + id + ' ' + p.category + '（' + batchQty(id) + unitOf(p.type) + '）　続けて読み取れます';
       return;
     }
     closeScanner();
     $('sId').value = id;
     $('sResult').hidden = true;
     updateIdHint();
-    toast('✅ ' + id + ' を読み取りました');
+    toast('' + id + ' を読み取りました');
   }
 
   // ---------- 在庫一覧 ----------
@@ -1911,34 +2062,6 @@
     return state.products.filter(p =>
       (!f.category || p.category === f.category) && (!f.type || p.type === f.type) && (!f.color || p.color === f.color) &&
       ($('showOff').checked || !p.discontinued) && (!$('noPhoto').checked || !p.imageUrl));
-  }
-
-  function renderInventory() {
-    const owners = state.config.owners;
-    const rows = inventoryRows();
-    $('invHead').innerHTML = '<tr><th>商品ID</th><th>画像</th><th>カテゴリ</th><th>種別</th><th>色</th><th>サイズ</th><th class="num">価格</th><th class="num">合計</th>' +
-      owners.map(o => '<th class="num">' + esc(o) + '</th>').join('') + '</tr>';
-
-    if (!rows.length) {
-      $('invBody').innerHTML = '<tr><td colspan="' + (8 + owners.length) + '" class="empty">' +
-        (state.products.length ? '条件に合う商品がありません' : '商品が登録されていません') + '</td></tr>';
-    } else {
-      $('invBody').innerHTML = rows.map(p =>
-        '<tr' + (p.discontinued ? ' class="off"' : '') + '>' +
-        '<td><button type="button" class="id-link" data-id="' + esc(p.id) + '">' + esc(p.id) + '</button>' +
-        '<button type="button" class="edit-btn" data-edit="' + esc(p.id) + '" aria-label="' + esc(p.id) + 'を編集">✏️</button>' +
-        (p.discontinued ? '<span class="off-tag">終了</span>' : '') + '</td>' +
-        '<td>' + (p.imageUrl
-          ? '<img class="thumb" data-img="' + esc(p.id) + '" src="' + esc(imageSrc(p.imageUrl, 120)) + '" alt="" loading="lazy" referrerpolicy="no-referrer">'
-          : '<button type="button" class="thumb-empty" data-img="' + esc(p.id) + '" aria-label="画像を追加">＋</button>') + '</td>' +
-        '<td>' + esc(p.category) + '</td><td>' + esc(p.type) + '</td><td>' + esc(p.color) + '</td><td>' + esc(p.size) + '</td>' +
-        '<td class="num">' + (p.price === '' ? '-' : esc(yen(p.price))) + '</td>' +
-        '<td class="num"><span class="total ' + totalClass(p.total) + '">' + p.total + '</span></td>' +
-        owners.map(o => '<td class="num' + (p.stock[o] ? '' : ' zero') + '">' + (p.stock[o] || 0) + '</td>').join('') +
-        '</tr>').join('');
-    }
-    const sum = rows.reduce((s, p) => s + p.total, 0);
-    $('invSummary').textContent = rows.length + '件 ／ 在庫合計 ' + sum + '点';
   }
 
   async function reloadInventory() {
@@ -2039,8 +2162,8 @@
       state.st.counted = {};
       saveStocktake();
       renderStocktake();
-      toast('✅ ' + res.changed + '商品の在庫を合わせました');
-      showUndo(res.opId, '棚卸し：' + res.changed + '商品');
+      toast('' + res.changed + '商品の在庫を合わせました');
+      showUndo(res.opId, '棚卸し：' + res.changed + '商品', 10000);
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -2167,7 +2290,7 @@
     // 印刷バーに「縦1枚 ⇄ 横（大きめ）」の切り替えを出す
     const alt = $('printAlt');
     alt.hidden = false;
-    alt.textContent = wide ? '📄 A4縦1枚にする' : '📄 A4横（大きめ）にする';
+    alt.textContent = wide ? 'A4縦1枚にする' : 'A4横（大きめ）にする';
     alt.onclick = () => printTally(wide ? 'fit' : 'wide');
   }
 
@@ -2206,7 +2329,7 @@
     $('eSize').value = p.size;
     $('ePrice').value = p.price === '' ? '' : p.price;
     $('ePriceAll').checked = false;
-    $('editStatus').textContent = p.discontinued ? '↩ 販売中に戻す' : '🚫 販売終了にする';
+    $('editStatus').textContent = p.discontinued ? '↩ 販売中に戻す' : '販売終了にする';
     resetDeleteButton();
     $('editModal').hidden = false;
   }
@@ -2216,7 +2339,7 @@
     clearTimeout(deleteTimer);
     const btn = $('editDelete');
     btn.classList.remove('armed');
-    btn.textContent = '🗑 この商品を削除';
+    btn.textContent = 'この商品を削除';
   }
 
   /** 1回目は確認表示、5秒以内にもう一度押すと削除（誤操作防止） */
@@ -2238,7 +2361,7 @@
       state.monthlyStale = true;
       refreshDerived();
       $('editModal').hidden = true;
-      toast('🗑 ' + p.id + ' を削除しました');
+      toast('' + p.id + ' を削除しました');
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -2261,8 +2384,8 @@
     try {
       upsertProduct(await call('setProductStatus', { productId: p.id, discontinued: next }));
       refreshDerived();
-      $('editStatus').textContent = next ? '↩ 販売中に戻す' : '🚫 販売終了にする';
-      toast(next ? '🚫 販売終了にしました' : '✅ 販売中に戻しました');
+      $('editStatus').textContent = next ? '↩ 販売中に戻す' : '販売終了にする';
+      toast(next ? '販売終了にしました' : '販売中に戻しました');
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -2294,7 +2417,7 @@
       (saved.siblings || []).forEach(upsertProduct);
       refreshDerived();
       $('editModal').hidden = true;
-      toast('✅ ' + data.productId + ' を更新しました' +
+      toast('' + data.productId + ' を更新しました' +
         (saved.siblings && saved.siblings.length ? '（ほか' + saved.siblings.length + '商品の価格も変更）' : ''));
     } catch (err) {
       toast(err.message, true);
@@ -2334,14 +2457,15 @@
       toast('画像をアップロード中…');
       const image = await readImage(file);
       const uploaded = await call('uploadImage', image);
+      const oldUrl = (findProduct(id) || {}).imageUrl || '';
       upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
-      // サイズ違いの同じ商品（商品名・種別・色が同じ）で写真がまだ無いものにも同じ写真を付ける
+      // サイズ違いの同じ商品（商品名・種別・色が同じ）で、写真が無いもの・同じ写真だったものにも同じ写真を付ける
       const base = findProduct(id);
-      const siblings = state.products.filter(p => p.id !== id && !p.imageUrl && base &&
+      const siblings = state.products.filter(p => p.id !== id && (!p.imageUrl || (oldUrl && p.imageUrl === oldUrl)) && base &&
         p.category === base.category && p.type === base.type && p.color === base.color);
       for (const sib of siblings) upsertProduct(await call('setProductImage', { productId: sib.id, imageUrl: uploaded.url }));
       refreshDerived();
-      toast('✅ ' + id + (siblings.length ? ' ほか' + siblings.length + '件' : '') + ' の画像を登録しました');
+      toast('' + id + (siblings.length ? ' ほか' + siblings.length + '件' : '') + ' の画像を登録しました');
       if (state.photoRun) setTimeout(nextPhoto, 400);
     } catch (err) {
       toast(err.message, true);
@@ -2373,13 +2497,13 @@
     const skipped = Object.keys(state.photoSkip || {}).length;
     if (!list.length) {
       state.photoRun = false;
-      return toast(skipped ? '✅ 終わりました（とばした商品 ' + skipped + '件は写真なしのままです）' : '✅ すべての商品に写真が入りました');
+      return toast(skipped ? '終わりました（とばした商品 ' + skipped + '件は写真なしのままです）' : 'すべての商品に写真が入りました');
     }
     const p = list[0];
-    const ans = await confirmBox('📷 次の商品の写真を撮ります（残り ' + list.length + '件）',
+    const ans = await confirmBox('次の商品の写真を撮ります（残り ' + list.length + '件）',
       '<b style="font-size:18px">' + esc(p.category) + '</b><br>' + esc(p.type) + (p.color && p.color !== '-' ? ' / ' + esc(p.color) : '') +
       '<br><small>サイズ違いにも同じ写真が付きます。写真が手元にないときは「とばす」で次の商品へ進めます。</small>',
-      '📷 撮る・選ぶ', '', '⏭ とばす');
+      '撮る・選ぶ', '', 'とばす');
     if (ans === 'extra') {
       state.photoSkip[[p.category, p.type, p.color].join('|')] = true;
       return nextPhoto();
@@ -2449,7 +2573,7 @@
           const r = await call('setDisplayOrder', { order: groups.map(g => g.key) });
           state.config.displayOrder = r.order;
           toolClose();
-          toast('✅ 並び順を保存しました');
+          toast('並び順を保存しました');
         } catch (err) { toast(err.message, true); }
       } },
     ]);
@@ -2481,11 +2605,11 @@
         (g.items.length > 1 ? '・' + g.items.map(p => p.size).join('/') : '')) + '</div></td>' +
         '<td class="num"><input class="pr" inputmode="numeric" data-gp="' + i + '" value="' + esc(priceOf(g)) + '" placeholder="未設定"></td></tr>').join('') +
       '</tbody></table>' +
-      '<div class="gh">🎁 セット販売（販売レジに「セット」ボタンが出ます）</div>' +
+      '<div class="gh">セット販売（販売レジに「セット」ボタンが出ます）</div>' +
       '<p class="hint">例：クリアファイルから好きな2枚で500円。値段を空欄にするとそのセットは消えます。</p>' +
       '<table><thead><tr><th>セット名</th><th>種類</th><th>枚数</th><th>値段</th></tr></thead><tbody id="setRows">' +
       sets.concat([{ name: '', type: types.indexOf('B5クリアファイル') >= 0 ? 'B5クリアファイル' : types[0], count: 2, price: '' }]).map(setRow).join('') + '</tbody></table>';
-    toolOpen('💴 価格・セット販売', body(), [
+    toolOpen('価格・セット販売', body(), [
       { label: 'やめる', ghost: true, onClick: toolClose },
       { label: '保存する', onClick: async () => {
         const prices = [];
@@ -2508,7 +2632,7 @@
           state.config.sets = rs.sets;
           refreshDerived();
           toolClose();
-          toast('✅ 価格' + (prices.length ? '（' + prices.length + '商品）' : '') + 'とセットを保存しました');
+          toast('価格' + (prices.length ? '（' + prices.length + '商品）' : '') + 'とセットを保存しました');
         } catch (err) { toast(err.message, true); }
       } },
     ]);
@@ -2516,12 +2640,12 @@
 
   // ---------- 持ち出し・残数チェック ----------
   async function openCarry() {
-    toolOpen('🚚 持ち出し・残数チェック', '<div class="empty">読み込み中…</div>', [{ label: '閉じる', ghost: true, onClick: toolClose }]);
+    toolOpen('持ち出し・残数チェック', '<div class="empty">読み込み中…</div>', [{ label: '閉じる', ghost: true, onClick: toolClose }]);
     let carries = [];
     try { carries = (await call('getCarries')).carries; } catch (err) { $('toolBody').innerHTML = '<p>' + esc(err.message) + '</p>'; return; }
-    const list = carries.map((c, i) => '<div class="gh">🎭 ' + esc(c.event) + '　（' + c.items.length + '商品・持ち出し ' + c.items.reduce((n, x) => n + x.out, 0) + '点）</div>' +
-      '<div class="row2"><button type="button" class="btn mini" data-close-carry="' + i + '">🔢 残数を入れて確定</button>' +
-      '<button type="button" class="btn ghost mini" data-edit-carry="' + i + '">✏️ 持ち出し数を直す</button></div>').join('');
+    const list = carries.map((c, i) => '<div class="gh">' + esc(c.event) + '　（' + c.items.length + '商品・持ち出し ' + c.items.reduce((n, x) => n + x.out, 0) + '点）</div>' +
+      '<div class="row2"><button type="button" class="btn mini" data-close-carry="' + i + '">残数を入れて確定</button>' +
+      '<button type="button" class="btn ghost mini" data-edit-carry="' + i + '">持ち出し数を直す</button></div>').join('');
     $('toolBody').innerHTML = '<p class="hint">① 公演の前に「持ち出す数」を記録 → ② 終わったら「残った数」を入れて確定。差（持ち出し − 残り − レジで記録済み）が販売として自動で記録されます。</p>' +
       (list || '<p class="sub">いま持ち出し中の公演はありません。</p>');
     $('toolActions').innerHTML = '';
@@ -2541,7 +2665,7 @@
     const outs = {};
     if (carry) carry.items.forEach(x => { outs[x.id] = x.out; });
     const rows = sortByDisplay(state.products.filter(p => !p.discontinued && ((p.stock[pool] || 0) > 0 || outs[p.id])));
-    toolOpen('🚚 持ち出す数を記録', '<div class="row2"><input class="tx" id="carryEvent" placeholder="公演名（例：10/5 大阪 昼）" value="' + esc(carry ? carry.event : '') + '"' + (carry ? ' readonly' : '') + ' list="eventList">' +
+    toolOpen('持ち出す数を記録', '<div class="row2"><input class="tx" id="carryEvent" placeholder="公演名（例：10/5 大阪 昼）" value="' + esc(carry ? carry.event : '') + '"' + (carry ? ' readonly' : '') + ' list="eventList">' +
       '<select id="carryPool">' + state.config.owners.map(o => '<option' + (o === pool ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>' +
       '<button type="button" class="btn ghost mini" id="carryAll">在庫を全部持ち出す</button></div>' +
       '<table><thead><tr><th>商品</th><th class="num">在庫</th><th class="num">持ち出す数</th></tr></thead><tbody>' +
@@ -2556,7 +2680,7 @@
         if (!items.length) return toast('持ち出す数を入れてください', true);
         try {
           await call('saveCarry', { event: event, location: $('carryPool').value, items: items });
-          toast('✅ 「' + event + '」の持ち出しを記録しました');
+          toast('「' + event + '」の持ち出しを記録しました');
           openCarry();
         } catch (err) { toast(err.message, true); }
       } },
@@ -2565,7 +2689,7 @@
   }
 
   function carryClose(carry) {
-    toolOpen('🔢 残数を入れて確定：' + carry.event, '<p class="hint">公演が終わって残った数を入れてください。売れた数 ＝ 持ち出し − 残り。レジで記録済みの分は差し引いて、残りを販売として記録します。</p>' +
+    toolOpen('残数を入れて確定：' + carry.event, '<p class="hint">公演が終わって残った数を入れてください。売れた数 ＝ 持ち出し − 残り。レジで記録済みの分は差し引いて、残りを販売として記録します。</p>' +
       '<table><thead><tr><th>商品</th><th class="num">持ち出し</th><th class="num">レジ記録済</th><th class="num">残り</th><th class="num">追加で記録</th></tr></thead><tbody>' +
       carry.items.map(x => '<tr><td><b>' + esc(x.category) + '</b><div class="sub">' + esc([x.type, x.color !== '-' ? x.color : '', x.size !== '-' ? x.size : ''].filter(Boolean).join(' / ')) + '</div></td>' +
         '<td class="num">' + x.out + '</td><td class="num">' + x.recorded + '</td>' +
@@ -2581,7 +2705,7 @@
           const r = await call('closeCarry', { event: carry.event, items: inputs.map(i => ({ productId: i.dataset.back, back: Number(i.value) })) });
           r.products.forEach(upsertProduct);
           refreshDerived();
-          toast('✅ 確定しました（販売 ' + r.recorded + '点を記録）');
+          toast('確定しました（販売 ' + r.recorded + '点を記録）');
           if (r.opId) showUndo(r.opId, '持ち出しの確定：' + r.recorded + '点');
           openCarry();
         } catch (err) { toast(err.message, true); }
@@ -2592,7 +2716,7 @@
       if (!i) return;
       const d = Number(i.dataset.out) - (Number(i.value) || 0) - Number(i.dataset.rec);
       const cell = document.querySelector('[data-diff="' + i.dataset.back + '"]');
-      cell.textContent = i.value === '' ? '-' : d < 0 ? '⚠️ ' + d : d;
+      cell.textContent = i.value === '' ? '-' : d < 0 ? '' + d : d;
       cell.className = 'num' + (d < 0 ? ' diffp' : '');
     };
   }
@@ -2601,7 +2725,7 @@
   function openReport() {
     const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
     const first = today.slice(0, 8) + '01';
-    toolOpen('📄 売上レポート', '<p class="hint">期間か公演を選んで「作る」を押すと、印刷・PDF保存できるレポートを作ります（販売の記録から集計。取り消した分は入りません）。</p>' +
+    toolOpen('売上レポート', '<p class="hint">期間か公演を選んで「作る」を押すと、印刷・PDF保存できるレポートを作ります（販売の記録から集計。取り消した分は入りません）。</p>' +
       '<div class="row2"><label>期間 <input type="date" id="repFrom" value="' + first + '"> 〜 <input type="date" id="repTo" value="' + today + '"></label></div>' +
       '<div class="row2"><label>または公演 <select id="repEvent"><option value="">（期間で集計）</option>' +
       (state.config.events || []).map(e => '<option>' + esc(e) + '</option>').join('') + '</select></label></div>', [
@@ -2702,15 +2826,15 @@
         const uploaded = await call('uploadImage', await readImage(b.files[j.i]));
         for (const id of g.ids) upsertProduct(await call('setProductImage', { productId: id, imageUrl: uploaded.url }));
         box.classList.add('done');
-        box.querySelector('.st').textContent = '✅ 登録しました';
+        box.querySelector('.st').textContent = '登録しました';
         ok++;
       } catch (err) {
-        box.querySelector('.st').textContent = '⚠️ ' + err.message;
+        box.querySelector('.st').textContent = '' + err.message;
       }
     }
     setBusy(btn, false);
     refreshDerived();
-    toast('✅ ' + ok + '枚の写真を登録しました');
+    toast('' + ok + '枚の写真を登録しました');
     if (ok === jobs.length) { $('bulkModal').hidden = true; state.bulk = null; }
   }
 
@@ -2759,14 +2883,19 @@
   function renderAlerts(list) {
     const zero = list.filter(p => p.total <= 0).length;
     $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '点以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
-    $('alertBadge').textContent = list.length;
-    $('alertBadge').hidden = list.length === 0;
+    updateAlertBadge();
+    state.alerts = list;
+    Object.keys(state.offPicked).forEach(id => { if (!list.some(p => p.id === id)) delete state.offPicked[id]; });
+    updateOffBar();
     if (!list.length) {
-      $('alertList').innerHTML = '<div class="card empty">在庫が少ない商品はありません 🎉</div>';
+      $('offBar').hidden = true;
+      $('alertList').innerHTML = '<div class="card empty">在庫が少ない商品はありません</div>';
       return;
     }
+    $('offBar').hidden = false;
     $('alertList').innerHTML = list.map(p =>
       '<div class="card alert-item' + (p.total <= 0 ? ' zero' : '') + '">' +
+      '<label class="off-check" aria-label="' + esc(p.id) + 'を選ぶ"><input type="checkbox" data-pick-off="' + esc(p.id) + '"' + (state.offPicked[p.id] ? ' checked' : '') + '></label>' +
       '<div class="body">' +
       '<div class="name">' + esc(p.id) + '　' + esc(p.category) + '</div>' +
       '<div>' + [p.type, p.color, p.size].map(esc).join(' / ') + '</div>' +
@@ -2774,8 +2903,46 @@
       '</div>' +
       '<div class="count"><b>' + p.total + '</b>' + (p.total <= 0 ? '在庫切れ' : '残り') +
       '<br><button type="button" class="link-btn" data-replenish="' + esc(p.id) + '">▲ 補充</button>' +
-      '<br><button type="button" class="link-btn" data-off="' + esc(p.id) + '" style="color:var(--muted)">🚫 販売終了</button></div>' +
+      '<br><button type="button" class="link-btn" data-off="' + esc(p.id) + '" style="color:var(--muted)">販売終了</button></div>' +
       '</div>').join('');
+  }
+
+  // ---------- 在庫わずか：まとめて販売終了 ----------
+  function updateOffBar() {
+    const n = Object.keys(state.offPicked).length;
+    $('offGo').disabled = !n;
+    $('offGo').textContent = n ? '選んだ ' + n + '件を販売終了にする' : '販売終了にする商品を選んでください';
+  }
+  function pickOff(filter) {
+    state.offPicked = {};
+    (state.alerts || []).filter(filter).forEach(p => { state.offPicked[p.id] = true; });
+    document.querySelectorAll('[data-pick-off]').forEach(c => { c.checked = !!state.offPicked[c.dataset.pickOff]; });
+    updateOffBar();
+  }
+  async function bulkDiscontinue() {
+    const ids = Object.keys(state.offPicked);
+    if (!ids.length) return;
+    const names = ids.map(id => { const p = findProduct(id); return p ? esc(id + '　' + describe(p)) : esc(id); });
+    const ok = await confirmBox(ids.length + '件を販売終了にしますか？',
+      '<div style="max-height:40vh;overflow:auto;font-size:13px;line-height:1.7;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px">' + names.join('<br>') + '</div>' +
+      '販売終了にすると、レジ・在庫確認ページ・この一覧に出なくなります。<br>あとで在庫一覧の「販売終了も表示」から、商品ごとに販売中へ戻せます。',
+      '販売終了にする', 'var(--danger)');
+    if (!ok) return;
+    const btn = $('offGo');
+    setBusy(btn, true, '保存中…');
+    try {
+      const res = await call('setProductsStatus', { productIds: ids, discontinued: true });
+      res.forEach(upsertProduct);
+      state.offPicked = {};
+      refreshDerived();
+      toast(res.length + '件を販売終了にしました');
+      loadAlerts();
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      setBusy(btn, false);
+      updateOffBar();
+    }
   }
 
   // ---------- 集計 ----------
@@ -2854,11 +3021,11 @@
     try {
       const res = await call('backupIfDue', { force: force === true });
       $('backupInfo').textContent = res.done
-        ? '🗂 バックアップを作りました（' + res.lastBackupAt + '）'
-        : '🗂 最終バックアップ：' + (res.lastBackupAt || '—');
-      if (force && res.done) toast('✅ バックアップを作りました');
+        ? 'バックアップを作りました（' + res.lastBackupAt + '）'
+        : '最終バックアップ：' + (res.lastBackupAt || '—');
+      if (force && res.done) toast('バックアップを作りました');
     } catch (err) {
-      $('backupInfo').textContent = '🗂 バックアップの状態を確認できませんでした';
+      $('backupInfo').textContent = 'バックアップの状態を確認できませんでした';
     }
   }
 
@@ -2874,7 +3041,7 @@
       state.products = data.products;
       state.monthlyStale = true;
       refreshDerived();
-      toast('✅ テストデータを本番の状態に戻しました');
+      toast('テストデータを本番の状態に戻しました');
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -2886,7 +3053,7 @@
   function setOperator(name) {
     state.operator = (name || '').trim().slice(0, 20);
     store(OP_STORE, state.operator || null);
-    $('opChip').textContent = state.operator ? '👤 ' + state.operator : '👤 担当者';
+    $('opChip').textContent = state.operator ? '' + state.operator : '担当者';
   }
 
   function openOperator() {
@@ -2938,7 +3105,7 @@
     $('opSave').addEventListener('click', () => {
       setOperator($('opInput').value);
       $('opModal').hidden = true;
-      toast(state.operator ? '👤 ' + state.operator + ' さんとして記録します' : '担当者なしで記録します');
+      toast(state.operator ? '' + state.operator + ' さんとして記録します' : '担当者なしで記録します');
     });
     $('opSkip').addEventListener('click', () => { $('opModal').hidden = true; });
 
@@ -3060,13 +3227,22 @@
 
     // 在庫わずか
     $('btnReloadAlerts').addEventListener('click', loadAlerts);
+    $('alertList').addEventListener('change', e => {
+      const c = e.target.closest('[data-pick-off]'); if (!c) return;
+      if (c.checked) state.offPicked[c.dataset.pickOff] = true; else delete state.offPicked[c.dataset.pickOff];
+      updateOffBar();
+    });
+    $('offAll').addEventListener('click', () => pickOff(() => true));
+    $('offZero').addEventListener('click', () => pickOff(p => p.total <= 0));
+    $('offNone').addEventListener('click', () => pickOff(() => false));
+    $('offGo').addEventListener('click', bulkDiscontinue);
     $('alertList').addEventListener('click', e => {
       const b = e.target.closest('[data-replenish]');
       if (b) return goToSales(b.dataset.replenish, 'replenish');
       const off = e.target.closest('[data-off]');
       if (off) {
         openEdit(off.dataset.off);
-        toast('「🚫 販売終了にする」を押すと、この一覧から消えます');
+        toast('「販売終了にする」を押すと、この一覧から消えます');
       }
     });
 

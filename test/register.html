@@ -493,12 +493,17 @@
   }
 
   // ---------- 商品をカード（種類・商品名・色）ごとにまとめる ----------
+  // セットだけで売る種類（管理画面の「セットだけ」）。レジでは1個ずつ入れられない
+  const setOnly = () => state.sets.filter(x => x.only).map(x => x.type);
+
   function groups() {
     const pool = $('pool').value;
+    const only = setOnly();
     const q = state.q.trim().normalize('NFKC').toLowerCase();
     const map = {}, list = [];
     state.products.forEach(p => {
       if (state.genre && p.type !== state.genre) return;
+      if (only.indexOf(p.type) >= 0) return;
       const text = [p.category, p.type, p.color, p.size].join(' ').normalize('NFKC').toLowerCase();
       if (q && text.indexOf(q) < 0) return;
       const k = [p.type, p.category, p.color].join('|');
@@ -544,7 +549,9 @@
       '</button>').join('');
     // 商品
     const gs = groups();
-    const setTiles = state.q ? [] : state.sets.map((x, i) => ({ x: x, i: i })).filter(o => !state.genre || state.genre === o.x.type);
+    const qn = state.q.trim().normalize('NFKC').toLowerCase();
+    const setTiles = state.sets.map((x, i) => ({ x: x, i: i })).filter(o => (!state.genre || state.genre === o.x.type) &&
+      (!qn || (o.x.name + ' ' + o.x.type + ' ' + state.products.filter(p => p.type === o.x.type).map(p => p.category).join(' ')).normalize('NFKC').toLowerCase().indexOf(qn) >= 0));
     const pool = $('pool').value;
     $('grid').innerHTML = setTiles.map(o => '<div class="tile settile" style="' + gc(o.x.type) + '"><span class="gtab">セット</span><div class="tcard">' +
       '<button class="tpic" data-set="' + o.i + '"><div class="ph txt" style="' + gc(o.x.type) + '">' + esc(o.x.name) + '</div></button>' +
@@ -605,6 +612,7 @@
 
   function add(id, d) {
     const p = byId(id); if (!p) return;
+    if (d > 0 && setOnly().indexOf(p.type) >= 0) return toast(p.type + 'はセットだけで売ります。「セット」の札から選んでください', true);
     const pool = $('pool').value;
     const next = (state.cart[id] || 0) + d;
     if (d > 0 && qtyIn(id) + d > (p.stock[pool] || 0)) return toast(p.category + '（' + (p.size !== '-' ? p.size : p.color) + '）は在庫が' + (p.stock[pool] || 0) + unitOf(p.type) + 'です', true);

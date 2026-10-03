@@ -2598,7 +2598,8 @@
     const setRow = (x, i) => '<tr><td><input class="tx" data-sn="' + i + '" value="' + esc(x.name || '') + '" placeholder="例：クリアファイル 2枚セット"></td>' +
       '<td><select data-st="' + i + '">' + types.map(t => '<option' + (t === x.type ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select></td>' +
       '<td><input type="number" min="2" data-sc="' + i + '" value="' + esc(x.count || 2) + '" style="width:60px"></td>' +
-      '<td><input class="pr" data-sp="' + i + '" inputmode="numeric" value="' + esc(x.price === undefined ? '' : x.price) + '" placeholder="円"></td></tr>';
+      '<td><input class="pr" data-sp="' + i + '" inputmode="numeric" value="' + esc(x.price === undefined ? '' : x.price) + '" placeholder="円"></td>' +
+      '<td style="text-align:center"><input type="checkbox" data-so="' + i + '"' + (x.only ? ' checked' : '') + ' style="width:22px;height:22px" aria-label="セットだけで売る"></td></tr>';
     const body = () => '<p class="hint">商品ごとの値段（税込）を入れてください。サイズ違いには同じ値段が入ります。空欄は「未設定」です。</p>' +
       '<table><thead><tr><th>商品</th><th class="num">価格（円）</th></tr></thead><tbody>' +
       groups.map((g, i) => '<tr><td><b>' + esc(g.p.category) + '</b><div class="sub">' + esc(g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') +
@@ -2606,8 +2607,8 @@
         '<td class="num"><input class="pr" inputmode="numeric" data-gp="' + i + '" value="' + esc(priceOf(g)) + '" placeholder="未設定"></td></tr>').join('') +
       '</tbody></table>' +
       '<div class="gh">セット販売（販売レジに「セット」ボタンが出ます）</div>' +
-      '<p class="hint">例：クリアファイルから好きな2枚で500円。値段を空欄にするとそのセットは消えます。</p>' +
-      '<table><thead><tr><th>セット名</th><th>種類</th><th>枚数</th><th>値段</th></tr></thead><tbody id="setRows">' +
+      '<p class="hint">例：クリアファイルから好きな2枚で500円。値段を空欄にするとそのセットは消えます。<br>「セットだけ」にチェックすると、販売レジではその種類を1個ずつ入れられなくなり、セットからだけ選べます。</p>' +
+      '<table><thead><tr><th>セット名</th><th>種類</th><th>枚数</th><th>値段</th><th>セットだけ</th></tr></thead><tbody id="setRows">' +
       sets.concat([{ name: '', type: types.indexOf('B5クリアファイル') >= 0 ? 'B5クリアファイル' : types[0], count: 2, price: '' }]).map(setRow).join('') + '</tbody></table>';
     toolOpen('価格・セット販売', body(), [
       { label: 'やめる', ghost: true, onClick: toolClose },
@@ -2621,7 +2622,8 @@
         const newSets = [...document.querySelectorAll('[data-sn]')].map(inp => {
           const i = inp.dataset.sn;
           return { name: inp.value.trim(), type: document.querySelector('[data-st="' + i + '"]').value,
-            count: document.querySelector('[data-sc="' + i + '"]').value, price: document.querySelector('[data-sp="' + i + '"]').value.trim() };
+            count: document.querySelector('[data-sc="' + i + '"]').value, price: document.querySelector('[data-sp="' + i + '"]').value.trim(),
+            only: document.querySelector('[data-so="' + i + '"]').checked };
         }).filter(x => x.name && x.price !== '');
         try {
           if (prices.length) {

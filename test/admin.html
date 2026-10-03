@@ -1316,22 +1316,29 @@
   }
 
   // ---------- 取り消し ----------
-  function showUndo(opId, label) {
+  // hideAfterMs を渡すと、その時間で取り消しの札を自動で消す（取り消すか確認中のときは消さない）
+  let undoTimer = null;
+  function showUndo(opId, label, hideAfterMs) {
     if (!opId) return;
+    clearTimeout(undoTimer);
     state.lastOp = { opId: opId, label: label };
-    $('undoText').innerHTML = esc(label) + '<br><small>まちがえたら取り消せます</small>';
+    $('undoText').innerHTML = esc(label) + '<br><small>まちがえたら取り消せます' + (hideAfterMs ? '（' + Math.round(hideAfterMs / 1000) + '秒で消えます）' : '') + '</small>';
     $('undoBar').hidden = false;
+    if (hideAfterMs) undoTimer = setTimeout(() => { if (!state.undoAsking && state.lastOp && state.lastOp.opId === opId) hideUndo(); }, hideAfterMs);
   }
 
   function hideUndo() {
+    clearTimeout(undoTimer);
     state.lastOp = null;
     $('undoBar').hidden = true;
   }
 
   async function onUndo() {
     if (!state.lastOp) return hideUndo();
+    state.undoAsking = true;
     const ok = await confirmBox('取り消しますか？', esc(state.lastOp.label) + '<br>在庫を元に戻します。', '取り消す', 'var(--danger)');
-    if (!ok) return;
+    state.undoAsking = false;
+    if (!ok) { if (!$('undoBar').hidden && /秒で消えます/.test($('undoText').innerHTML)) hideUndo(); return; }
     const btn = $('undoBtn');
     setBusy(btn, true, '取消中…');
     try {
@@ -2141,7 +2148,7 @@
       saveStocktake();
       renderStocktake();
       toast('' + res.changed + '商品の在庫を合わせました');
-      showUndo(res.opId, '棚卸し：' + res.changed + '商品');
+      showUndo(res.opId, '棚卸し：' + res.changed + '商品', 10000);
     } catch (err) {
       toast(err.message, true);
     } finally {

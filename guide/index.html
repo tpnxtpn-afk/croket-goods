@@ -11,317 +11,223 @@
 <title>コロッケ グッズ在庫管理システムガイド</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=BIZ+UDPGothic:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap">
 <style>
+  /* システムの画面と同じ：インクの黒・ジャンルの虹7色・ハンガーの札 */
   :root {
-    --ground: #f4f5f7;
+    --ground: #eef0f3;
     --surface: #ffffff;
-    --ink: #1d2027;
-    --text: #2c3e50;
-    --muted: #66727d;
-    --line: #e1e4e8;
-    --soft: #eef0f3;
-    --viewer: #e67e22;
-    --viewer-soft: #fdf1e5;
-    --admin: #8e44ad;
-    --admin-soft: #f4ecf8;
+    --ink: #14171d;
+    --text: #1f242c;
+    --muted: #5d6571;
+    --line: #d6dbe1;
+    --soft: #f4f6f8;
+    --viewer: #1d74d0;
+    --viewer-soft: #e6f0fb;
+    --register: #d23a2f;
+    --register-soft: #fbe9e7;
+    --admin: #14171d;
+    --admin-soft: #e7e9ed;
     --accent: var(--viewer);
     --accent-soft: var(--viewer-soft);
-    --ok: #1e8449;
-    --ok-soft: #eaf7ee;
-    --low: #b9651a;
-    --low-soft: #fdf3e6;
-    --zero: #8d959c;
-    --zero-soft: #f2f3f5;
-    --danger: #d64534;
-    --rainbow: linear-gradient(90deg, #ff4d4d, #ff9f1a, #ffd93d, #3ddc84, #29b6f6, #7c4dff, #e056fd);
-    --frame: #1d2027;
+    --low: #c26a00;
+    --low-soft: #fff1dc;
+    --hatch: #c9ced6;
+    --out: #8f97a3;
+    --danger: #d23a2f;
+    --frame: #14171d;
+    --rainbow: linear-gradient(90deg, #e0352b 0 14.3%, #ef7a14 0 28.6%, #d9a400 0 42.9%, #23945a 0 57.2%, #1d74d0 0 71.5%, #6a4fd0 0 85.8%, #b0409a 0);
+    --display: "Zen Kaku Gothic New", "Hiragino Sans", sans-serif;
+    --num: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --ground: #121418;
-      --surface: #1c1f26;
-      --ink: #0b0c0f;
-      --text: #e6e8ec;
-      --muted: #9ba5af;
-      --line: #2e333c;
-      --soft: #252a33;
-      --viewer: #f0913a;
-      --viewer-soft: #33261a;
-      --admin: #b57bd4;
-      --admin-soft: #2c2233;
-      --ok: #5fd08a;
-      --ok-soft: #1b2e22;
-      --low: #f0a55a;
-      --low-soft: #33281b;
-      --zero: #9aa1a8;
-      --zero-soft: #262a31;
-      --danger: #ff7b6b;
-      --frame: #000000;
+      --ground: #101318; --surface: #1a1e25; --ink: #0b0d10; --text: #e9ecf0; --muted: #a0a9b5; --line: #2f3640; --soft: #222831;
+      --viewer: #6aa8ff; --viewer-soft: #172537; --register: #ff7a6e; --register-soft: #35201e; --admin: #e9ecf0; --admin-soft: #262c35;
+      --low: #ffb547; --low-soft: #3a2a12; --hatch: #3a414c; --out: #6c7480; --danger: #ff7a6e; --frame: #000;
     }
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --ground: #121418;
-    --surface: #1c1f26;
-    --ink: #0b0c0f;
-    --text: #e6e8ec;
-    --muted: #9ba5af;
-    --line: #2e333c;
-    --soft: #252a33;
-    --viewer: #f0913a;
-    --viewer-soft: #33261a;
-    --admin: #b57bd4;
-    --admin-soft: #2c2233;
-    --ok: #5fd08a;
-    --ok-soft: #1b2e22;
-    --low: #f0a55a;
-    --low-soft: #33281b;
-    --zero: #9aa1a8;
-    --zero-soft: #262a31;
-    --danger: #ff7b6b;
-    --frame: #000000;
+    --ground: #101318; --surface: #1a1e25; --ink: #0b0d10; --text: #e9ecf0; --muted: #a0a9b5; --line: #2f3640; --soft: #222831;
+    --viewer: #6aa8ff; --viewer-soft: #172537; --register: #ff7a6e; --register-soft: #35201e; --admin: #e9ecf0; --admin-soft: #262c35;
+    --low: #ffb547; --low-soft: #3a2a12; --hatch: #3a414c; --out: #6c7480; --danger: #ff7a6e; --frame: #000;
   }
 
   * { box-sizing: border-box; }
   body {
-    margin: 0;
-    background: var(--ground);
-    color: var(--text);
+    margin: 0; background: var(--ground); color: var(--text);
     font-family: "BIZ UDPGothic", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", Meiryo, sans-serif;
-    font-weight: 400;
-    font-size: 17px;
-    line-height: 1.85;
-    -webkit-text-size-adjust: 100%;
+    font-size: 17px; line-height: 1.85; -webkit-text-size-adjust: 100%;
     /* 文節の切れ目（<wbr>）でだけ改行する。長すぎる語は最後の手段として途中で折る */
-    word-break: keep-all;
-    overflow-wrap: anywhere;
-    line-break: strict;
+    word-break: keep-all; overflow-wrap: anywhere; line-break: strict;
   }
-  body.admin-mode { --accent: var(--admin); --accent-soft: var(--admin-soft); }
+  body.mode-register { --accent: var(--register); --accent-soft: var(--register-soft); }
+  body.mode-admin { --accent: var(--admin); --accent-soft: var(--admin-soft); }
   a { color: var(--accent); }
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .n { font-family: var(--num); font-weight: 700; font-variant-numeric: tabular-nums; }
 
   /* ---------- 表紙 ---------- */
-  .masthead {
-    position: relative;
-    background: radial-gradient(120% 160% at 0% 0%, #343a46 0%, #1d2027 55%, #121418 100%);
-    color: #fff;
-    padding: 28px 20px 34px;
-  }
-  .masthead::after {
-    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--rainbow);
-  }
-  .masthead-inner { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; }
-  .kicker { margin: 0; font-size: 13px; letter-spacing: .28em; color: rgba(255,255,255,.6); font-weight: 700; }
-  .masthead h1 {
-    margin: 6px 0 10px;
-    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-weight: 400;
-    font-size: clamp(30px, 6.4vw, 52px); line-height: 1.2; letter-spacing: .03em;
-    background: var(--rainbow); -webkit-background-clip: text; background-clip: text; color: transparent;
-    text-wrap: balance;
-  }
+  .masthead { position: relative; background: #14171d; color: #fff; padding-inline: 20px; padding-block: 30px 36px; }
+  .masthead::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--rainbow); }
+  .masthead-inner { max-width: 980px; margin: 0 auto; }
+  .kicker { margin: 0; font-family: var(--num); font-size: 14px; letter-spacing: .24em; color: rgba(255,255,255,.6); }
+  .masthead h1 { margin: 6px 0 12px; font-family: var(--display); font-weight: 900; font-size: clamp(28px, 6vw, 48px); line-height: 1.25; text-wrap: balance; }
   .masthead h1 .nb { display: inline-block; }
-  .masthead .lead { margin: 0; max-width: 34em; color: rgba(255,255,255,.86); font-size: 16px; }
-  .hero-art { width: 150px; height: auto; }
+  .masthead .lead { margin: 0; max-width: 36em; color: rgba(255,255,255,.85); font-size: 16px; }
 
   /* ---------- 切りかえ ---------- */
   .switch-wrap {
     position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
     background: color-mix(in srgb, var(--ground) 92%, transparent);
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--line);
-    padding: 10px 16px;
+    border-bottom: 1px solid var(--line); padding-inline: 16px; padding-block: 10px;
   }
-  .switch { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .switch { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .switch button {
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 56px; padding: 8px 10px;
-    border: 2px solid var(--line); border-radius: 14px;
-    background: var(--surface); color: var(--muted);
-    font: inherit; font-weight: 700; font-size: 16px; line-height: 1.3;
-    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 58px; padding: 8px 8px;
+    border: 2px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted);
+    font: inherit; font-weight: 700; font-size: 16px; line-height: 1.3; cursor: pointer; text-align: left;
   }
   .switch button small { display: block; font-size: 12px; font-weight: 400; }
+  .switch svg { flex: 0 0 auto; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .switch button[aria-selected="true"][data-panel="viewer"] { border-color: var(--viewer); background: var(--viewer); color: #fff; }
-  .switch button[aria-selected="true"][data-panel="admin"] { border-color: var(--admin); background: var(--admin); color: #fff; }
-  .switch svg { flex: 0 0 auto; }
+  .switch button[aria-selected="true"][data-panel="register"] { border-color: var(--register); background: var(--register); color: #fff; }
+  .switch button[aria-selected="true"][data-panel="admin"] { border-color: #14171d; background: #14171d; color: #fff; }
 
   /* ---------- 本文 ---------- */
   .page { max-width: 980px; margin: 0 auto; padding-inline: 16px; padding-block: 8px 72px; }
-  .intro {
-    display: grid; grid-template-columns: 1fr; gap: 16px;
-    margin: 24px 0 8px; padding: 20px;
-    border-radius: 18px; background: var(--accent-soft);
-  }
-  .intro h2 { margin: 0; font-size: 22px; line-height: 1.5; text-wrap: balance; }
+  .intro { display: grid; gap: 16px; margin: 24px 0 8px; padding: 20px; border-radius: 16px; background: var(--accent-soft); }
+  .intro h2 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 23px; line-height: 1.45; text-wrap: balance; }
   .intro p { margin: 0; }
-  .url-box {
-    display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
-    padding: 14px; border-radius: 14px; background: var(--surface);
-  }
-  .url-box .qr { width: 112px; height: 112px; padding: 6px; border-radius: 10px; background: #fff; }
+  .url-box { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; padding: 14px; border-radius: 12px; background: var(--surface); }
+  .url-box .qr { width: 112px; height: 112px; padding: 6px; border-radius: 8px; background: #fff; }
   .url-box .qr svg { display: block; width: 100%; height: 100%; }
-  .url-box b { display: block; font-size: 14px; color: var(--muted); font-weight: 700; }
-  .url-text {
-    display: block; margin: 2px 0 8px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; word-break: normal; overflow-wrap: anywhere; color: var(--accent); text-decoration: underline; text-underline-offset: 3px;
-    
-  }
-  .copy {
-    border: 0; border-radius: 10px; padding: 8px 14px;
-    background: var(--accent); color: #fff; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
-  }
+  .url-box b { display: block; font-size: 14px; color: var(--muted); }
+  .url-text { display: block; margin: 2px 0 8px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; word-break: normal; overflow-wrap: anywhere; color: var(--accent); text-underline-offset: 3px; }
+  .copy { border: 0; border-radius: 8px; padding: 8px 14px; background: var(--accent); color: var(--surface); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  body.mode-admin .copy { color: var(--ground); }
 
   .toc { margin: 22px 0 6px; }
   .toc h2 { margin: 0 0 8px; font-size: 15px; color: var(--muted); letter-spacing: .08em; }
   .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; counter-reset: toc; }
   .toc li { counter-increment: toc; }
-  .toc a {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border-radius: 999px;
-    background: var(--surface); border: 1px solid var(--line);
-    color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700;
-  }
-  .toc a::before {
-    content: counter(toc); display: inline-grid; place-items: center;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); color: #fff; font-size: 12px;
-  }
+  .toc a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--text); text-decoration: none; font-size: 14px; font-weight: 700; }
+  .toc a::before { content: counter(toc); display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--surface); font-family: var(--num); font-size: 14px; }
+  body.mode-admin .toc a::before { color: var(--ground); }
 
-  .chapter-title {
-    display: flex; align-items: center; gap: 12px;
-    margin: 48px 0 8px; font-size: 14px; letter-spacing: .12em; color: var(--muted); font-weight: 700;
-  }
+  .chapter-title { display: flex; align-items: center; gap: 12px; margin: 48px 0 8px; font-size: 14px; letter-spacing: .12em; color: var(--muted); font-weight: 700; }
   .chapter-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-  .step {
-    display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start;
-    padding: 28px 0; border-bottom: 1px solid var(--line);
-    scroll-margin-top: 96px;
-  }
-  .step.wide { grid-template-columns: minmax(0, 1fr); }
-  .step.two-shots { grid-template-columns: minmax(0, 1fr); }
+  .step { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; padding: 28px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 96px; }
+  .step.wide, .step.two-shots { grid-template-columns: minmax(0, 1fr); }
+  .step.tab-shot { grid-template-columns: minmax(0, 1fr); }
   .step-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
-  .no {
-    flex: 0 0 auto; display: grid; place-items: center;
-    width: 48px; height: 48px; border-radius: 16px;
-    background: var(--accent); color: #fff;
-    font-family: "Dela Gothic One", "Hiragino Sans", sans-serif; font-size: 22px;
-  }
-  .step h3 { margin: 0; font-size: 23px; line-height: 1.4; font-weight: 700; text-wrap: balance; }
+  .no { flex: 0 0 auto; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: var(--accent); color: var(--surface); font-family: var(--num); font-weight: 700; font-size: 26px; }
+  body.mode-admin .no { color: var(--ground); }
+  .step h3 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 23px; line-height: 1.4; text-wrap: balance; }
   .step p { margin: 10px 0; max-width: 36em; }
-  .step .note {
-    margin: 14px 0; padding: 12px 14px; border-radius: 12px;
-    background: var(--soft); font-size: 15px; line-height: 1.75; max-width: 36em;
-  }
-  .step .note b { color: var(--text); }
-  .step .warn { background: var(--low-soft); }
+  .step .note { margin: 14px 0; padding: 12px 14px; border-radius: 10px; background: var(--surface); border-left: 4px solid var(--line); font-size: 15px; line-height: 1.75; max-width: 36em; }
+  .step .warn { border-left-color: var(--low); background: var(--low-soft); }
   .nw { white-space: nowrap; }
 
   .legend { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 10px; max-width: 36em; }
-  .legend li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
-  .pin {
-    display: inline-grid; place-items: center;
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--danger); color: #fff;
-    font-size: 15px; font-weight: 700; line-height: 1;
-    box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(0,0,0,.35);
-    font-variant-numeric: tabular-nums;
-  }
-  .legend .pin { margin-top: 2px; box-shadow: none; }
-  .legend b { font-weight: 700; }
+  .legend li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .pin { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--danger); color: #fff; font-size: 15px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .legend .pin { margin-top: 2px; }
 
   .phone { margin: 0; justify-self: center; width: 100%; max-width: 300px; }
-  .screen {
-    position: relative;
-    border: 9px solid var(--frame); border-radius: 34px; overflow: hidden;
-    background: var(--frame);
-    box-shadow: 0 14px 34px rgba(20, 24, 32, .18);
-  }
+  .tablet { margin: 0; justify-self: center; width: 100%; max-width: 760px; }
+  .screen { position: relative; border: 9px solid var(--frame); border-radius: 34px; overflow: hidden; background: var(--frame); box-shadow: 0 14px 34px rgba(20, 24, 32, .18); }
+  .tablet .screen { border-width: 12px; border-radius: 26px; }
   .screen img { display: block; width: 100%; height: auto; border-radius: 25px; }
+  .tablet .screen img { border-radius: 14px; }
   .screen .pin { position: absolute; transform: translate(-50%, -50%);
     background: color-mix(in srgb, var(--danger) 62%, transparent);
-    box-shadow: 0 0 0 3px rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.2);
-    text-shadow: 0 1px 2px rgba(0,0,0,.45); }
-  .phone figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; line-height: 1.6; }
+    box-shadow: 0 0 0 3px rgba(255,255,255,.7), 0 2px 6px rgba(0,0,0,.2); text-shadow: 0 1px 2px rgba(0,0,0,.45); }
+  figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; line-height: 1.6; }
   .shots { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin-top: 12px; }
   .shots .phone { flex: 0 1 260px; }
   .flow-arrow { align-self: center; color: var(--muted); font-size: 28px; font-weight: 700; }
-
   .paper { margin: 0; justify-self: center; width: 100%; max-width: 560px; }
   .paper img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); box-shadow: 0 10px 28px rgba(20,24,32,.14); }
-  .paper figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); text-align: center; }
 
-  /* 在庫の色 */
-  .states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0; max-width: 36em; }
-  .state { padding: 12px 10px; border-radius: 14px; text-align: center; border: 1px solid; }
-  .state .dot { font-size: 26px; line-height: 1; }
-  .state b { display: block; font-size: 17px; font-weight: 700; }
-  .state small { display: block; font-size: 13px; }
-  .state.ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); color: var(--ok); }
-  .state.low { background: var(--low-soft); border-color: color-mix(in srgb, var(--low) 35%, transparent); color: var(--low); }
-  .state.zero { background: var(--zero-soft); border-color: var(--line); color: var(--zero); }
+  /* ハンガーの札（見本） */
+  .tags { display: flex; flex-wrap: wrap; gap: 16px 12px; margin: 18px 0 10px; align-items: flex-end; }
+  .tagdemo { display: grid; justify-items: center; gap: 6px; font-size: 13px; color: var(--muted); text-align: center; }
+  .tag { position: relative; width: 64px; border: 2px solid var(--text); border-radius: 8px; padding: 3px 0 5px; text-align: center; background: var(--surface); }
+  .tag::before { content: ""; position: absolute; left: 50%; top: -9px; width: 13px; height: 8px; border: 2px solid var(--text); border-bottom: none; border-radius: 8px 8px 0 0; transform: translateX(-50%); background: var(--surface); }
+  .tag i { display: block; font-style: normal; font-size: 12px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+  .tag b { display: block; font-family: var(--num); font-weight: 700; font-size: 26px; line-height: 1; }
+  .tag.low { border-color: var(--low); background: var(--low-soft); }
+  .tag.low::before { border-color: var(--low); background: var(--low-soft); }
+  .tag.low b { color: var(--low); }
+  .tag.out { border-color: var(--hatch); background: repeating-linear-gradient(-45deg, transparent 0 4px, var(--hatch) 4px 5px); }
+  .tag.out::before { border-color: var(--hatch); background: var(--surface); }
+  .tag.out b, .tag.out i { color: var(--out); }
+  .tag.out b { text-decoration: line-through; text-decoration-thickness: 2px; }
 
-  .chip-demo { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-  .chip-demo span { padding: 4px 10px; border-radius: 8px; border: 1px solid; font-size: 14px; font-weight: 700; }
-  .chip-demo .ok { background: var(--ok-soft); border-color: color-mix(in srgb, var(--ok) 35%, transparent); color: var(--ok); }
-  .chip-demo .low { background: var(--low-soft); border-color: color-mix(in srgb, var(--low) 35%, transparent); color: var(--low); }
-  .chip-demo .zero { background: var(--zero-soft); border-color: var(--line); color: var(--zero); }
+  /* ジャンルの色 */
+  .genres { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .genres span { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1.5px solid var(--gc); font-size: 14px; font-weight: 700; }
+  .genres i { width: 10px; height: 10px; border-radius: 3px; background: var(--gc); }
 
   /* 正の字 */
   .tally-demo { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
   .tally-demo figure { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
-  .tally-demo svg { display: block; width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .tally-demo svg { display: block; width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
   .tally-demo svg path { stroke: var(--text); }
 
-  /* ホーム画面に追加 */
   .howto { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 14px 0; }
-  .howto > div { padding: 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
-  .howto h4 { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+  .howto > div { padding: 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+  .howto h4 { margin: 0 0 8px; font-size: 16px; }
   .howto ol { margin: 0; padding-left: 1.3em; font-size: 15px; line-height: 1.8; }
   .howto svg { vertical-align: -6px; }
 
   .tabs-guide { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
-  .tabs-guide div { padding: 10px 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); text-align: center; font-size: 13px; line-height: 1.5; }
-  .tabs-guide .ico { display: block; font-size: 24px; }
-  .tabs-guide b { display: block; font-size: 14px; font-weight: 700; }
+  .tabs-guide div { padding: 10px 6px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); text-align: center; font-size: 13px; line-height: 1.5; }
+  .tabs-guide svg { display: block; margin: 0 auto 2px; width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .tabs-guide b { display: block; font-size: 14px; }
+
+  .checklist { list-style: none; margin: 14px 0; padding: 0; display: grid; gap: 8px; max-width: 36em; }
+  .checklist li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+  .checklist li::before { content: ""; width: 20px; height: 20px; margin-top: 4px; border: 2px solid var(--accent); border-radius: 5px; }
 
   .faq { margin: 12px 0 0; display: grid; gap: 10px; }
-  .faq details { border-radius: 14px; background: var(--surface); border: 1px solid var(--line); padding: 0 16px; }
-  .faq summary { cursor: pointer; padding: 14px 0; font-weight: 700; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  .faq details { border-radius: 12px; background: var(--surface); border: 1px solid var(--line); padding-inline: 16px; }
+  .faq summary { cursor: pointer; padding-block: 14px; font-weight: 700; list-style: none; display: flex; gap: 10px; align-items: baseline; }
   .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::before { content: "Q"; color: var(--accent); font-family: "Dela Gothic One", sans-serif; }
+  .faq summary::before { content: "Q"; color: var(--accent); font-family: var(--num); font-size: 20px; }
   .faq details p { margin: 0 0 14px; font-size: 16px; }
 
   .footer { margin-top: 40px; font-size: 13px; color: var(--muted); text-align: center; }
 
   @media (max-width: 760px) {
     .step { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-    .masthead-inner { grid-template-columns: 1fr; }
-    .hero-art { display: none; }
     .tabs-guide { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-    .tabs-guide div {
-      display: grid; grid-template-columns: 34px 6.5em minmax(0, 1fr); gap: 8px; align-items: center;
-      padding: 10px 12px; text-align: left; font-size: 14px;
-    }
-    .tabs-guide .ico { font-size: 22px; text-align: center; }
+    .tabs-guide div { display: grid; grid-template-columns: 30px 6.5em minmax(0, 1fr); gap: 8px; align-items: center; padding: 10px 12px; text-align: left; font-size: 14px; }
+    .tabs-guide svg { margin: 0; }
     .tabs-guide b { font-size: 15px; }
     .flow-arrow { flex-basis: 100%; text-align: center; transform: rotate(90deg); line-height: 1; }
     .shots { gap: 16px; }
     .shots .phone { flex-basis: 250px; }
-    .switch button { gap: 6px; padding: 8px 6px; }
+    .switch { gap: 6px; }
+    .switch button { flex-direction: column; gap: 2px; padding: 8px 4px; font-size: 15px; text-align: center; }
+    .switch svg { width: 20px; height: 20px; }
     .screen .pin { width: 22px; height: 22px; font-size: 12px; box-shadow: 0 0 0 2px rgba(255,255,255,.7), 0 1px 4px rgba(0,0,0,.2); }
+    .tablet .screen { border-width: 6px; border-radius: 14px; }
+    .tablet .screen img { border-radius: 8px; }
+    .tablet .screen .pin { width: 20px; height: 20px; font-size: 11px; }
     .intro { padding: 18px 16px; }
     .howto { grid-template-columns: minmax(0, 1fr); }
-    .url-box { grid-template-columns: 1fr; justify-items: start; }
+    .url-box { grid-template-columns: minmax(0, 1fr); justify-items: start; }
   }
   @media (max-width: 420px) {
     body { font-size: 16px; }
     .step h3 { font-size: 21px; }
-    .states { gap: 6px; }
-    .state b { font-size: 15px; }
+    .switch button small { display: none; }
   }
   @media (prefers-reduced-motion: no-preference) {
     .switch button { transition: background .15s, color .15s, border-color .15s; }
@@ -339,71 +245,40 @@
 
 <header class="masthead">
   <div class="masthead-inner">
-    <div>
-      <p class="kicker">KOROKKE GOODS STOCK</p>
-      <h1><span class="nb">コロッケ</span> <span class="nb">グッズ在庫管理</span><wbr><span class="nb">システムガイド</span></h1>
-      <p class="lead">スマホで<wbr>在庫を<wbr>見る<wbr>方<wbr>法と、<wbr>売れた<wbr>数・<wbr>入った<wbr>数を<wbr>記録する<wbr>方<wbr>法を、<wbr>画面の<wbr>写真つきで<wbr>説明します。<wbr>はじめての方は<wbr>上から<wbr>順番に<wbr>読んでください。</p>
-    </div>
-    <svg class="hero-art" viewBox="0 0 150 230" aria-hidden="true">
-      <rect x="10" y="4" width="130" height="222" rx="22" fill="#0b0c0f"/>
-      <rect x="17" y="11" width="116" height="208" rx="16" fill="#f4f5f7"/>
-      <rect x="17" y="11" width="116" height="30" rx="16" fill="#1d2027"/>
-      <rect x="17" y="30" width="116" height="11" fill="#1d2027"/>
-      <rect x="17" y="40" width="116" height="3" fill="#ff9f1a"/>
-      <rect x="26" y="20" width="56" height="8" rx="4" fill="#ffd93d"/>
-      <g>
-        <rect x="24" y="52" width="102" height="44" rx="8" fill="#fff"/>
-        <rect x="30" y="58" width="30" height="30" rx="6" fill="#e9d5c4"/>
-        <path d="M38 66 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#e67e22"/>
-        <rect x="66" y="60" width="40" height="6" rx="3" fill="#2c3e50"/>
-        <rect x="66" y="74" width="16" height="12" rx="3" fill="#eaf7ee" stroke="#9fd8b3"/>
-        <rect x="86" y="74" width="16" height="12" rx="3" fill="#fdf3e6" stroke="#f1c996"/>
-        <rect x="106" y="74" width="14" height="12" rx="3" fill="#f2f3f5" stroke="#d6d9dd"/>
-      </g>
-      <g>
-        <rect x="24" y="104" width="102" height="44" rx="8" fill="#fff"/>
-        <rect x="30" y="110" width="30" height="30" rx="6" fill="#d8e3f0"/>
-        <path d="M38 118 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#3498db"/>
-        <rect x="66" y="112" width="46" height="6" rx="3" fill="#2c3e50"/>
-        <circle cx="72" cy="132" r="5" fill="#27ae60"/>
-        <rect x="80" y="129" width="26" height="6" rx="3" fill="#27ae60"/>
-      </g>
-      <g>
-        <rect x="24" y="156" width="102" height="44" rx="8" fill="#fff"/>
-        <rect x="30" y="162" width="30" height="30" rx="6" fill="#f1dde8"/>
-        <path d="M38 170 l6 -4 h6 l6 4 l-3 5 h-2 v12 h-12 v-12 h-2z" fill="#e84393"/>
-        <rect x="66" y="164" width="36" height="6" rx="3" fill="#2c3e50"/>
-        <circle cx="72" cy="184" r="5" fill="#e67e22"/>
-        <rect x="80" y="181" width="34" height="6" rx="3" fill="#e67e22"/>
-      </g>
-    </svg>
+    <p class="kicker">KOROKKE GOODS STOCK</p>
+    <h1><span class="nb">コロッケ</span> <span class="nb">グッズ在庫管理</span><wbr><span class="nb">システムガイド</span></h1>
+    <p class="lead">在庫の<wbr>見かた、<wbr>会場での<wbr>売りかた<wbr>（販売レジ）、<wbr>在庫の<wbr>管理の<wbr>しかたを、<wbr>画面の<wbr>写真つきで<wbr>説明します。<wbr>上の<wbr>ボタンで、<wbr>自分の<wbr>使う<wbr>画面を<wbr>選んでください。</p>
   </div>
 </header>
 
 <div class="switch-wrap">
   <div class="switch" role="tablist" aria-label="説明を切りかえる">
     <button type="button" role="tab" id="tab-viewer" data-panel="viewer" aria-selected="true" aria-controls="viewer">
-      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 5c-5 0-9 5-10 7 1 2 5 7 10 7s9-5 10-7c-1-2-5-7-10-7zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg>
-      <span>見る<wbr>人<small><wbr>お客さま・スタッフ</small></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>見る<small><wbr>在庫確認ページ</small></span>
+    </button>
+    <button type="button" role="tab" id="tab-register" data-panel="register" aria-selected="false" aria-controls="register">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l-2 11H6z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+      <span>売る<small><wbr>販売レジ</small></span>
     </button>
     <button type="button" role="tab" id="tab-admin" data-panel="admin" aria-selected="false" aria-controls="admin">
-      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.3V21h3.7l10.9-10.9-3.7-3.7L3 17.3zM20.7 7a1 1 0 000-1.4l-2.3-2.3a1 1 0 00-1.4 0l-1.8 1.8 3.7 3.7L20.7 7z"/></svg>
-      <span>管理する<wbr>人<small>販売・補充・登録</small></span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>
+      <span>管理する<small><wbr>管理画面</small></span>
     </button>
   </div>
 </div>
 
 <!-- ======================================================= -->
-<!-- 在庫を見る人                                              -->
+<!-- 見る（在庫確認ページ）                                    -->
 <!-- ======================================================= -->
 <main class="page" id="viewer" role="tabpanel" aria-labelledby="tab-viewer">
   <div class="intro">
     <h2>いまある<wbr>商品と、<wbr>残りの<wbr>数が<wbr>スマホで<wbr>見られます</h2>
-    <p>見るだけの<wbr>ページなので、<wbr>どこを<wbr>押しても<wbr>在庫が<wbr>変わる<wbr>ことは<wbr>ありません。<wbr>安心して<wbr>さわってください。</p>
+    <p>見るだけの<wbr>ページなので、<wbr>どこを<wbr>押しても<wbr>在庫は<wbr>変わりません。<wbr>安心して<wbr>さわってください。</p>
     <div class="url-box">
-      <div class="qr" id="qrViewer" aria-label="在庫ページのQRコード"></div>
+      <div class="qr" id="qrViewer" aria-label="在庫確認ページのQRコード"></div>
       <div>
-        <b>在庫ページの<wbr>アドレス</b>
+        <b>在庫確認ページの<wbr>アドレス</b>
         <a class="url-text" id="urlViewer" href="https://tpnxtpn-afk.github.io/croket-goods/" target="_blank" rel="noopener">https://tpnxtpn-afk.github.io/<wbr>croket-goods/</a>
         <button type="button" class="copy" data-copy="urlViewer">アドレスを<wbr>コピー</button>
       </div>
@@ -416,10 +291,11 @@
     <ol>
       <li><a href="#v-open">ページを<wbr>ひらく</a></li>
       <li><a href="#v-screen">画面の<wbr>見かた</a></li>
-      <li><a href="#v-colors">残りの<wbr>数の<wbr>見かた</a></li>
+      <li><a href="#v-tags">残りの<wbr>数の<wbr>見かた</a></li>
       <li><a href="#v-place">場所を<wbr>切りかえる</a></li>
       <li><a href="#v-find">商品を<wbr>さが<wbr>す</a></li>
       <li><a href="#v-detail">大きな<wbr>写真で<wbr>見る</a></li>
+      <li><a href="#v-tile">写真で<wbr>並べる</a></li>
       <li><a href="#v-big">文字を<wbr>大きくする</a></li>
       <li><a href="#v-home">ホーム画面に<wbr>置く</a></li>
       <li><a href="#v-faq">こまった<wbr>とき</a></li>
@@ -431,7 +307,7 @@
       <div class="step-head"><span class="no">1</span><h3>ページを<wbr>ひらく</h3></div>
       <p>上の<wbr>アドレスを<wbr>タップするか、<wbr>QRコードを<wbr>カメラで<wbr>写してください。</p>
       <p>はじめて<wbr>開いた<wbr>ときだけ、<b><wbr>「かんたんな<wbr>使い方」</b>が<wbr>出ます。<wbr>読んだら<b><wbr>「わかりました」</b>を<wbr>押してください。</p>
-      <div class="note">この<wbr>説明は、<wbr>あとから<wbr>右上の <b>？</b> ボタンで<wbr>いつでも<wbr>見られます。</div>
+      <div class="note">この<wbr>説明は、<wbr>あとから<wbr>右上の <b>？</b> で<wbr>いつでも<wbr>見られます。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c01-guide.jpg" width="600" height="1298" alt="はじめて開いたときに出る、かんたんな使い方の画面"></div>
@@ -446,47 +322,50 @@
       <ol class="legend">
         <li><span class="pin">1</span><span><b>大</b> … 文字が<wbr>大きくなります。<wbr>もう<wbr>一度<wbr>押すと<wbr>元に<wbr>戻ります。</span></li>
         <li><span class="pin">2</span><span><b>？</b> … 使い方を<wbr>もう<wbr>一度<wbr>見られます。</span></li>
-        <li><span class="pin">3</span><span><b>↻</b> … いちばん新しい<wbr>在庫にします。</span></li>
-        <li><span class="pin">4</span><span><b>場所の<wbr>タブ</b> … 在庫が<wbr>置いてある<wbr>場所ごとに<wbr>見られます。</span></li>
+        <li><span class="pin">3</span><span><b>更新</b> … いちばん新しい<wbr>在庫にします。</span></li>
+        <li><span class="pin">4</span><span><b>場所の<wbr>タブ</b> … 在庫が<wbr>置いてある<wbr>場所ごとに<wbr>見られます。<wbr>大きな<wbr>数字は、<wbr>その<wbr>場所に<wbr>ある<wbr>合計の<wbr>数です。</span></li>
         <li><span class="pin">5</span><span><b>さが<wbr>す</b> … 名前・色・サイズで<wbr>探せます。</span></li>
-        <li><span class="pin">6</span><span><b>種類の<wbr>ボタン</b> … Tシャツだけ、<wbr>タオルだけ、のように<wbr>絞れます。</span></li>
-        <li><span class="pin">7</span><span><b>並び順</b> … 名前順・<wbr>多い順・少ない<wbr>順を<wbr>選べます。</span></li>
-        <li><span class="pin">8</span><span><b>売り<wbr>切れも<wbr>表示</b> … チェックすると、<wbr>残りが<wbr>0の<wbr>商品も<wbr>出ます。</span></li>
-        <li><span class="pin">9</span><span><b>残りの<wbr>数</b> … サイズごとに<wbr>何枚あるかが<wbr>出ます。</span></li>
+        <li><span class="pin">6</span><span><b>種類の<wbr>ボタン</b> … Tシャツだけ、<wbr>タオルだけのように<wbr>絞れます。<wbr>ボタンの<wbr>色は<wbr>種類ごとに<wbr>決まっています。</span></li>
+        <li><span class="pin">7</span><span><b>並び順</b> … 名前順・<wbr>多い順・少ない<wbr>順を<wbr>選べます。<b><wbr>売り切れも<wbr>表示</b>に<wbr>チェックすると、<wbr>残りが<wbr>0の<wbr>商品も<wbr>出ます。</span></li>
+        <li><span class="pin">8</span><span><b>リスト／写真で<wbr>並べる</b> … 一覧の<wbr>見せ方を<wbr>切りかえます。</span></li>
+        <li><span class="pin">9</span><span><b>残りの<wbr>数</b> … サイズごとの<wbr>残りが、<wbr>札の<wbr>形で<wbr>並びます。</span></li>
       </ol>
     </div>
     <figure class="phone">
       <div class="screen">
         <img src="img/c02-list.jpg" width="600" height="1298" alt="在庫一覧の画面">
-        <span class="pin" style="left:73.1%;top:2.8%">1</span>
-        <span class="pin" style="left:83.3%;top:7.4%">2</span>
-        <span class="pin" style="left:93.6%;top:2.8%">3</span>
-        <span class="pin" style="left:50%;top:13.2%">4</span>
-        <span class="pin" style="left:88%;top:24.1%">5</span>
-        <span class="pin" style="left:67.4%;top:29.7%">6</span>
-        <span class="pin" style="left:34.2%;top:35.3%">7</span>
-        <span class="pin" style="left:82.1%;top:35.3%">8</span>
-        <span class="pin" style="left:78%;top:55.7%">9</span>
+        <span class="pin" style="left:68.7%;top:3.3%">1</span>
+        <span class="pin" style="left:79.5%;top:3.3%">2</span>
+        <span class="pin" style="left:91.5%;top:3.3%">3</span>
+        <span class="pin" style="left:16.7%;top:12.9%">4</span>
+        <span class="pin" style="left:80.0%;top:22.7%">5</span>
+        <span class="pin" style="left:34.7%;top:27.8%">6</span>
+        <span class="pin" style="left:34.4%;top:32.8%">7</span>
+        <span class="pin" style="left:50.0%;top:37.4%">8</span>
+        <span class="pin" style="left:61.5%;top:59.6%">9</span>
       </div>
       <figcaption>いつも<wbr>見る<wbr>画面<wbr>（在庫の<wbr>一覧）</figcaption>
     </figure>
   </section>
 
-  <section class="step" id="v-colors">
+  <section class="step" id="v-tags">
     <div>
       <div class="step-head"><span class="no">3</span><h3>残りの<wbr>数の<wbr>見かた</h3></div>
-      <p>残りの<wbr>数は、<wbr>色と<wbr>言葉でも<wbr>分かるようになっています。</p>
-      <div class="states">
-        <div class="state ok"><span class="dot">🟢</span><b><wbr>あり</b><small>6枚以上</small></div>
-        <div class="state low"><span class="dot">🟡</span><b>の<wbr>こりわずか</b><small><wbr>5枚以下</small></div>
-        <div class="state zero"><span class="dot">⚪</span><b>売り<wbr>切れ</b><small>0枚</small></div>
+      <p>残りの<wbr>数は、<wbr>ハンガーに<wbr>掛けた<wbr>札のような<wbr>形で<wbr>出ます。<wbr>札の<wbr>上の<wbr>小さな<wbr>文字が<wbr>サイズ、<wbr>大きな<wbr>数字が<wbr>残りの<wbr>数です。</p>
+      <div class="tags" aria-label="札の見本">
+        <div class="tagdemo"><span class="tag"><i>S</i><b>12</b></span><wbr>あり</div>
+        <div class="tagdemo"><span class="tag low"><i>M</i><b>3</b></span>の<wbr>こりわずか<br><wbr>（5以下）</div>
+        <div class="tagdemo"><span class="tag out"><i>L</i><b>0</b></span>売り<wbr>切れ</div>
+        <div class="tagdemo"><span class="tag" style="width:118px"><i>在庫</i><b>24</b></span>サイズの<wbr>ない<wbr>商品</div>
       </div>
-      <p>サイズが<wbr>いくつか<wbr>ある<wbr>商品は、<wbr>1つの<wbr>カードに<wbr>まとめて、<wbr>サイズごとの<wbr>数が<wbr>並びます。</p>
-      <div class="chip-demo" aria-label="サイズごとの表示の例">
-        <span class="ok">S 12枚</span><span class="low">M 3枚</span><span class="zero">L 0枚</span><span class="ok">XL 8枚</span>
+      <p>オレンジの<wbr>札は<wbr>残りが<wbr>少ない、<wbr>斜線と<wbr>取り消し線の<wbr>札は<wbr>売り切れです。<wbr>サイズの<wbr>ない<wbr>商品<wbr>（タオルや<wbr>ストラップなど）は、<wbr>横長の<wbr>札が<wbr>1つ出ます。</p>
+      <p>商品は<wbr>種類ごとに<wbr>色が<wbr>決まっています。<wbr>見出しの<wbr>タブや、<wbr>絞りこみの<wbr>ボタンが<wbr>同じ色です。</p>
+      <div class="genres" aria-label="種類の色">
+        <span style="--gc:#e0352b"><i></i>Tシャツ</span><span style="--gc:#ef7a14"><i></i>タオル</span><span style="--gc:#d9a400"><i></i>クリアファイル</span>
+        <span style="--gc:#23945a"><i></i>ストール・ニット帽</span><span style="--gc:#1d74d0"><i></i>キーホルダー・ストラップ</span>
+        <span style="--gc:#b0409a"><i></i>マグネット・ステッカー</span><span style="--gc:#6a4fd0"><i></i><wbr>その<wbr>ほかの<wbr>小物</span>
       </div>
-      <p>この<wbr>例では、<wbr>Mは<wbr>残り少なく、<wbr>Lは<wbr>売り切れです。</p>
-      <div class="note">最近<wbr>入った<wbr>商品には、<wbr>赤い <b>NEW</b> の<wbr>印が<wbr>付きます<wbr>（<wbr>入ってから<wbr>2週間）。</div>
+      <div class="note">写真が<wbr>まだない<wbr>商品は、<wbr>写真の<wbr>代わりに<wbr>商品名が<wbr>大きく<wbr>出ます。<wbr>最近<wbr>入った<wbr>商品には、<wbr>赤い <b>NEW</b> の<wbr>印が<wbr>付きます<wbr>（<wbr>入ってから<wbr>2週間）。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/c08-sort.jpg" width="600" height="1298" alt="在庫の多い順に並べた画面"></div>
@@ -497,12 +376,12 @@
   <section class="step" id="v-place">
     <div>
       <div class="step-head"><span class="no">4</span><h3>場所を<wbr>切りかえる</h3></div>
-      <p>いちばん上の<wbr>タブで、<wbr>在庫が<wbr>置いてある<wbr>場所を<wbr>切りかえます。<wbr>タブの<wbr>下の<wbr>小さな<wbr>数字は、<wbr>その<wbr>場所に<wbr>ある<wbr>合計の<wbr>枚数です。</p>
-      <ol class="legend">
-        <li><span class="pin" style="background:#e67e22">現</span><span><b>現場用</b> … イベント・<wbr>公演の<wbr>会場に<wbr>持っていく<wbr>在庫です。</span></li>
-        <li><span class="pin" style="background:#e84393">フ</span><span><b>ファンクラブ用</b> … ファンクラブ向けに<wbr>取っておいている<wbr>在庫です。</span></li>
-        <li><span class="pin" style="background:#27ae60">販</span><span><b>販売在庫</b> … 通販などで<wbr>販売する<wbr>在庫です。</span></li>
-      </ol>
+      <p>いちばん上の<wbr>タブで、<wbr>在庫が<wbr>置いてある<wbr>場所を<wbr>切りかえます。</p>
+      <ul class="legend">
+        <li><span class="pin" style="background:var(--viewer)">現</span><span><b>現場用</b> … イベント・<wbr>公演の<wbr>会場に<wbr>持っていく<wbr>在庫です。</span></li>
+        <li><span class="pin" style="background:var(--viewer)">フ</span><span><b>ファンクラブ用</b> … ファンクラブ向けに<wbr>取っておいている<wbr>在庫です。</span></li>
+        <li><span class="pin" style="background:var(--viewer)">販</span><span><b>販売在庫</b> … 通販などで<wbr>販売する<wbr>在庫です。</span></li>
+      </ul>
       <div class="note">最後に<wbr>見ていた<wbr>場所は<wbr>覚えているので、<wbr>次に<wbr>開いた<wbr>ときも<wbr>そのまま<wbr>出ます。</div>
     </div>
     <figure class="phone">
@@ -514,9 +393,9 @@
   <section class="step two-shots" id="v-find">
     <div>
       <div class="step-head"><span class="no">5</span><h3>商品を<wbr>さが<wbr>す</h3></div>
-      <p><b>文字を<wbr>打たずに<wbr>探すとき</b>は、<wbr>種類の<wbr>ボタン<wbr>（Tシャツ・タオルなど）を<wbr>押します。<wbr>もう<wbr>一度<wbr>押すと<wbr>元に<wbr>戻ります。</p>
-      <p><b>言葉で<wbr>探すとき</b>は、<wbr>上の<wbr>「さが<wbr>す」欄に<wbr>打ちこみます。<wbr>ひらがなでも<wbr>大丈夫です。</p>
-      <div class="note">「しろ」で<wbr>白い<wbr>商品、<wbr>「て<wbr>ぃーしゃつ」で<wbr>Tシャツ、<wbr>「xl」で<wbr>XLサイズが<wbr>見つかります。<wbr>✕ を<wbr>押すと<wbr>検索を<wbr>やめて、<wbr>全部の<wbr>商品に<wbr>戻ります。</div>
+      <p><b>文字を<wbr>打たずに<wbr>探すとき</b>は、<wbr>種類の<wbr>ボタン<wbr>（Tシャツ・タオルなど）を<wbr>押します。<b><wbr>「すべて」</b>を<wbr>押すと<wbr>元に<wbr>戻ります。</p>
+      <p><b>言葉で<wbr>探すとき</b>は、<wbr>「名前・色・サイズで<wbr>探す」の<wbr>欄に<wbr>打ちこみます。<wbr>ひらがなでも<wbr>大丈夫です。</p>
+      <div class="note">「しろ」で<wbr>白い<wbr>商品、<wbr>「て<wbr>ぃーしゃつ」で<wbr>Tシャツ、<wbr>「xl」で<wbr>XLサイズが<wbr>見つかります。<wbr>欄の<wbr>右の ✕ を<wbr>押すと、<wbr>検索を<wbr>やめて<wbr>全部の<wbr>商品に<wbr>戻ります。</div>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -533,7 +412,7 @@
   <section class="step" id="v-detail">
     <div>
       <div class="step-head"><span class="no">6</span><h3>大きな<wbr>写真で<wbr>見る</h3></div>
-      <p>商品の<wbr>カードを<wbr>タップすると、<wbr>大きな<wbr>写真と<wbr>サイズごとの<wbr>残りの<wbr>数が<wbr>出ます。</p>
+      <p>商品を<wbr>タップすると、<wbr>大きな<wbr>写真と<wbr>サイズごとの<wbr>残りの<wbr>数が<wbr>出ます。</p>
       <p>見終わったら<b><wbr>「閉じる」</b>を<wbr>押すか、<wbr>写真の<wbr>外側を<wbr>押してください。</p>
     </div>
     <figure class="phone">
@@ -542,10 +421,22 @@
     </figure>
   </section>
 
+  <section class="step" id="v-tile">
+    <div>
+      <div class="step-head"><span class="no">7</span><h3>写真で<wbr>並べる</h3></div>
+      <p><b>「写真で<wbr>並べる」</b>を<wbr>押すと、<wbr>商品の<wbr>写真が<wbr>大きく<wbr>並びます。<wbr>お客さまに<wbr>見せながら<wbr>選んで<wbr>もらう<wbr>ときに<wbr>便利です。</p>
+      <p><b>「リスト」</b>を<wbr>押すと<wbr>元の<wbr>一覧に<wbr>戻ります。</p>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/c09-tile.jpg" width="600" height="1298" alt="写真で並べた画面"></div>
+      <figcaption>「写真で<wbr>並べる」に<wbr>した<wbr>ところ</figcaption>
+    </figure>
+  </section>
+
   <section class="step" id="v-big">
     <div>
-      <div class="step-head"><span class="no">7</span><h3>文字を<wbr>大きくする</h3></div>
-      <p>右上の<b><wbr>「大」</b>を<wbr>押すと、<wbr>画面全体の<wbr>文字が<wbr>大きくなります。<wbr>押すと<wbr>白くなり、<wbr>大きくなっている<wbr>印です。</p>
+      <div class="step-head"><span class="no">8</span><h3>文字を<wbr>大きくする</h3></div>
+      <p>右上の<b><wbr>「大」</b>を<wbr>押すと、<wbr>画面全体の<wbr>文字が<wbr>大きくなります。<wbr>押すと<wbr>ボタンが<wbr>白くなり、<wbr>大きくなっている<wbr>印に<wbr>なります。</p>
       <p>もう<wbr>一度<wbr>押すと<wbr>元の<wbr>大きさに<wbr>戻ります。<wbr>選んだ<wbr>大きさは、<wbr>次に<wbr>開いた<wbr>ときも<wbr>同じです。</p>
     </div>
     <figure class="phone">
@@ -556,7 +447,7 @@
 
   <section class="step" id="v-home">
     <div>
-      <div class="step-head"><span class="no">8</span><h3>ホーム画面に<wbr>置く<wbr>（おすすめ）</h3></div>
+      <div class="step-head"><span class="no">9</span><h3>ホーム画面に<wbr>置く<wbr>（おすすめ）</h3></div>
       <p>スマホの<wbr>ホーム画面に<wbr>アイコンを<wbr>置くと、<wbr>次からは<b><wbr>アイコンを<wbr>押すだけ</b>で<wbr>開けます。<wbr>アプリを<wbr>入れる<wbr>必要は<wbr>ありません。</p>
       <div class="howto">
         <div>
@@ -594,15 +485,15 @@
       <div class="faq">
         <details open>
           <summary>数が<wbr>古いような<wbr>気が<wbr>する</summary>
-          <p>画面の<wbr>上に<wbr>「◯分前の<wbr>在庫です」と<wbr>出ています。<wbr>右上の <b>↻</b> を<wbr>押すと、<wbr>いちばん新しい<wbr>在庫に<wbr>なります。<wbr>しばらく<wbr>開いたままに<wbr>していた<wbr>場合は、<wbr>戻ってきた<wbr>ときに<wbr>自動で<wbr>新しくなります。</p>
+          <p>画面の<wbr>上に<wbr>「◯分前の<wbr>在庫です」と<wbr>出ています。<wbr>右上の <b>更新</b> を<wbr>押すと、<wbr>いちばん新しい<wbr>在庫に<wbr>なります。<wbr>しばらく<wbr>開いたままに<wbr>していた<wbr>場合は、<wbr>戻ってきた<wbr>ときに<wbr>自動で<wbr>新しくなります。</p>
         </details>
         <details>
           <summary>「読み込み中…」のまま<wbr>進まない</summary>
-          <p>電波の<wbr>良い<wbr>場所で、<wbr>右上の <b>↻</b> を<wbr>押してください。<wbr>それでも<wbr>出ない<wbr>ときは、<wbr>ページを<wbr>一度<wbr>閉じて<wbr>開きな<wbr>おしてください。</p>
+          <p>電波の<wbr>良い<wbr>場所で、<wbr>右上の <b>更新</b> を<wbr>押してください。<wbr>それでも<wbr>出ない<wbr>ときは、<wbr>ページを<wbr>一度<wbr>閉じて<wbr>開きな<wbr>おしてください。</p>
         </details>
         <details>
           <summary>写真が<wbr>出ない</summary>
-          <p>写真は<wbr>少し<wbr>遅れて<wbr>出る<wbr>ことがあります。<wbr>数秒待つか、<wbr>↻ を<wbr>押してください。<wbr>写真が<wbr>まだ<wbr>撮られていない<wbr>商品は、<wbr>Tシャツや<wbr>タオルの<wbr>絵で<wbr>表示されます。</p>
+          <p>写真は<wbr>少し<wbr>遅れて<wbr>出る<wbr>ことがあります。<wbr>数秒待つか、<b><wbr>更新</b> を<wbr>押してください。<wbr>写真が<wbr>まだ<wbr>撮られていない<wbr>商品は、<wbr>商品名が<wbr>大きく<wbr>出ます。</p>
         </details>
         <details>
           <summary>探している<wbr>商品が<wbr>出てこない</summary>
@@ -610,22 +501,281 @@
         </details>
         <details>
           <summary>ここで<wbr>在庫を<wbr>変えられますか？</summary>
-          <p>この<wbr>ページは<wbr>見るだけです。<wbr>在庫を<wbr>変えるのは、<wbr>管理する<wbr>人の<wbr>画面からです<wbr>（上の<wbr>「管理する<wbr>人」を<wbr>押すと<wbr>説明が<wbr>出ます）。</p>
+          <p>この<wbr>ページは<wbr>見るだけです。<wbr>会場で<wbr>売る<wbr>ときは<wbr>「売る<wbr>（販売レジ）」、<wbr>在庫を<wbr>直すときは<wbr>「管理する<wbr>（管理画面）」を<wbr>使います。<wbr>上の<wbr>ボタンで<wbr>説明を<wbr>切りかえられます。</p>
         </details>
       </div>
     </div>
   </section>
 
-  <p class="footer"><span class="nb">コロッケ グッズ在庫管理システムガイド</span>　見る<wbr>人向け</p>
+  <p class="footer"><span class="nb">コロッケ グッズ在庫管理システムガイド</span>　見る<wbr>（在庫確認ページ）</p>
 </main>
 
 <!-- ======================================================= -->
-<!-- 在庫を管理する人                                          -->
+<!-- 売る（販売レジ）                                          -->
+<!-- ======================================================= -->
+<main class="page" id="register" role="tabpanel" aria-labelledby="tab-register" hidden>
+  <div class="intro">
+    <h2>会場では、<wbr>販売レジで<wbr>1会<wbr>計ずつ<wbr>記録します</h2>
+    <p>iPadや<wbr>スマホで<wbr>商品の<wbr>札を<wbr>押して<wbr>「会計する」を<wbr>押すと、<wbr>売れた<wbr>数が<wbr>その場で<wbr>記録され、<wbr>在庫も<wbr>減ります。<wbr>電波が<wbr>ない<wbr>会場でも<wbr>使えます。</p>
+    <div class="url-box">
+      <div class="qr" id="qrRegister" aria-label="販売レジのQRコード"></div>
+      <div>
+        <b>販売レジの<wbr>アドレス</b>
+        <a class="url-text" id="urlRegister" href="https://tpnxtpn-afk.github.io/croket-goods/register.html" target="_blank" rel="noopener">https://tpnxtpn-afk.github.io/<wbr>croket-goods/<wbr>register.html</a>
+        <button type="button" class="copy" data-copy="urlRegister">アドレスを<wbr>コピー</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="toc" aria-label="もくじ">
+    <h2>もくじ</h2>
+    <ol>
+      <li><a href="#r-ready">公演の<wbr>前に</a></li>
+      <li><a href="#r-screen">画面の<wbr>見かた</a></li>
+      <li><a href="#r-add">商品を<wbr>入れる</a></li>
+      <li><a href="#r-set">セット販売</a></li>
+      <li><a href="#r-pay">おつり・会計</a></li>
+      <li><a href="#r-undo">まちがえた<wbr>とき</a></li>
+      <li><a href="#r-sales">売れた<wbr>もの<wbr>・締め</a></li>
+      <li><a href="#r-offline">電波が<wbr>ない<wbr>とき</a></li>
+      <li><a href="#r-phone">スマホで<wbr>使う</a></li>
+      <li><a href="#r-faq">こまった<wbr>とき</a></li>
+    </ol>
+  </nav>
+
+  <p class="chapter-title">準備</p>
+
+  <section class="step wide" id="r-ready">
+    <div>
+      <div class="step-head"><span class="no">1</span><h3>公演の<wbr>前に<wbr>（ネットが<wbr>つながる<wbr>場所で）</h3></div>
+      <ul class="checklist">
+        <li><span>上の<wbr>アドレスを<wbr>開き、<b><wbr>ホーム画面に<wbr>追加</b>します<wbr>（やり方は<wbr>「見る」の <a href="#v-home">ホーム画面に<wbr>置く</a> と<wbr>同じです）。</span></li>
+        <li><span>はじめて<wbr>開くと<b><wbr>パスワード</b>を<wbr>聞かれます。<wbr>管理画面と<wbr>同じ<wbr>パスワードです。<wbr>一度<wbr>入れれば、<wbr>その<wbr>端末では<wbr>次から<wbr>聞かれません。</span></li>
+        <li><span>上の<wbr>欄に<b><wbr>公演</b><wbr>（例：10/10 横須賀）<wbr>・<b>担当</b><wbr>（自分の<wbr>名前）を<wbr>入れ、<b><wbr>在庫</b>は<wbr>「現場用」を<wbr>選びます。<wbr>公演ごとの<wbr>売上に<wbr>使います。</span></li>
+        <li><span><b>ネットが<wbr>つながる<wbr>場所で<wbr>一度<wbr>開いて<wbr>おきます。</b><wbr>画面・在庫・商品写真が<wbr>端末に<wbr>保存され、<wbr>会場で<wbr>電波が<wbr>なくても<wbr>開けるようになります。</span></li>
+      </ul>
+      <div class="note warn">パスワードは、<wbr>ほかの<wbr>人に<wbr>送ったり、<wbr>見える<wbr>場所に<wbr>書いたりしないでください。</div>
+    </div>
+  </section>
+
+  <section class="step tab-shot" id="r-screen">
+    <div>
+      <div class="step-head"><span class="no">2</span><h3>画面の<wbr>見かた<wbr>（iPad横向き）</h3></div>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>公演・担当・在庫</b> … 準備で<wbr>入れた<wbr>内容です。<wbr>公演が<wbr>変わったら<wbr>書きかえてください。</span></li>
+        <li><span class="pin">2</span><span><b>オンライン</b> … 電波の<wbr>状態です。<wbr>送れていない<wbr>会計が<wbr>あると<wbr>「未送信 ◯件」と<wbr>出ます。</span></li>
+        <li><span class="pin">3</span><span><b>売れた<wbr>もの</b> … 今<wbr>日<wbr>売れた<wbr>商品と、<wbr>締めの<wbr>金額チェックが<wbr>見られます。</span></li>
+        <li><span class="pin">4</span><span><b>在庫を<wbr>更新</b> … いちばん新しい<wbr>在庫にします。</span></li>
+        <li><span class="pin">5</span><span><b>種類</b> … 押すと、<wbr>その<wbr>種類だけ出ます。<wbr>色は<wbr>「見る」の<wbr>画面と<wbr>同じです。</span></li>
+        <li><span class="pin">6</span><span><b>さが<wbr>す</b> … 商品名や<wbr>色で<wbr>探せます。</span></li>
+        <li><span class="pin">7</span><span><b>サイズの<wbr>札</b> … 押すと、<wbr>その<wbr>サイズが<wbr>1つ<wbr>お会計に<wbr>入ります。<wbr>数字は<wbr>残りの<wbr>数です。</span></li>
+        <li><span class="pin">8</span><span><b>お会計</b> … 入れた<wbr>商品と<wbr>合計が<wbr>レシートのように<wbr>出ます。</span></li>
+        <li><span class="pin">9</span><span><b>会計する</b> … 押すと<wbr>販売が<wbr>記録されます。</span></li>
+        <li><span class="pin">10</span><span><b>この<wbr>端末の<wbr>記録</b> … 今<wbr>日<wbr>この<wbr>端末でした<wbr>会計が<wbr>並びます。</span></li>
+      </ol>
+    </div>
+    <figure class="tablet">
+      <div class="screen">
+        <img src="img/r01-ipad.jpg" width="1200" height="834" alt="販売レジの画面全体">
+        <span class="pin" style="left:17.6%;top:3.2%">1</span>
+        <span class="pin" style="left:76.1%;top:3.2%">2</span>
+        <span class="pin" style="left:85.1%;top:3.2%">3</span>
+        <span class="pin" style="left:94.5%;top:3.2%">4</span>
+        <span class="pin" style="left:8.3%;top:16.1%">5</span>
+        <span class="pin" style="left:43.5%;top:10.7%">6</span>
+        <span class="pin" style="left:43.5%;top:52.0%">7</span>
+        <span class="pin" style="left:85.6%;top:11.2%">8</span>
+        <span class="pin" style="left:85.6%;top:87.9%">9</span>
+        <span class="pin" style="left:85.6%;top:95.7%">10</span>
+      </div>
+      <figcaption>販売レジの<wbr>画面<wbr>（iPadを<wbr>横に<wbr>した<wbr>ところ）</figcaption>
+    </figure>
+  </section>
+
+  <p class="chapter-title">会計</p>
+
+  <section class="step tab-shot" id="r-add">
+    <div>
+      <div class="step-head"><span class="no">3</span><h3>商品を<wbr>入れる</h3></div>
+      <p><b>サイズの<wbr>札を<wbr>押す</b>と、<wbr>その<wbr>商品が<wbr>1つ<wbr>お会計に<wbr>入ります。<wbr>2枚なら<wbr>2回押します。<wbr>お会計に<wbr>入っている<wbr>数は、<wbr>札の<wbr>右上に<wbr>黒い丸で<wbr>出ます。</p>
+      <p>商品の<b><wbr>写真を<wbr>押す</b>と、<wbr>サイズを<wbr>大きな<wbr>ボタンで<wbr>選ぶ<wbr>画面が<wbr>出ます。</p>
+      <p>お会計の <b>＋ −</b> で<wbr>数を<wbr>直せます。<b><wbr>すべて<wbr>消す</b> で、<wbr>お会計を<wbr>空に<wbr>できます。</p>
+      <div class="note">残りが<wbr>0の<wbr>札は<wbr>斜線に<wbr>なり、<wbr>押せません。<wbr>お会計に<wbr>入れた<wbr>分は、<wbr>札の<wbr>数字から<wbr>先に<wbr>引かれます。</div>
+    </div>
+    <figure class="tablet">
+      <div class="screen"><img src="img/r02-sizes.jpg" width="1200" height="834" alt="サイズを選ぶ画面"></div>
+      <figcaption>写真を<wbr>押すと<wbr>出る、<wbr>サイズを<wbr>選ぶ<wbr>画面</figcaption>
+    </figure>
+  </section>
+
+  <section class="step tab-shot" id="r-set">
+    <div>
+      <div class="step-head"><span class="no">4</span><h3>セット販売<wbr>（マグネットなど）</h3></div>
+      <p><b>「セット」</b>の<wbr>札<wbr>（例：マグネットセット 500円）を<wbr>押すと、<wbr>中身を<wbr>選ぶ<wbr>画面が<wbr>出ます。<wbr>お客さまが<wbr>選んだ<wbr>商品を、<wbr>決まった<wbr>数だけ押して <b>カゴに<wbr>入れる</b> を<wbr>押します。</p>
+      <p>マグネットは<b><wbr>セットだけで<wbr>売る</b><wbr>商品です。<wbr>1個ずつの<wbr>札は<wbr>出ないので、<wbr>必ずセットの<wbr>札から<wbr>入れてください。</p>
+      <div class="note">セットの<wbr>値段や<wbr>中身は、<wbr>管理画面の<wbr>「集計・他 → 価格・セット販売」で<wbr>決めます。</div>
+    </div>
+    <figure class="tablet">
+      <div class="screen"><img src="img/r03-set.jpg" width="1200" height="834" alt="セットの中身を選ぶ画面"></div>
+      <figcaption>セットの<wbr>中身を<wbr>2つ<wbr>選んだ<wbr>ところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step tab-shot" id="r-pay">
+    <div>
+      <div class="step-head"><span class="no">5</span><h3>お預かり・<wbr>おつり → 会計する</h3></div>
+      <ol class="legend">
+        <li><span class="pin">1</span><span>商品と<wbr>数を<wbr>確かめます。</span></li>
+        <li><span class="pin">2</span><span>合計の<wbr>金額を<wbr>お客さまに<wbr>伝えます。</span></li>
+        <li><span class="pin">3</span><span><b>お預かり</b>に<wbr>受け取った<wbr>金額を<wbr>入れます。<wbr>「ちょうど」<wbr>「＋1,000」などの<wbr>ボタンでも<wbr>入れられます。</span></li>
+        <li><span class="pin">4</span><span><b><wbr>おつり</b>が<wbr>緑の<wbr>大きな<wbr>数字で<wbr>出ます。<wbr>足りない<wbr>ときは<wbr>「あと<wbr>◯円」と<wbr>赤で<wbr>出ます。</span></li>
+        <li><span class="pin">5</span><span><b>会計する</b>を<wbr>押します。<wbr>これで<wbr>販売が<wbr>記録され、<wbr>在庫が<wbr>減ります。</span></li>
+      </ol>
+      <div class="note">お預かりは、<wbr>おつりの<wbr>計算の<wbr>ためだけに<wbr>使います。<wbr>入れなくても<wbr>会計できます。</div>
+    </div>
+    <div class="shots">
+      <figure class="tablet">
+        <div class="screen">
+          <img src="img/r04-cart.jpg" width="1200" height="834" alt="お会計に商品が入り、おつりが出ている画面">
+          <span class="pin" style="left:96.1%;top:18.2%">1</span>
+          <span class="pin" style="left:90.6%;top:61.5%">2</span>
+          <span class="pin" style="left:86.5%;top:68.0%">3</span>
+          <span class="pin" style="left:85.6%;top:77.9%">4</span>
+          <span class="pin" style="left:85.6%;top:87.9%">5</span>
+        </div>
+        <figcaption>お預かり15,000円で、<wbr>おつり<wbr>4,500円</figcaption>
+      </figure>
+      <figure class="tablet">
+        <div class="screen"><img src="img/r05-paid.jpg" width="1200" height="834" alt="会計したあと、右下の記録に入ったところ"></div>
+        <figcaption>会計すると、<wbr>右下の<wbr>「この<wbr>端末の<wbr>記録」に<wbr>入ります</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step tab-shot" id="r-undo">
+    <div>
+      <div class="step-head"><span class="no">6</span><h3>まちがえた<wbr>とき・すぐ<wbr>キャンセルされた<wbr>とき</h3></div>
+      <p>右下の <b>この<wbr>端末の<wbr>記録</b> で、<wbr>その<wbr>会計の <b>取り消す</b> を<wbr>押します。<wbr>ボタンが<wbr>「もう<wbr>一度<wbr>押すと<wbr>取消」に<wbr>変わるので、<b><wbr>もう<wbr>一度<wbr>押す</b>と<wbr>取り消されます<wbr>（押しまちがい<wbr>防止の<wbr>ため2回です）。</p>
+      <p>取り消した<wbr>会計には<wbr>線が<wbr>引かれ、<wbr>在庫も<wbr>元に<wbr>戻ります。<wbr>その<wbr>あと、<wbr>正しい<wbr>内容で<wbr>もう<wbr>一度<wbr>会計してください。</p>
+      <div class="note">電波が<wbr>ない<wbr>ときも<wbr>取り消せます。<wbr>くわしくは <a href="#r-offline">電波が<wbr>ない<wbr>とき</a> を<wbr>見てください。</div>
+    </div>
+    <figure class="tablet">
+      <div class="screen"><img src="img/r06-undo.jpg" width="1200" height="834" alt="取り消すボタンを1回押したところ"></div>
+      <figcaption>1回押すと<wbr>「もう<wbr>一度<wbr>押すと<wbr>取消」に<wbr>変わります</figcaption>
+    </figure>
+  </section>
+
+  <section class="step two-shots" id="r-sales">
+    <div>
+      <div class="step-head"><span class="no">7</span><h3>売れた<wbr>もの<wbr>・締め<wbr>（精算チェック）</h3></div>
+      <p>上の <b>売れた<wbr>もの</b> を<wbr>押すと、<wbr>ほかの<wbr>端末の<wbr>分も<wbr>合わせた、<wbr>今日売れた<wbr>ものが<wbr>見られます。</p>
+      <ul class="legend">
+        <li><span class="pin" style="background:var(--register)">順</span><span><b>会計の<wbr>順番</b> … 会計ごとに、<wbr>時刻・担当・中身・金額が<wbr>並びます。<wbr>取り消した<wbr>会計には<wbr>線が<wbr>引かれます。</span></li>
+        <li><span class="pin" style="background:var(--register)">数</span><span><b>商品ごとの<wbr>個数</b> … 何が<wbr>何個売れたかが、<wbr>種類ごとに<wbr>多い順で<wbr>並びます。</span></li>
+      </ul>
+      <p>公演が<wbr>終わったら、<wbr>上の <b>締め</b> の<wbr>欄に、<wbr>レシートや<wbr>現金を<wbr>数えた<b><wbr>実際の<wbr>金額</b>を<wbr>入れます。<wbr>記録の<wbr>合計と<wbr>同じなら<wbr>「ぴったりです」、<wbr>ちがうと<wbr>差額が<wbr>出ます。</p>
+      <div class="note">上の<wbr>選択欄で、<wbr>昨日より<wbr>前の<wbr>日や、<wbr>公演ごとの<wbr>合計に<wbr>切りかえられます。</div>
+    </div>
+    <div class="shots">
+      <figure class="tablet">
+        <div class="screen"><img src="img/r07-sales.jpg" width="1200" height="834" alt="売れたもの（会計の順番）の画面"></div>
+        <figcaption>会計の<wbr>順番<wbr>（ここでは<wbr>撮影用の<wbr>会計を<wbr>取り消した<wbr>あと）</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step tab-shot" id="r-offline">
+    <div>
+      <div class="step-head"><span class="no">8</span><h3>電波が<wbr>ない<wbr>とき</h3></div>
+      <p>電波が<wbr>なくても、<wbr>いつもと<wbr>同じように<wbr>会計できます。<wbr>会計は<wbr>端末に<wbr>保存され、<wbr>電波が<wbr>戻ると<b><wbr>自動で<wbr>送られます</b>。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span>右上が <b>オフライン（未送信 ◯件）</b> に<wbr>なります。</span></li>
+        <li><span class="pin">2</span><span>まだ<wbr>送っていない<wbr>会計には <b>未送信</b> と<wbr>出ます。<wbr>在庫の<wbr>数は、<wbr>その場で<wbr>減ります。</span></li>
+        <li><span class="pin">3</span><span>未送信の<wbr>会計の <b>取り消す</b><wbr>（2回押す）で、<wbr>その<wbr>会計を<wbr>消せます。<wbr>在庫も<wbr>元に<wbr>戻ります。</span></li>
+      </ol>
+      <p>電波が<wbr>ある<wbr>ときに<wbr>送った<wbr>会計を、<wbr>電波が<wbr>ない間に<wbr>取り消すことも<wbr>できます。<wbr>記録に<wbr>「取消<wbr>（つながったら<wbr>送ります）」と<wbr>出て、<wbr>電波が<wbr>戻ると<wbr>取り消しも<wbr>送られます。</p>
+      <p><b>売れた<wbr>もの</b> は、<wbr>電波が<wbr>ない間は<b><wbr>この<wbr>端末の<wbr>記録だけ</b>で<wbr>出ます<wbr>（未送信の<wbr>会計も<wbr>入ります）。</p>
+      <div class="note warn">レジを<wbr>2台<wbr>使っていて<wbr>両方とも<wbr>電波が<wbr>ない<wbr>ときは、<wbr>もう<wbr>1台で<wbr>売れた<wbr>数は<wbr>お互いに<wbr>見えません。<wbr>在庫が<wbr>少ない<wbr>商品は、<wbr>レジの<wbr>係どうしで<wbr>声を<wbr>かけてください。</div>
+    </div>
+    <figure class="tablet">
+      <div class="screen">
+        <img src="img/r09-offline.jpg" width="1200" height="834" alt="電波がないときに会計した画面">
+        <span class="pin" style="left:72.8%;top:3.2%">1</span>
+        <span class="pin" style="left:85.6%;top:82.0%">2</span>
+        <span class="pin" style="left:96.5%;top:80.7%">3</span>
+      </div>
+      <figcaption>電波が<wbr>ない<wbr>ときに<wbr>会計した<wbr>ところ</figcaption>
+    </figure>
+  </section>
+
+  <section class="step two-shots" id="r-phone">
+    <div>
+      <div class="step-head"><span class="no">9</span><h3>スマホで<wbr>使う</h3></div>
+      <p>スマホでも<wbr>同じように<wbr>使えます。<wbr>種類の<wbr>ボタンは<wbr>上に<wbr>横一列で<wbr>並び、<wbr>お会計は<wbr>画面の<wbr>下の<wbr>黒い帯に<wbr>まとまります。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>公演・担当</b> … 押すと、<wbr>公演・担当・在庫の<wbr>欄が<wbr>開きます。</span></li>
+        <li><span class="pin">2</span><span><b>下の<wbr>帯</b> … 点数と<wbr>合計が<wbr>出ます。<wbr>押すとお会計の<wbr>画面が<wbr>開き、<wbr>おつりの<wbr>計算と<wbr>会計が<wbr>できます。</span></li>
+      </ol>
+    </div>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen">
+          <img src="img/r10-phone.jpg" width="600" height="1298" alt="スマホで開いた販売レジ">
+          <span class="pin" style="left:35.6%;top:2.9%">1</span>
+          <span class="pin" style="left:50.0%;top:95.3%">2</span>
+        </div>
+        <figcaption>スマホの<wbr>販売レジ</figcaption>
+      </figure>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <figure class="phone">
+        <div class="screen"><img src="img/r11-phone-cart.jpg" width="600" height="1298" alt="スマホでお会計を開いた画面"></div>
+        <figcaption>下の<wbr>帯を<wbr>押すと、<wbr>お会計が<wbr>開きます</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step wide" id="r-faq">
+    <div>
+      <div class="step-head"><span class="no">?</span><h3>こまった<wbr>とき</h3></div>
+      <div class="faq">
+        <details open>
+          <summary>「通信が<wbr>途中で<wbr>切れました」と<wbr>出た</summary>
+          <p>記録できている<wbr>場合が<wbr>あります。<wbr>すぐに<wbr>やり直さず、<wbr>右下の<wbr>記録と<wbr>在庫の<wbr>数を<wbr>見て、<wbr>会計が<wbr>入っているか<wbr>確かめてください。<wbr>入っていなければ、<wbr>もう<wbr>一度<wbr>会計します。</p>
+        </details>
+        <details>
+          <summary>札が<wbr>押せない</summary>
+          <p>残りが<wbr>0の<wbr>商品は<wbr>押せません。<wbr>実物が<wbr>あるのに<wbr>0に<wbr>なっている<wbr>ときは、<wbr>上の <b>在庫を<wbr>更新</b> を<wbr>押してください。<wbr>それでも<wbr>0なら、<wbr>管理する<wbr>人に<wbr>「棚卸し」で<wbr>数を<wbr>直して<wbr>もらってください。</p>
+        </details>
+        <details>
+          <summary>マグネットを<wbr>1個だけ<wbr>入れたい</summary>
+          <p>マグネットは<wbr>セットだけで<wbr>売る<wbr>商品です。<wbr>「マグネットセット」の<wbr>札から<wbr>2個選んでください。</p>
+        </details>
+        <details>
+          <summary>合計が<wbr>「価格未設定」と<wbr>出る</summary>
+          <p>その<wbr>商品に<wbr>まだ<wbr>値段が<wbr>入っていません。<wbr>管理する<wbr>人に<wbr>「価格・セット販売」で<wbr>値段を<wbr>入れて<wbr>もらってください。<wbr>会計は<wbr>そのまま<wbr>できます。</p>
+        </details>
+        <details>
+          <summary>電波が<wbr>ない<wbr>場所で<wbr>開けない</summary>
+          <p>ネットが<wbr>つながる<wbr>場所で、<wbr>一度も<wbr>レジを<wbr>開いていない<wbr>端末は、<wbr>電波が<wbr>ないと<wbr>開けません。<wbr>公演の<wbr>前に、<wbr>ホーム画面から<wbr>一度<wbr>開いておいてください。</p>
+        </details>
+        <details>
+          <summary>「未送信」が<wbr>ずっと<wbr>消えない</summary>
+          <p>電波の<wbr>良い<wbr>場所に<wbr>移ると、<wbr>20秒ごとに<wbr>自動で<wbr>送ります。<wbr>すぐ<wbr>送りたい<wbr>ときは、<wbr>レジを<wbr>開き直してください。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <p class="footer"><span class="nb">コロッケ グッズ在庫管理システムガイド</span>　売る<wbr>（販売レジ）</p>
+</main>
+
+<!-- ======================================================= -->
+<!-- 管理する（管理画面）                                      -->
 <!-- ======================================================= -->
 <main class="page" id="admin" role="tabpanel" aria-labelledby="tab-admin" hidden>
   <div class="intro">
-    <h2>売れた<wbr>数・<wbr>入った<wbr>数を<wbr>記録して、<wbr>在庫を<wbr>いつも<wbr>正しく<wbr>保ちます</h2>
-    <p>管理の<wbr>画面で<wbr>記録した数は、<wbr>すぐに<wbr>「見る<wbr>人」の<wbr>ページにも<wbr>反映されます。<wbr>まちがえても、<wbr>あとから<wbr>取り消せるので<wbr>安心してください。</p>
+    <h2>入った<wbr>数・<wbr>売れた<wbr>数を<wbr>記録して、<wbr>在庫を<wbr>いつも<wbr>正しく<wbr>保ちます</h2>
+    <p>管理画面で<wbr>記録した数は、<wbr>すぐに<wbr>在庫確認ページと<wbr>販売レジにも<wbr>反映されます。<wbr>まちがえても、<wbr>あとから<wbr>取り消せます。</p>
     <div class="url-box">
       <div class="qr" id="qrAdmin" aria-label="管理画面のQRコード"></div>
       <div>
@@ -641,18 +791,20 @@
     <ol>
       <li><a href="#a-start">はじめに<wbr>開く<wbr>とき</a></li>
       <li><a href="#a-tabs">画面の<wbr>全体</a></li>
-      <li><a href="#a-sale">売れた<wbr>とき</a></li>
+      <li><a href="#a-sale">1つずつ記録</a></li>
+      <li><a href="#a-sale-confirm">確認して<wbr>記録</a></li>
       <li><a href="#a-undo">まちがえた<wbr>とき</a></li>
       <li><a href="#a-sheet">販売チェック<wbr>表</a></li>
       <li><a href="#a-batch">まとめて<wbr>記録</a></li>
       <li><a href="#a-restock">補充・移動</a></li>
       <li><a href="#a-register">新しい<wbr>商品</a></li>
+      <li><a href="#a-list">在庫一覧</a></li>
       <li><a href="#a-edit">商品を<wbr>直す・<wbr>終える</a></li>
-      <li><a href="#a-count">数え直す<wbr>（棚卸し）</a></li>
+      <li><a href="#a-count">棚卸し</a></li>
       <li><a href="#a-alerts">在庫わずか</a></li>
       <li><a href="#a-summary">集計</a></li>
-      <li><a href="#a-import">在庫表から<wbr>取り込む</a></li>
-      <li><a href="#a-other">その他・<wbr>注意</a></li>
+      <li><a href="#a-prices">価格・セット</a></li>
+      <li><a href="#a-other">その<wbr>他の<wbr>機能</a></li>
       <li><a href="#a-faq">こまった<wbr>とき</a></li>
     </ol>
   </nav>
@@ -662,14 +814,14 @@
   <section class="step two-shots" id="a-start">
     <div>
       <div class="step-head"><span class="no">1</span><h3>はじめに<wbr>開く<wbr>とき</h3></div>
-      <p>はじめて<wbr>開くと<b><wbr>パスワード</b>を<wbr>聞かれます。<wbr>パスワードは、<wbr>管理の<wbr>担当者から<wbr>教えて<wbr>もらってください。<wbr>一度<wbr>入れれば、<wbr>その<wbr>スマホでは<wbr>次から<wbr>聞かれません。</p>
-      <p>つぎに<b><wbr>お名前</b>を<wbr>聞かれます。<wbr>入れておくと、<wbr>だれが<wbr>記録したかが<wbr>販売履歴に<wbr>残ります。<wbr>ここで<wbr>入れた<wbr>名前は、<wbr>画面右上の 👤 から<wbr>いつでも<wbr>変えられます。</p>
+      <p>はじめて<wbr>開くと<b><wbr>パスワード</b>を<wbr>聞かれます。<wbr>パスワードは、<wbr>管理の<wbr>担当者から<wbr>教えて<wbr>もらってください。<wbr>一度<wbr>入れれば、<wbr>その<wbr>端末では<wbr>次から<wbr>聞かれません。</p>
+      <p>つぎに<b><wbr>お名前</b>を<wbr>聞かれます。<wbr>入れておくと、<wbr>だれが<wbr>記録したかが<wbr>販売履歴に<wbr>残ります。<wbr>名前は、<wbr>画面右上の<wbr>名前の<wbr>ボタンから<wbr>いつでも<wbr>変えられます。</p>
       <div class="note warn"><b>パスワードは、<wbr>ほかの<wbr>人に<wbr>送ったり、<wbr>見える<wbr>場所に<wbr>書いたりしないでください。</b><wbr>管理画面では<wbr>在庫を<wbr>変えられる<wbr>ためです。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a01-password.jpg" width="600" height="1298" alt="パスワードを入れる画面"></div>
-        <figcaption>パスワードを<wbr>入れる</figcaption>
+        <figcaption>パスワードを<wbr>入れて<wbr>「開く」</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a02-operator.jpg" width="600" height="1298" alt="担当者のお名前を入れる画面"></div>
@@ -681,16 +833,16 @@
   <section class="step wide" id="a-tabs">
     <div>
       <div class="step-head"><span class="no">2</span><h3>画面の<wbr>全体</h3></div>
-      <p>画面の<wbr>上に<wbr>5つの<wbr>ボタン<wbr>（タブ）が<wbr>並んでいます。<wbr>やりたいことに<wbr>合わせて<wbr>押してください。</p>
+      <p>画面の<wbr>上に<wbr>5つの<wbr>タブが<wbr>並んでいます。<wbr>やりたいことに<wbr>合わせて<wbr>押してください。</p>
       <div class="tabs-guide">
-        <div><span class="ico">📝</span><b>商品登録</b>新しい<wbr>商品を<wbr>入れる</div>
-        <div><span class="ico">🛒</span><b>販売・補充</b>売れた<wbr>・<wbr>入った<wbr>・<wbr>動かした</div>
-        <div><span class="ico">📋</span><b>在庫一覧</b><wbr>全部の<wbr>在庫・<wbr>棚卸し・印刷</div>
-        <div><span class="ico">🔔</span><b>在庫わずか</b><wbr>残り5枚以下の<wbr>商品</div>
-        <div><span class="ico">📊</span><b>集計・他</b>月ごと<wbr>・<wbr>公演ごとの<wbr>売上</div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><b>商品登録</b>新しい<wbr>商品を<wbr>入れる</div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l-2 11H6z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><b>販売・補充</b>売れた<wbr>・<wbr>入った<wbr>・<wbr>動かした</div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><b>在庫一覧</b><wbr>全部の<wbr>在庫・<wbr>棚卸し・印刷</div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10"/><circle cx="12" cy="19" r="1.3"/></svg><b>在庫わずか</b><wbr>残り5以下の<wbr>商品</div>
+        <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-6"/></svg><b>集計・他</b>売上・価格・<wbr>その<wbr>ほか</div>
       </div>
-      <p>タブの<wbr>上に<wbr>ある <b>👀 在庫確認ページ</b> を<wbr>押すと、<wbr>お客さまが<wbr>見る<wbr>在庫の<wbr>ページが<wbr>開きます。<b><wbr>📖 説明書</b> を<wbr>押すと、<wbr>この<wbr>説明書が<wbr>開きます。</p>
-      <div class="note">タブを<wbr>押すと、<wbr>画面の<wbr>上の<wbr>色も<wbr>変わります<wbr>（販売は<wbr>赤、<wbr>在庫一覧は<wbr>オレンジ、<wbr>など）。<wbr>今どの<wbr>画面に<wbr>いるかの<wbr>目印に<wbr>してください。</div>
+      <p>タブの<wbr>上の <b>在庫確認ページ ↗</b> を<wbr>押すと、<wbr>お客さまが<wbr>見る<wbr>在庫の<wbr>ページが<wbr>開きます。<b><wbr>説明書 ↗</b> を<wbr>押すと、<wbr>この<wbr>説明書が<wbr>開きます。</p>
+      <div class="note">会場で<wbr>1会<wbr>計ずつ売る<wbr>ときは、<wbr>管理画面ではなく <b>販売レジ</b> を<wbr>使います<wbr>（上の<wbr>「売る」を<wbr>見てください）。<wbr>管理画面の<wbr>「販売・補充」は、<wbr>あとから<wbr>まとめて<wbr>記録する<wbr>ときや、<wbr>補充・移動に<wbr>使います。</div>
     </div>
   </section>
 
@@ -698,12 +850,12 @@
 
   <section class="step" id="a-sale">
     <div>
-      <div class="step-head"><span class="no">3</span><h3>売れた<wbr>とき<wbr>（1つずつ記録）</h3></div>
-      <p><b>🛒 販売・補充</b> を<wbr>押して、<b><wbr>「1商<wbr>品ずつ」</b>を<wbr>選びます。</p>
+      <div class="step-head"><span class="no">3</span><h3>売れた<wbr>数を<wbr>1つずつ記録する</h3></div>
+      <p><b>販売・補充</b> を<wbr>押して、<b><wbr>「1商<wbr>品ずつ」</b>を<wbr>選びます。</p>
       <ol class="legend">
         <li><span class="pin">1</span><span><b>▼ 販売</b> を<wbr>選びます<wbr>（赤くなっていれば<wbr>OK）。</span></li>
-        <li><span class="pin">2</span><span><b>🔍 選ぶ</b> を<wbr>押すと、<wbr>写真つきの<wbr>一覧から<wbr>商品を<wbr>選べます。<wbr>商品IDを<wbr>覚えていなくて<wbr>大丈夫です。</span></li>
-        <li><span class="pin">3</span><span><b>📷</b> を<wbr>押すと、<wbr>商品に<wbr>貼った<wbr>QRラベルを<wbr>カメラで<wbr>読み取れます。</span></li>
+        <li><span class="pin">2</span><span><b>選ぶ</b> を<wbr>押すと、<wbr>写真つきの<wbr>一覧から<wbr>商品を<wbr>選べます。<wbr>商品IDを<wbr>覚えていなくて<wbr>大丈夫です。</span></li>
+        <li><span class="pin">3</span><span><b>読取</b> を<wbr>押すと、<wbr>商品に<wbr>貼った<wbr>QRラベルを<wbr>カメラで<wbr>読み取れます。</span></li>
         <li><span class="pin">4</span><span><b>数量</b>を ＋ − で<wbr>合わせます。</span></li>
         <li><span class="pin">5</span><span>どこの<wbr>在庫から<wbr>売れたか<wbr>（<b>在庫区分</b>）を<wbr>選びます。</span></li>
         <li><span class="pin">6</span><span><b>イベント名</b>を<wbr>入れると、<wbr>公演ごとの<wbr>売上が<wbr>分かります<wbr>（入れなくても<wbr>OK）。</span></li>
@@ -713,13 +865,13 @@
     <figure class="phone">
       <div class="screen">
         <img src="img/a06-sale.jpg" width="600" height="1298" alt="1商品ずつ販売を記録する画面">
-        <span class="pin" style="left:6.5%;top:30.6%">1</span>
-        <span class="pin" style="left:69.6%;top:48.7%">2</span>
-        <span class="pin" style="left:87.6%;top:53.7%">3</span>
-        <span class="pin" style="left:50%;top:67.7%">4</span>
-        <span class="pin" style="left:88%;top:77.1%">5</span>
-        <span class="pin" style="left:88%;top:86.2%">6</span>
-        <span class="pin" style="left:78%;top:93.1%">7</span>
+        <span class="pin" style="left:20.6%;top:32.5%">1</span>
+        <span class="pin" style="left:69.5%;top:44.3%">2</span>
+        <span class="pin" style="left:85.9%;top:44.3%">3</span>
+        <span class="pin" style="left:50.0%;top:63.3%">4</span>
+        <span class="pin" style="left:80.0%;top:71.6%">5</span>
+        <span class="pin" style="left:80.0%;top:79.7%">6</span>
+        <span class="pin" style="left:75.0%;top:86.0%">7</span>
       </div>
       <figcaption>「販売・補充」の<wbr>画面</figcaption>
     </figure>
@@ -729,7 +881,7 @@
     <div>
       <div class="step-head"><span class="no">4</span><h3>確認して、<wbr>記録する</h3></div>
       <p>「販売します。<wbr>よろしいですか？」と、<wbr>商品と<wbr>数が<wbr>出ます。<wbr>合っていれば <b>▼ 販売する</b>、<wbr>ちがっていれば <b>やめる</b> を<wbr>押します。</p>
-      <p>記録できると <b>✅ 販売しました</b> と<wbr>出て、<wbr>在庫の<wbr>数が<wbr>「10 → 8」のように<wbr>変わった<wbr>ことが<wbr>分かります。</p>
+      <p>記録できると <b>販売しました</b> と<wbr>出て、<wbr>在庫の<wbr>数が<wbr>「29 → 27」のように<wbr>変わった<wbr>ことが<wbr>分かります。</p>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -748,7 +900,7 @@
     <div>
       <div class="step-head"><span class="no">5</span><h3>まちがえた<wbr>とき</h3></div>
       <p>記録した<wbr>あと、<wbr>画面の<wbr>下に<wbr>黒い帯が<wbr>出ます。<wbr>まちがえた<wbr>ときは <b>↩ 取り消す</b> を<wbr>押し、<wbr>確認で <b>取り消す</b> を<wbr>押すと、<wbr>在庫が<wbr>元に<wbr>戻ります。</p>
-      <div class="note">取り消せるのは <b>24時間以内</b>の<wbr>「販売・補充・移動・<wbr>棚卸し」です。<br><wbr>帯を ✕ で<wbr>消してしまった<wbr>ときや、<wbr>24時間より<wbr>前の<wbr>ものは、<wbr>反対の<wbr>操作<wbr>（売った<wbr>数を<wbr>「補充」する、<wbr>など）で<wbr>直してください。</div>
+      <div class="note">取り消せるのは <b>24時間以内</b>の<wbr>「販売・補充・移動・<wbr>棚卸し」です。<br><wbr>棚卸しの<wbr>あとの帯は、<wbr>10秒たつと<wbr>自動で<wbr>消えます。<br><wbr>帯を ✕ で<wbr>消してしまった<wbr>ときや、<wbr>24時間より<wbr>前の<wbr>ものは、<wbr>反対の<wbr>操作<wbr>（売った<wbr>数を<wbr>「補充」する、<wbr>など）で<wbr>直してください。</div>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a08b-undo-confirm.jpg" width="600" height="1298" alt="取り消しますか、という確認の画面"></div>
@@ -760,9 +912,9 @@
 
   <section class="step wide" id="a-sheet">
     <div>
-      <div class="step-head"><span class="no">6</span><h3>販売チェック表で<wbr>数える</h3></div>
-      <p>会場では、<wbr>1つ<wbr>売れる<wbr>たびに<wbr>スマホで<wbr>記録するのは<wbr>大変です。<wbr>紙の<b><wbr>販売チェック表</b>に<wbr>「正」の<wbr>字で<wbr>数えて<wbr>おき、<wbr>あとで<wbr>まとめて<wbr>記録するのが<wbr>おすすめです。</p>
-      <p><b>📋 在庫一覧</b> を<wbr>押して、<b><wbr>🖨 販売チェック<wbr>表</b> を<wbr>押すと、<wbr>いまの<wbr>商品の<wbr>一覧が<wbr>入った<wbr>表が<wbr>出ます。<wbr>パソコンや<wbr>スマホの<wbr>ブラウザの<wbr>「印刷」から、<b class="nw"><wbr>A4・縦</b>で<wbr>印刷してください<wbr>（1枚に<wbr>入ります）。</p>
+      <div class="step-head"><span class="no">6</span><h3>販売チェック表で<wbr>数える<wbr>（レジを<wbr>使わない<wbr>とき）</h3></div>
+      <p>販売レジを<wbr>使えない<wbr>ときは、<wbr>紙の<b><wbr>販売チェック表</b>に<wbr>「正」の<wbr>字で<wbr>数えて<wbr>おき、<wbr>あとで<wbr>まとめて<wbr>記録します。</p>
+      <p><b>在庫一覧</b> を<wbr>押して、<b><wbr>販売チェック<wbr>表</b> を<wbr>押すと、<wbr>いま在庫が<wbr>ある<wbr>商品の<wbr>一覧が<wbr>入った<wbr>表が<wbr>出ます。<b><wbr>印刷する</b> から、<b class="nw"><wbr>A4・縦</b>で<wbr>印刷してください<wbr>（1枚に<wbr>入ります）。<wbr>字を<wbr>大きくしたい<wbr>ときは <b>A4横<wbr>（<wbr>大きめ）に<wbr>する</b> を<wbr>押します。</p>
       <p>時間帯①〜⑦の<wbr>マスに、<wbr>売れる<wbr>たびに<wbr>線を<wbr>1本ずつ<wbr>書きます。<wbr>5本で<wbr>「正」が<wbr>1つ＝5個です。</p>
       <div class="tally-demo" aria-label="正の字の書き方">
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32" stroke-width="3" stroke-linecap="round" fill="none"/></svg>1個</figure>
@@ -771,59 +923,64 @@
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33" stroke-width="3" stroke-linecap="round" fill="none"/></svg>4個</figure>
         <figure><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 8H32M20 8V33M20 20H30M11 20V33M6 33H34" stroke-width="3" stroke-linecap="round" fill="none"/></svg>5個</figure>
       </div>
-      <p>いちばん<wbr>下に<b><wbr>空欄が<wbr>10行</b>あります。<wbr>当日いきなり出た<wbr>商品は、<wbr>ここに<wbr>名前を<wbr>書いて<wbr>使ってください。<wbr>上には<wbr>日付と<wbr>担当者2名の<wbr>欄が<wbr>あります。</p>
+      <p>いちばん<wbr>下に<b><wbr>空欄</b>が<wbr>あります。<wbr>当日いきなり出た<wbr>商品は、<wbr>ここに<wbr>名前を<wbr>書いて<wbr>使ってください。<wbr>上には<wbr>日付と<wbr>担当者2名の<wbr>欄が<wbr>あります。</p>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen">
-          <img src="img/a10-inventory.jpg" width="600" height="1298" alt="在庫一覧の画面。棚卸し、販売チェック表、QRラベル印刷のボタンがある">
-          <span class="pin" style="left:64%;top:43.2%">1</span>
+          <img src="img/a10-inventory.jpg" width="600" height="1298" alt="在庫一覧の画面。棚卸し、販売チェック表などのボタンがある">
+          <span class="pin" style="left:43.4%;top:40.4%">1</span>
         </div>
-        <figcaption>① 在庫一覧の<wbr>「🖨 販売チェック表」</figcaption>
+        <figcaption>① 在庫一覧の<wbr>「販売チェック表」</figcaption>
       </figure>
       <figure class="paper">
-        <img src="img/a13-tally.jpg" width="900" height="1272" alt="販売チェック表の見本。商品の一覧と、時間帯①から⑦、合計、備考の欄がある">
+        <img src="img/a13-tally.jpg" width="900" height="1273" alt="販売チェック表の見本。商品の一覧と、時間帯①から⑦、合計、備考の欄がある">
         <figcaption>出てくる<wbr>表（上の<wbr>「印刷する」で<wbr>印刷します）</figcaption>
       </figure>
     </div>
   </section>
 
-  <section class="step" id="a-batch">
+  <section class="step two-shots" id="a-batch">
     <div>
       <div class="step-head"><span class="no">7</span><h3>公演の<wbr>あとに、<wbr>まとめて<wbr>記録する</h3></div>
       <p>販売チェック表の<wbr>「合計」を<wbr>見ながら、<wbr>まとめて<wbr>記録します。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>🛒 販売・補充</b> で <b>「まとめて<wbr>入力」</b>を<wbr>選び、<b><wbr>▼ 販売</b>・在庫区分・イベント名を<wbr>合わせます。</span></li>
+        <li><span class="pin">1</span><span><b>販売・補充</b> で <b>「まとめて<wbr>入力」</b>を<wbr>選び、<b><wbr>▼ 販売</b>・在庫区分・イベント名を<wbr>合わせます。</span></li>
         <li><span class="pin">2</span><span>売れた<wbr>商品の <b>＋</b> を、<wbr>売れた<wbr>数だけ押します。<wbr>多すぎたら <b>−</b> で<wbr>減らします。</span></li>
-        <li><span class="pin">3</span><span>画面の<wbr>下に<wbr>「◯商品 ◯枚」と<wbr>合計が<wbr>出ます。<b><wbr>確認へ</b> を<wbr>押し、<wbr>内容が<wbr>合っていれば <b>▼ 販売する</b>。</span></li>
+        <li><span class="pin">3</span><span>画面の<wbr>下に<wbr>「◯商品 ◯点」と<wbr>合計が<wbr>出ます。<b><wbr>確認へ</b> を<wbr>押し、<wbr>内容が<wbr>合っていれば <b>▼ 販売する</b>。</span></li>
       </ol>
-      <div class="note">途中で<wbr>画面を<wbr>閉じても、<wbr>入れた<wbr>数は<wbr>その<wbr>スマホに<wbr>残っています。<wbr>「商品を<wbr>さが<wbr>す」の<wbr>欄に<wbr>名前を<wbr>入れると、<wbr>目的の<wbr>商品が<wbr>すぐ<wbr>見つかります。<wbr>📷 で<wbr>QRラベルを<wbr>読むと、<wbr>1回で<wbr>＋1されます。</div>
+      <div class="note">途中で<wbr>画面を<wbr>閉じても、<wbr>入れた<wbr>数は<wbr>その<wbr>端末に<wbr>残っています。<wbr>「商品を<wbr>さが<wbr>す」の<wbr>欄に<wbr>名前を<wbr>入れると、<wbr>目的の<wbr>商品が<wbr>すぐ<wbr>見つかります。<b><wbr>読取</b> で<wbr>QRラベルを<wbr>読むと、<wbr>1回で<wbr>＋1されます。</div>
     </div>
-    <figure class="phone">
-      <div class="screen">
-        <img src="img/a09-batch.jpg" width="600" height="1298" alt="まとめて入力の画面。商品ごとに＋と−のボタンがある">
-        <span class="pin" style="left:89.2%;top:20.3%">2</span>
-        <span class="pin" style="left:28.5%;top:92%">3</span>
-        <span class="pin" style="left:86.2%;top:91%">3</span>
-      </div>
-      <figcaption>数を<wbr>入れると、<wbr>下に<wbr>合計と<wbr>「確認へ」が<wbr>出ます</figcaption>
-    </figure>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen">
+          <img src="img/a09-batch.jpg" width="600" height="1298" alt="まとめて入力の画面。商品ごとに＋と−のボタンがある">
+          <span class="pin" style="left:89.0%;top:11.4%">2</span>
+          <span class="pin" style="left:28.3%;top:96.4%">3</span>
+        </div>
+        <figcaption>数を<wbr>入れると、<wbr>下に<wbr>合計と<wbr>「確認へ」が<wbr>出ます</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a09b-batch-confirm.jpg" width="600" height="1298" alt="まとめて記録する前の確認画面"></div>
+        <figcaption>確認して<wbr>「▼ 販売する」</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="step" id="a-restock">
     <div>
       <div class="step-head"><span class="no">8</span><h3>商品が<wbr>入った<wbr>とき・場所を<wbr>移すとき</h3></div>
-      <p>売れた<wbr>ときと<wbr>同じ<wbr>画面の、<wbr>いちばん上の<wbr>ボタンを<wbr>切りかえます。</p>
-      <ol class="legend">
-        <li><span class="pin" style="background:#27ae60">▲</span><span><b>▲ 補充</b> … 商品が<wbr>入って、<wbr>在庫が<wbr>増えた<wbr>とき。</span></li>
-        <li><span class="pin" style="background:#3498db">⇄</span><span><b>⇄ 移動</b> … 「現場用」から<wbr>「ファンクラブ用」のように、<wbr>置き場所を<wbr>移すとき。<wbr>移動元と<wbr>移動先を<wbr>選びます。<wbr>合計の<wbr>数は<wbr>変わらず、<wbr>売上にも<wbr>入りません。</span></li>
-      </ol>
+      <p>売れた<wbr>ときと<wbr>同じ<wbr>画面の、<wbr>上の<wbr>ボタンを<wbr>切りかえます。</p>
+      <ul class="legend">
+        <li><span class="pin" style="background:#1d8a52">▲</span><span><b>▲ 補充</b> … 商品が<wbr>入って、<wbr>在庫が<wbr>増えた<wbr>とき。</span></li>
+        <li><span class="pin" style="background:#1d74d0">⇄</span><span><b>⇄ 移動</b> … 「現場用」から<wbr>「ファンクラブ用」のように、<wbr>置き場所を<wbr>移すとき。<wbr>移動元と<wbr>移動先を<wbr>選びます。<wbr>合計の<wbr>数は<wbr>変わらず、<wbr>売上にも<wbr>入りません。</span></li>
+      </ul>
       <p>その<wbr>あとの<wbr>流れ<wbr>（商品を<wbr>選ぶ → 数量 → 確認）は、<wbr>販売と<wbr>同じです。</p>
     </div>
     <figure class="phone">
       <div class="screen"><img src="img/a06-sale.jpg" width="600" height="1298" alt="販売・補充の画面の上にある、販売・補充・移動のボタン">
-        <span class="pin" style="left:50%;top:35.3%;background:#27ae60">▲</span>
-        <span class="pin" style="left:79.6%;top:35.3%;background:#3498db">⇄</span>
+        <span class="pin" style="left:50.0%;top:32.5%">▲</span>
+        <span class="pin" style="left:79.4%;top:32.5%">⇄</span>
       </div>
       <figcaption>上の<wbr>ボタンで<wbr>「補充」<wbr>「移動」に<wbr>切りかえ</figcaption>
     </figure>
@@ -834,47 +991,65 @@
   <section class="step two-shots" id="a-register">
     <div>
       <div class="step-head"><span class="no">9</span><h3>新しい<wbr>商品を<wbr>登録する</h3></div>
-      <p><b>📝 商品登録</b> を<wbr>押して、<wbr>上から<wbr>順に<wbr>入れていきます。</p>
+      <p><b>商品登録</b> を<wbr>押して、<wbr>上から<wbr>順に<wbr>入れていきます。</p>
       <ol class="legend">
         <li><span class="pin">1</span><span><b>カテゴリ<wbr>（商品名）<wbr>・種別・色</b>を<wbr>入れます。<wbr>一度<wbr>入れた<wbr>名前は、<wbr>打ち<wbr>はじめると<wbr>候補に<wbr>出ます。</span></li>
-        <li><span class="pin">2</span><span><b>サイズ</b>は、<wbr>ある<wbr>ものを<wbr>全部<wbr>押して<wbr>選びます<wbr>（紫に<wbr>なった<wbr>ものが<wbr>選ばれています）。<wbr>選んだ数だけ、<wbr>まとめて<wbr>登録されます。</span></li>
+        <li><span class="pin">2</span><span><b>サイズ</b>は、<wbr>ある<wbr>ものを<wbr>全部<wbr>押して<wbr>選びます<wbr>（黒くなった<wbr>ものが<wbr>選ばれています）。<wbr>選んだ数だけ、<wbr>まとめて<wbr>登録されます。</span></li>
         <li><span class="pin">3</span><span><b>価格</b>を<wbr>入れると、<wbr>売上金額が<wbr>集計できます<wbr>（<wbr>空でも<wbr>OK）。</span></li>
-        <li><span class="pin">4</span><span><b>📷 撮影する</b> で<wbr>その場で<wbr>写真を<wbr>撮れます<wbr>（なくても<wbr>OK）。</span></li>
-        <li><span class="pin">5</span><span><b>初期在庫</b>に、<wbr>サイズごと<wbr>・場所ごとの<wbr>数を<wbr>入れて、<b><wbr>登録する</b> を<wbr>押します。</span></li>
+        <li><span class="pin">4</span><span><b>撮影する</b> で<wbr>その場で<wbr>写真を<wbr>撮れます<wbr>（なくても<wbr>OK）。</span></li>
+        <li><span class="pin">5</span><span><b>初期在庫</b>に、<wbr>サイズごと<wbr>・場所ごとの<wbr>数を<wbr>入れて、<b><wbr>まとめて<wbr>登録する</b> を<wbr>押します。</span></li>
       </ol>
       <div class="note warn">同じ<wbr>商品が<wbr>もう<wbr>ある<wbr>ときは、<wbr>黄色い<wbr>文字で<wbr>知らせます。<wbr>その<wbr>ときは<wbr>登録せずに、<wbr>「販売・補充 → ▲ 補充」で<wbr>数を<wbr>足してください。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a03-register.jpg" width="600" height="1298" alt="商品登録の画面。サイズを複数選べる">
-          <span class="pin" style="left:88%;top:31.2%">1</span>
-          <span class="pin" style="left:88%;top:58.2%">2</span>
-          <span class="pin" style="left:88%;top:73.7%">3</span>
-          <span class="pin" style="left:50%;top:90.2%">4</span>
+          <span class="pin" style="left:80.0%;top:45.0%">1</span>
+          <span class="pin" style="left:85.0%;top:55.0%">2</span>
+          <span class="pin" style="left:80.0%;top:64.9%">3</span>
+          <span class="pin" style="left:27.9%;top:82.8%">4</span>
         </div>
-        <figcaption>商品情報と<wbr>サイズ<wbr>（S・M・L）を<wbr>選んだ<wbr>ところ</figcaption>
+        <figcaption>商品情報と<wbr>サイズを<wbr>選んだ<wbr>ところ</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a04-register-stock.jpg" width="600" height="1298" alt="初期在庫を入れる表と、まとめて登録するボタン">
-          <span class="pin" style="left:88%;top:40%">5</span>
+          <span class="pin" style="left:85.0%;top:50.0%">5</span>
         </div>
         <figcaption>サイズごとの<wbr>在庫を<wbr>入れて<wbr>「まとめて<wbr>登録する」</figcaption>
       </figure>
     </div>
   </section>
 
+  <section class="step" id="a-list">
+    <div>
+      <div class="step-head"><span class="no">10</span><h3>在庫一覧の<wbr>見かた</h3></div>
+      <p><b>在庫一覧</b> には、<wbr>全部の<wbr>商品が<wbr>商品名ごとに<wbr>並びます。<wbr>サイズ違いは<wbr>1つに<wbr>まとまり、<wbr>サイズごとの<wbr>在庫が<wbr>札で<wbr>出ます。</p>
+      <ol class="legend">
+        <li><span class="pin">1</span><span><b>サイズの<wbr>札</b> … 押すと、<wbr>その<wbr>商品を<wbr>選んだ<wbr>状態で<wbr>「販売・補充」に<wbr>移ります。</span></li>
+        <li><span class="pin">2</span><span><b>直す</b> … サイズの<wbr>ボタンを<wbr>押すと、<wbr>その<wbr>商品の<wbr>情報を<wbr>直せます。</span></li>
+      </ol>
+      <p>写真を<wbr>押すと、<wbr>写真を<wbr>大きく<wbr>見たり、<wbr>差しかえたりできます。<wbr>写真が<wbr>ない<wbr>商品は <b>写真を<wbr>登録</b> から<wbr>撮れます。<wbr>上の<wbr>「写真なしだけ」に<wbr>チェックすると、<wbr>写真が<wbr>ない<wbr>商品だけが<wbr>出ます。</p>
+    </div>
+    <figure class="phone">
+      <div class="screen"><img src="img/a10b-cards.jpg" width="600" height="1298" alt="在庫一覧の商品の並び">
+        <span class="pin" style="left:33.9%;top:15.9%">1</span>
+        <span class="pin" style="left:39.0%;top:20.7%">2</span>
+      </div>
+      <figcaption>在庫一覧<wbr>（サイズごとの<wbr>札）</figcaption>
+    </figure>
+  </section>
+
   <section class="step two-shots" id="a-edit">
     <div>
-      <div class="step-head"><span class="no">10</span><h3>商品を<wbr>直す・販売を<wbr>終える</h3></div>
-      <p><b>📋 在庫一覧</b> で、<wbr>商品IDの<wbr>横の <b>✏️</b> を<wbr>押すと、<wbr>名前・種別・色・サイズ・価格を<wbr>直せます。<wbr>在庫の<wbr>数や<wbr>履歴は<wbr>変わりません。</p>
-      <p><b>もう<wbr>仕入れない<wbr>商品</b>は、<b><wbr>🚫 販売終了に<wbr>する</b> を<wbr>押してください。<wbr>見る<wbr>人の<wbr>ページと<wbr>「在庫わずか」から<wbr>消えます。<wbr>データは<wbr>残るので、<wbr>あとで<wbr>「販売中に<wbr>戻す」ことも<wbr>できます。</p>
-      <div class="note warn"><b>🗑 この<wbr>商品を<wbr>削除</b> は、<wbr>2回押すと<wbr>本当に<wbr>消えます。<wbr>元には<wbr>戻せません。<wbr>ふだんは<wbr>「販売終了」を<wbr>使ってください。</div>
-      <div class="note">一覧の<wbr>写真の<wbr>欄を<wbr>押すと、<wbr>写真を<wbr>見たり差しかえたりできます。<wbr>写真が<wbr>ない<wbr>商品は ＋ を<wbr>押すと<wbr>追加できます。</div>
+      <div class="step-head"><span class="no">11</span><h3>商品を<wbr>直す・販売を<wbr>終える</h3></div>
+      <p><b>在庫一覧</b> の <b>直す</b> を<wbr>押すと、<wbr>名前・種別・色・サイズ・価格を<wbr>直せます。<wbr>在庫の<wbr>数や<wbr>履歴は<wbr>変わりません。</p>
+      <p><b>もう<wbr>仕入れない<wbr>商品</b>は、<b><wbr>販売終了に<wbr>する</b> を<wbr>押してください。<wbr>在庫確認ページ・販売レジ・<wbr>「在庫わずか」から<wbr>消えます。<wbr>データは<wbr>残るので、<wbr>あとで<wbr>「販売中に<wbr>戻す」ことも<wbr>できます。</p>
+      <div class="note warn"><b>この<wbr>商品を<wbr>削除</b> は、<wbr>2回押すと<wbr>本当に<wbr>消えます。<wbr>元には<wbr>戻せません。<wbr>ふだんは<wbr>「販売終了」を<wbr>使ってください。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a12-edit.jpg" width="600" height="1298" alt="商品情報の編集画面"></div>
-        <figcaption>✏️ で<wbr>開く<wbr>編集画面</figcaption>
+        <figcaption>「直す」で<wbr>開く<wbr>画面</figcaption>
       </figure>
       <figure class="phone">
         <div class="screen"><img src="img/a12b-edit-bottom.jpg" width="600" height="1298" alt="編集画面の下にある、販売終了と削除のボタン"></div>
@@ -885,21 +1060,20 @@
 
   <section class="step two-shots" id="a-count">
     <div>
-      <div class="step-head"><span class="no">11</span><h3>数え直す<wbr>（棚卸し）</h3></div>
+      <div class="step-head"><span class="no">12</span><h3>数え直す<wbr>（棚卸し）</h3></div>
       <p>実際の<wbr>数と<wbr>画面の<wbr>数が<wbr>合わない<wbr>ときに<wbr>使います。</p>
       <ol class="legend">
-        <li><span class="pin">1</span><span><b>📋 在庫一覧</b> の <b>📋 棚卸し</b> を<wbr>押し、<wbr>数える<wbr>場所<wbr>（在庫区分）を<wbr>選びます。</span></li>
-        <li><span class="pin">2</span><span>数えた<wbr>数を、<wbr>商品ごとに<wbr>入れます。<wbr>入れなかった<wbr>商品は<wbr>そのままです。<wbr>右に<wbr>「+2」<wbr>「−1」のように<wbr>差が<wbr>出ます。</span></li>
-        <li><span class="pin">3</span><span>下の <b>確認へ</b> を<wbr>押し、<wbr>差が<wbr>ある<wbr>商品だけが<wbr>出るので<wbr>確かめて <b>反映する</b>。</span></li>
+        <li><span class="pin">1</span><span><b>在庫一覧</b> の <b>棚卸し</b> を<wbr>押し、<wbr>数える<wbr>場所<wbr>（在庫区分）を<wbr>選びます。</span></li>
+        <li><span class="pin">2</span><span>数えた<wbr>数を、<wbr>商品ごとに<wbr>入れます。<wbr>入れなかった<wbr>商品は<wbr>そのままです。</span></li>
+        <li><span class="pin">3</span><span>下の <b>確認へ</b> を<wbr>押すと、<wbr>差が<wbr>ある<wbr>商品だけが<wbr>出ます。<wbr>確かめて <b>反映する</b> を<wbr>押します。</span></li>
       </ol>
-      <div class="note">棚卸しで<wbr>直した数は、<wbr>売上には<wbr>入りません。<wbr>途中で<wbr>やめても、<wbr>入れた<wbr>数は<wbr>その<wbr>スマホに<wbr>残ります。</div>
+      <div class="note">棚卸しで<wbr>直した数は、<wbr>売上には<wbr>入りません。<wbr>途中で<wbr>やめても、<wbr>入れた<wbr>数は<wbr>その<wbr>端末に<wbr>残ります。<wbr>反映した<wbr>あとの<wbr>「取り消す」の<wbr>帯は、<wbr>10秒で<wbr>消えます。</div>
     </div>
     <div class="shots">
       <figure class="phone">
         <div class="screen"><img src="img/a11-stocktake.jpg" width="600" height="1298" alt="棚卸しの画面。商品ごとに数えた数を入れる欄がある">
-          <span class="pin" style="left:88%;top:31.6%">1</span>
-          <span class="pin" style="left:58%;top:65.9%">2</span>
-          <span class="pin" style="left:86.2%;top:91%">3</span>
+          <span class="pin" style="left:80.0%;top:29.0%">1</span>
+          <span class="pin" style="left:86.2%;top:96.4%">3</span>
         </div>
         <figcaption>数えた<wbr>数を<wbr>入れる</figcaption>
       </figure>
@@ -910,25 +1084,32 @@
     </div>
   </section>
 
-  <section class="step" id="a-alerts">
+  <section class="step two-shots" id="a-alerts">
     <div>
-      <div class="step-head"><span class="no">12</span><h3>在庫わずか</h3></div>
-      <p><b>🔔 在庫わずか</b> には、<wbr>合計が<b><wbr>5枚以下</b>の<wbr>商品が、<wbr>少ない<wbr>順に<wbr>並びます。<wbr>タブの<wbr>上の<wbr>数字が、<wbr>その<wbr>件数です。</p>
-      <p><b>▲ 補充</b> を<wbr>押すと、<wbr>その<wbr>商品を<wbr>選んだ<wbr>状態で<wbr>補充の<wbr>画面に<wbr>移ります。<wbr>もう<wbr>仕入れない<wbr>商品は <b>🚫 販売終了</b> に<wbr>すると、<wbr>この<wbr>一覧から<wbr>消えます。</p>
+      <div class="step-head"><span class="no">13</span><h3>在庫わずか・まとめて<wbr>販売終了</h3></div>
+      <p><b>在庫わずか</b> には、<wbr>合計が<b><wbr>5以下</b>の<wbr>商品が、<wbr>少ない<wbr>順に<wbr>並びます。<wbr>タブの<wbr>上の<wbr>数字は、<wbr>売り<wbr>切れを<wbr>除いた<wbr>「残りわずか」の<wbr>件数です。</p>
+      <p><b>▲ 補充</b> を<wbr>押すと、<wbr>その<wbr>商品を<wbr>選んだ<wbr>状態で<wbr>補充の<wbr>画面に<wbr>移ります。</p>
+      <p><b>もう<wbr>仕入れない<wbr>商品を<wbr>まとめて<wbr>販売終了に<wbr>する</b><wbr>ときは、<wbr>商品の<wbr>左の<wbr>チェックを<wbr>入れるか、<wbr>上の <b>すべて<wbr>選ぶ</b>・<b><wbr>在庫切れだけ選ぶ</b> で<wbr>選び、<wbr>赤い <b>選んだ ◯件を<wbr>販売終了に<wbr>する</b> を<wbr>押します。<wbr>選んだ<wbr>商品の<wbr>一覧が<wbr>出るので、<wbr>確かめてから<wbr>決めます。</p>
       <div class="note">メールなどの<wbr>お知らせは<wbr>送りません。<wbr>気に<wbr>なった<wbr>ときに<wbr>この<wbr>タブを<wbr>見てください。</div>
     </div>
-    <figure class="phone">
-      <div class="screen"><img src="img/a14-alerts.jpg" width="600" height="1298" alt="在庫わずかの一覧"></div>
-      <figcaption>残りが<wbr>少ない<wbr>商品の<wbr>一覧</figcaption>
-    </figure>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a14-alerts.jpg" width="600" height="1298" alt="在庫わずかの一覧"></div>
+        <figcaption>残りが<wbr>少ない<wbr>商品の<wbr>一覧</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a14b-alerts-pick.jpg" width="600" height="1298" alt="販売終了にする商品を2件選んだところ"></div>
+        <figcaption>2件を<wbr>選んだ<wbr>ところ</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="step two-shots" id="a-summary">
     <div>
-      <div class="step-head"><span class="no">13</span><h3>売上を<wbr>見る<wbr>（集計）</h3></div>
-      <p><b>📊 集計・<wbr>他</b> を<wbr>押すと、<wbr>月ごとの<wbr>販売数・補充数・売上金額が<wbr>出ます。<b><wbr>集計を<wbr>更新する</b> を<wbr>押すと<wbr>最新に<wbr>なります。</p>
-      <p>下の<b><wbr>🎪 イベント別</b>では、<wbr>イベント名を<wbr>付けて<wbr>記録した<wbr>販売を、<wbr>公演ごとに<wbr>見られます。</p>
-      <div class="note">売上金額は、<wbr>商品に<wbr>価格を<wbr>入れてから<wbr>売れた<wbr>分だけ<wbr>計算されます。<wbr>価格は<wbr>「商品を<wbr>直す」で<wbr>入れられます。</div>
+      <div class="step-head"><span class="no">14</span><h3>売上を<wbr>見る<wbr>（集計）</h3></div>
+      <p><b>集計・<wbr>他</b> を<wbr>押すと、<wbr>月ごとの<wbr>販売数・補充数・売上金額が<wbr>出ます。<b><wbr>集計を<wbr>更新する</b> を<wbr>押すと<wbr>最新に<wbr>なります。</p>
+      <p>下の<b><wbr>イベント別</b>では、<wbr>イベント名を<wbr>付けて<wbr>記録した<wbr>販売を、<wbr>公演ごとに<wbr>見られます。</p>
+      <div class="note">売上金額は、<wbr>商品に<wbr>価格を<wbr>入れてから<wbr>売れた<wbr>分だけ<wbr>計算されます。</div>
     </div>
     <div class="shots">
       <figure class="phone">
@@ -942,28 +1123,39 @@
     </div>
   </section>
 
-  <section class="step" id="a-import">
+  <section class="step two-shots" id="a-prices">
     <div>
-      <div class="step-head"><span class="no">14</span><h3>在庫表<wbr>（スプレッドシート）から<wbr>取り込む</h3></div>
-      <p>別に<wbr>管理している<wbr>在庫表に<wbr>新しい<wbr>商品が<wbr>増えた<wbr>ときに<wbr>使います。</p>
-      <p><b>📝 商品登録</b> の<wbr>いちばん下、<b><wbr>⑤ 在庫表から<wbr>取り込む</b> に<wbr>在庫表の<wbr>アドレスを<wbr>貼り、<b><wbr>いまの<wbr>在庫表と<wbr>比べる</b> を<wbr>押します。<wbr>まだ<wbr>登録されていない<wbr>商品だけが<wbr>出るので、<wbr>チェックを<wbr>確かめて <b>登録する</b> を<wbr>押します。</p>
-      <div class="note">名前が<wbr>少し<wbr>ちがうだけで<wbr>同じ<wbr>商品の<wbr>ときは、<wbr>「◯◯と<wbr>同じ<wbr>商品に<wbr>する」を<wbr>押してください。<wbr>次からは<wbr>同じ<wbr>ものと<wbr>して<wbr>扱います。<wbr>登録しない<wbr>行は<wbr>「今後<wbr>この<wbr>行を<wbr>表示しない」を<wbr>押します。</div>
+      <div class="step-head"><span class="no">15</span><h3>価格・セット販売</h3></div>
+      <p><b>集計・<wbr>他</b> の<wbr>いちばん下、<b><wbr>その<wbr>他</b> の <b>価格・セット販売</b> で、<wbr>商品の<wbr>値段<wbr>（税込）を<wbr>まとめて<wbr>入れられます。<wbr>サイズ違いには<wbr>同じ<wbr>値段が<wbr>入ります。</p>
+      <p>下の<b><wbr>セット販売</b>では、<wbr>「マグネットから<wbr>好きな<wbr>2個で<wbr>500円」のような<wbr>セットを<wbr>作れます。<b><wbr>セットだけで<wbr>売る</b> に<wbr>チェックすると、<wbr>販売レジでは<wbr>その<wbr>種類を<wbr>1個ずつ<wbr>入れられなくなり、<wbr>セットからだけ<wbr>選べます。</p>
+      <div class="note">値段を<wbr>空欄に<wbr>して<wbr>保存すると、<wbr>その<wbr>セットは<wbr>消えます。<wbr>いちばん<wbr>下の<wbr>空欄に<wbr>入れると、<wbr>セットを<wbr>追加できます。</div>
     </div>
-    <figure class="phone">
-      <div class="screen"><img src="img/a17-source.jpg" width="600" height="1298" alt="在庫表と比べた結果。未登録の商品が2件出ている"></div>
-      <figcaption>未登録の<wbr>商品だけが<wbr>出ます</figcaption>
-    </figure>
+    <div class="shots">
+      <figure class="phone">
+        <div class="screen"><img src="img/a18-tools.jpg" width="600" height="1298" alt="集計・他のその他のボタン"></div>
+        <figcaption>「その<wbr>他」の<wbr>ボタン</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="screen"><img src="img/a19-prices-sets.jpg" width="600" height="1298" alt="価格とセット販売を入れる画面"></div>
+        <figcaption>価格と<wbr>セットを<wbr>入れる<wbr>画面</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="step wide" id="a-other">
     <div>
-      <div class="step-head"><span class="no">15</span><h3>その他・<wbr>注意</h3></div>
-      <ol class="legend">
-        <li><span class="pin" style="background:var(--admin)">A</span><span><b>バックアップ</b> … 週に<wbr>1回、<wbr>管理画面を<wbr>開いた<wbr>ときに<wbr>自動で<wbr>在庫表の<wbr>コピーが<wbr>作られます<wbr>（Googleドライブの<wbr>「コロッケ在庫 バックアップ」）。<wbr>「集計・他」の <b>今すぐ<wbr>バックアップ</b> でも<wbr>作れます。</span></li>
-        <li><span class="pin" style="background:var(--admin)">B</span><span><b>お客さま用QR</b> … 「集計・他」の <b>お客さま用QR</b> で、<wbr>見る<wbr>人の<wbr>ページの<wbr>QRコードを<wbr>大きく<wbr>印刷できます。<wbr>会場に<wbr>貼っておくと<wbr>便利です。</span></li>
-        <li><span class="pin" style="background:var(--admin)">C</span><span><b>QRラベル</b> … 「在庫一覧」の <b>QRラベル印刷</b> で、<wbr>商品ごとの<wbr>QRラベルを<wbr>印刷できます。<wbr>袋や<wbr>箱に<wbr>貼ると、<wbr>📷 で<wbr>読むだけで<wbr>商品を<wbr>選べます。</span></li>
-        <li><span class="pin" style="background:var(--admin)">D</span><span><b>在庫表を<wbr>直接<wbr>書きかえる<wbr>とき</b> … 書きかえた数は<wbr>見る<wbr>人の<wbr>ページにも<wbr>出ますが、<wbr>販売履歴に<wbr>残らず、<wbr>集計にも<wbr>入りません。<wbr>数を<wbr>合わせたい<wbr>ときは<wbr>「棚卸し」を<wbr>使ってください。</span></li>
-      </ol>
+      <div class="step-head"><span class="no">16</span><h3>その<wbr>他の機能・<wbr>注意</h3></div>
+      <ul class="legend">
+        <li><span class="pin" style="background:var(--muted)">A</span><span><b>持ち出し・残数チェック</b><wbr>（集計・他） … 公演の<wbr>前に<wbr>「持ち出す数」を<wbr>記録し、<wbr>終わったら<wbr>「残った<wbr>数」を<wbr>入れて<wbr>確定すると、<wbr>差（持ち出し − 残り − レジで<wbr>記録済みの<wbr>分）が<wbr>販売と<wbr>して<wbr>記録されます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">B</span><span><b>売上レポート</b><wbr>（集計・他） … 期間か<wbr>公演を<wbr>選ぶと、<wbr>印刷や<wbr>PDFで<wbr>保存できる売上の<wbr>一覧を<wbr>作ります。</span></li>
+        <li><span class="pin" style="background:var(--muted)">C</span><span><b>売り場の<wbr>並び順</b><wbr>（集計・他） … 会場の<wbr>机に<wbr>並べる<wbr>順に<wbr>しておくと、<wbr>在庫確認ページ・販売レジ・販売チェック<wbr>表が<wbr>その順に<wbr>なります。</span></li>
+        <li><span class="pin" style="background:var(--muted)">D</span><span><b>写真なしを<wbr>続けて<wbr>登録・<wbr>撮りためた<wbr>写真を<wbr>割り当て</b><wbr>（在庫一覧） … 写真が<wbr>ない<wbr>商品に、<wbr>続けて<wbr>写真を<wbr>付けられます。<wbr>サイズ違いには<wbr>同じ<wbr>写真が<wbr>付きます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">E</span><span><b>値札・POP印刷／QRラベル印刷</b><wbr>（在庫一覧） … 会場に<wbr>置く<wbr>値札や、<wbr>袋に<wbr>貼る<wbr>QRラベルを<wbr>印刷できます。<wbr>QRラベルは<wbr>「読取」で<wbr>読むだけで<wbr>商品を<wbr>選べます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">F</span><span><b>お客さま用QR</b><wbr>（集計・他） … 在庫確認ページの<wbr>QRコードを<wbr>大きく<wbr>印刷できます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">G</span><span><b>バックアップ</b> … 週に<wbr>1回、<wbr>管理画面を<wbr>開いた<wbr>ときに<wbr>自動で<wbr>在庫表の<wbr>コピーが<wbr>作られます<wbr>（Googleドライブの<wbr>「コロッケ在庫 バックアップ」）。<wbr>「今すぐ<wbr>バックアップ」でも<wbr>作れます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">H</span><span><b>在庫表から<wbr>取り込む</b><wbr>（商品登録の<wbr>いちばん下） … 別の<wbr>在庫表の<wbr>アドレスを<wbr>貼って<wbr>比べると、<wbr>まだ<wbr>登録されていない<wbr>商品だけを<wbr>登録できます。</span></li>
+        <li><span class="pin" style="background:var(--muted)">I</span><span><b>在庫表を<wbr>直接<wbr>書きかえる<wbr>とき</b> … 書きかえた数は<wbr>在庫確認ページにも<wbr>出ますが、<wbr>販売履歴に<wbr>残らず、<wbr>集計にも<wbr>入りません。<wbr>数を<wbr>合わせたい<wbr>ときは<wbr>「棚卸し」を<wbr>使ってください。</span></li>
+      </ul>
     </div>
   </section>
 
@@ -973,11 +1165,11 @@
       <div class="faq">
         <details open>
           <summary>「通信が<wbr>途切れました」と<wbr>出た</summary>
-          <p>記録できている<wbr>場合が<wbr>あります。<wbr>すぐに<wbr>やり直さず、<wbr>まず<wbr>「在庫一覧」の <b>↻ 更新</b> を<wbr>押して、<wbr>数が<wbr>変わっているか<wbr>確かめてください。<wbr>変わっていなければ、<wbr>もう<wbr>一度<wbr>記録します。</p>
+          <p>記録できている<wbr>場合が<wbr>あります。<wbr>すぐに<wbr>やり直さず、<wbr>まず<wbr>「在庫一覧」の <b>更新</b> を<wbr>押して、<wbr>数が<wbr>変わっているか<wbr>確かめてください。<wbr>変わっていなければ、<wbr>もう<wbr>一度<wbr>記録します。</p>
         </details>
         <details>
           <summary>もう<wbr>一度<wbr>パスワードを<wbr>聞かれた</summary>
-          <p>パスワードが<wbr>変わったか、<wbr>スマホの<wbr>記録が<wbr>消えた<wbr>可能性が<wbr>あります。<wbr>管理の<wbr>担当者に<wbr>確かめて、<wbr>もう<wbr>一度<wbr>入れてください。</p>
+          <p>パスワードが<wbr>変わったか、<wbr>端末の<wbr>記録が<wbr>消えた<wbr>可能性が<wbr>あります。<wbr>管理の<wbr>担当者に<wbr>確かめて、<wbr>もう<wbr>一度<wbr>入れてください。</p>
         </details>
         <details>
           <summary>「在庫が<wbr>足りません」と<wbr>出た</summary>
@@ -992,27 +1184,28 @@
           <p>用紙を A4・縦 に<wbr>して<wbr>印刷してください。<wbr>表は<wbr>用紙の<wbr>下まで<wbr>自動で<wbr>伸びます。<wbr>印刷の<wbr>「倍率」は 100% に<wbr>してください。</p>
         </details>
         <details>
-          <summary>カメラ<wbr>（📷）が<wbr>使えない</summary>
-          <p>ブラウザが<wbr>カメラの<wbr>使用を<wbr>聞いてきたら<wbr>「許可」を<wbr>押してください。<wbr>使えない<wbr>ときは、<wbr>🔍 選ぶ から<wbr>写真で<wbr>選べます。</p>
+          <summary>カメラ<wbr>（読取）が<wbr>使えない</summary>
+          <p>ブラウザが<wbr>カメラの<wbr>使用を<wbr>聞いてきたら<wbr>「許可」を<wbr>押してください。<wbr>使えない<wbr>ときは、<b><wbr>選ぶ</b> から<wbr>写真で<wbr>選べます。</p>
         </details>
       </div>
     </div>
   </section>
 
-  <p class="footer"><span class="nb">コロッケ グッズ在庫管理システムガイド</span>　管理する<wbr>人向け　（画面の<wbr>写真は<wbr>説明用の<wbr>見本データです）</p>
+  <p class="footer"><span class="nb">コロッケ グッズ在庫管理システムガイド</span>　管理する<wbr>（管理画面）</p>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
   (function () {
     var buttons = document.querySelectorAll('.switch button');
-    var panels = { viewer: document.getElementById('viewer'), admin: document.getElementById('admin') };
+    var panels = { viewer: document.getElementById('viewer'), register: document.getElementById('register'), admin: document.getElementById('admin') };
 
     function show(name, scroll) {
       if (!panels[name]) name = 'viewer';
       Object.keys(panels).forEach(function (key) { panels[key].hidden = key !== name; });
       buttons.forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.panel === name)); });
-      document.body.classList.toggle('admin-mode', name === 'admin');
+      document.body.classList.toggle('mode-register', name === 'register');
+      document.body.classList.toggle('mode-admin', name === 'admin');
       try { localStorage.setItem('guide.panel', name); } catch (e) { /* 保存できない環境 */ }
       if (scroll) window.scrollTo({ top: 0 });
     }
@@ -1021,10 +1214,11 @@
       b.addEventListener('click', function () { show(b.dataset.panel, true); });
     });
 
-    // #admin や #a-sale のようなリンクで開いたときは、その側を出す
+    // #register や #r-pay のようなリンクで開いたときは、その説明を出す
     function fromHash() {
       var h = (location.hash || '').slice(1);
       if (h === 'admin' || h.indexOf('a-') === 0) return 'admin';
+      if (h === 'register' || h.indexOf('r-') === 0) return 'register';
       if (h === 'viewer' || h.indexOf('v-') === 0) return 'viewer';
       return null;
     }
@@ -1034,6 +1228,14 @@
     window.addEventListener('hashchange', function () {
       var p = fromHash();
       if (p) show(p, false);
+    });
+    // 説明の中のリンク（例：「見る」のホーム画面に置く）を押したら、その説明に切りかえる
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var h = a.getAttribute('href').slice(1);
+      var p = h.indexOf('a-') === 0 ? 'admin' : h.indexOf('r-') === 0 ? 'register' : h.indexOf('v-') === 0 ? 'viewer' : null;
+      if (p && panels[p].hidden) show(p, false);
     });
 
     // QRコード
@@ -1046,6 +1248,7 @@
       el.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
     }
     drawQr('qrViewer', document.getElementById('urlViewer').textContent.trim());
+    drawQr('qrRegister', document.getElementById('urlRegister').textContent.trim());
     drawQr('qrAdmin', document.getElementById('urlAdmin').textContent.trim());
 
     // アドレスのコピー

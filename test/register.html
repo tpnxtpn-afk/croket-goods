@@ -59,8 +59,8 @@
 
   /* ジャンル：色の札 */
   nav.genres { overflow-y: auto; padding: 12px 0 12px 10px; background: var(--panel); border-right: 1px solid var(--rule); }
-  .genre { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; padding: 12px 10px; margin-bottom: 4px; border-radius: 10px 0 0 10px;
-    font-size: 15px; font-weight: 700; color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
+  .genre { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 12px 8px; margin-bottom: 4px; border-radius: 10px 0 0 10px;
+    font-size: 14px; font-weight: 700; color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
   .genre i { width: 12px; height: 12px; border-radius: 3px; background: var(--gc, var(--ink)); flex: none; }
   .genre.on { background: var(--gc, var(--ink)); color: #fff; margin-right: -1px; }
   .genre.on i { background: #fff; }
@@ -227,7 +227,7 @@
 
   /* ---------- お知らせ・ログイン ---------- */
   .toast { position: fixed; left: 50%; bottom: calc(26px + var(--safe-b)); transform: translateX(-50%); background: var(--ink); color: #fff;
-    padding: 14px 22px; border-radius: 12px; font-size: 16px; font-weight: 700; z-index: 40; box-shadow: 0 10px 28px rgba(0,0,0,.3); max-width: 90vw; }
+    padding: 14px 22px; border-radius: 12px; font-size: 16px; font-weight: 700; z-index: 40; box-shadow: 0 10px 28px rgba(0,0,0,.3); width: max-content; max-width: calc(100vw - 32px); text-align: center; }
   .toast.err { background: var(--bad); }
   .login { position: fixed; inset: 0; background: var(--ground); display: grid; place-items: center; z-index: 50; padding: 16px; }
   .login form { background: var(--panel); padding: 28px; border-radius: 16px; width: min(420px, 100%); border: 2px solid var(--ink); }
@@ -274,6 +274,7 @@
     .log { display: block; max-height: 22%; }
     .sizes { grid-template-columns: repeat(2, 1fr); }
     .sheet { padding: 16px; }
+    .toast { bottom: calc(84px + var(--safe-b)); }
   }
 
   /* ---------- iPad縦（幅が狭いとき）：ジャンルを上、レシートを下に ---------- */
@@ -290,6 +291,8 @@
     .log { display: none; }
     .hfield input { width: 110px; }
   }
+  /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
+  body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
 </head>
 <body>
@@ -586,7 +589,7 @@
       const price = p.price === '' || p.price == null ? '' : '　' + yen(p.price * n);
       return '<div class="line">' + th + '<div><b>' + esc(p.category) + '</b><small>' + esc(desc) + '　残り' + (p.stock[pool] || 0) + price + '</small></div>' +
         '<div class="qty"><button data-dec="' + esc(id) + '">−</button><span>' + n + '</span><button data-inc="' + esc(id) + '">＋</button></div></div>';
-    }).join('') : '<div class="cart-empty">商品の写真をタップすると<br>ここに入ります</div>';
+    }).join('') : '<div class="cart-empty">商品の札をタップすると<br>ここに入ります</div>';
     state.total = unpriced === qty ? 0 : total;
     $('sumQty').textContent = qty + '点';
     $('barQty').textContent = qty ? qty + '点' : 'まだ空です';
@@ -889,13 +892,13 @@
     document.querySelectorAll('#salesSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === salesState.view));
     if (!sales.length) { $('salesBody').innerHTML = '<div class="empty">この日の販売はまだありません</div>'; return; }
     const label = i => [i.category, i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' ');
-    const shime = (salesState.data && !salesState.data.event) ? '<div class="shime"><b>締め（精算チェック）</b><div class="shrow">記録の合計 <b>' + (amt ? yen(amt) : '価格未設定') + '</b>' +
+    const shime = (salesState.data && !salesState.data.event) ? '<div class="shime"><b>締め（精算チェック）</b><div class="shrow">記録の合計 <b>' + (amt || !live.length ? yen(amt) : '価格未設定') + '</b>' +
       '<label>実際の金額（レシート・現金） <input id="realYen" inputmode="numeric" placeholder="円" value="' + esc(salesState.real || '') + '"></label><span id="shimeDiff"></span></div></div>' : '';
     if (salesState.view === 'list') {
       $('salesBody').innerHTML = shime + sales.map((x, k) => '<div class="sale' + (x.undone ? ' undone' : '') + '"><div class="top"><b>' + esc(x.at.slice(6)) + '</b>' +
         '<span>' + x.qty + '点' + (x.operator ? '・' + esc(x.operator) : '') + (x.undone ? '・取消済' : '') + '</span>' +
         '<span class="amt">' + (x.amount ? yen(x.amount) : '') + '</span></div><ul>' +
-        x.items.map(i => '<li>' + esc(label(i)) + ' <span>' + esc(i.type) + '</span>　×' + i.qty + '</li>').join('') + '</ul></div>').join('');
+        x.items.map(i => '<li><span>' + esc(i.type) + '</span> ' + esc(label(i)) + '　×' + i.qty + '</li>').join('') + '</ul></div>').join('');
       shimeDiff();
       return;
     }
@@ -909,6 +912,7 @@
     const types = {};
     list.forEach(i => { (types[i.type] = types[i.type] || []).push(i); });
     const order = Object.keys(types).sort((a, b) => types[b].reduce((n, i) => n + i.n, 0) - types[a].reduce((n, i) => n + i.n, 0));
+    if (!order.length) { $('salesBody').innerHTML = shime + '<div class="empty">売れた商品はありません（取り消した会計は数えません）</div>'; return; }
     $('salesBody').innerHTML = shime + '<div class="rank">' + order.map(t => {
       const items = types[t].sort((a, b) => b.n - a.n);
       return '<div class="gh" style="' + gc(t) + '">' + esc(t) + '　計 ' + items.reduce((n, i) => n + i.n, 0) + unitOf(t) + '</div>' +

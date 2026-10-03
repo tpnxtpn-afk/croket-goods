@@ -108,7 +108,7 @@
   .tag i { width: 11px; height: 11px; border-radius: 50%; border: 1px solid var(--line); background: var(--cc, transparent); }
 
   /* サイズのハンガー札 */
-  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 62px)); gap: 13px 6px; padding-top: 9px; }
+  .sizes { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 58px)); gap: 13px 5px; padding-top: 9px; }
   .sz { position: relative; border: 1.5px solid var(--text); border-radius: 7px; padding: 3px 0 4px; text-align: center; background: #fff; }
   .sz::before { content: ""; position: absolute; left: 50%; top: -8px; width: 11px; height: 7px; border: 1.5px solid var(--text); border-bottom: none; border-radius: 7px 7px 0 0; transform: translateX(-50%); background: #fff; }
   .sz i { display: block; font-style: normal; font-size: 11px; font-weight: 700; color: var(--muted); line-height: 1.2; }
@@ -173,9 +173,11 @@
   .banner .x { background: none; color: rgba(255,255,255,.6); padding: 4px 6px; font-size: 18px; }
 
   .toast { position: fixed; left: 50%; bottom: 20px; z-index: 100; max-width: 90%; padding: 12px 18px; border-radius: 10px; background: var(--text); color: #fff;
-    font-size: 14px; font-weight: 700; opacity: 0; transform: translate(-50%, 20px); transition: opacity .25s, transform .25s; pointer-events: none; }
+    font-size: 14px; font-weight: 700; opacity: 0; transform: translate(-50%, 20px); transition: opacity .25s, transform .25s; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); text-align: center; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   .toast.error { background: var(--bad); }
+  /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
+  body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
 </head>
 <body>
@@ -240,7 +242,7 @@
     <p class="lead">3つだけ覚えれば大丈夫です</p>
     <div class="step"><div class="n">1</div><div><b>上のタブで場所をえらぶ</b><small id="guidePools"></small></div></div>
     <div class="step"><div class="n">2</div><div><b>商品をタップすると大きく見られます</b><small>写真とサイズごとの残りが出ます</small></div></div>
-    <div class="step"><div class="n">3</div><div><b>右上の「更新」で最新の在庫になります</b><small>札の見方</small><span class="legend"><span class="sz"><i>M</i><b>12</b></span><span class="sz low"><i>のこり少</i><b>2</b></span><span class="sz zero"><i>売り切れ</i><b>0</b></span></span></div></div>
+    <div class="step"><div class="n">3</div><div><b>右上の「更新」で最新の在庫になります</b><small>札の見方</small><span class="legend"><span class="sz"><i>M</i><b>12</b></span><span class="sz low"><i>わずか</i><b>2</b></span><span class="sz zero"><i>売り切れ</i><b>0</b></span></span></div></div>
     <button type="button" class="btn" id="guideClose">わかりました</button>
   </div>
 </div>
@@ -671,7 +673,7 @@
 
   // ---------- 使い方・ホーム画面への追加 ----------
   function showGuide() {
-    $('guidePools').textContent = owners.join(' ／ ') + ' を切り替えられます';
+    $('guidePools').textContent = owners.join('・') + 'を切り替えられます';
     $('guide').hidden = false;
   }
 

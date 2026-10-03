@@ -510,6 +510,16 @@
   .card.alert-item.zero { border-left-color: var(--danger); }
   .alert-item .count b { font-size: 30px; }
 
+  .nw { white-space: nowrap; }
+  .set-edit { border: 1px solid var(--line); border-radius: 10px; padding: 10px; margin-bottom: 10px; display: grid; gap: 8px; }
+  .set-edit label { display: grid; gap: 2px; font-size: 12px; color: var(--muted); font-weight: 700; }
+  .set-edit .set-row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, .8fr) minmax(0, 1fr); gap: 8px; }
+  .tool-body .set-edit input.tx, .tool-body .set-edit select, .tool-body .set-edit input[type=number], .tool-body .set-edit input.pr { width: 100%; padding: 8px; font-size: 15px; border: 1.5px solid #b9c0c9; border-radius: 8px; color: var(--text); }
+  .set-edit label.set-only { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text); }
+  .set-edit label.set-only input { width: 22px; height: 22px; margin: 0; accent-color: var(--text); }
+  .undo-bar button { white-space: nowrap; flex: none; }
+  .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); width: max-content; max-width: calc(100vw - 32px); text-align: center; }
+
   /* 在庫一覧：商品ごとの札 */
   .inv-list { display: flex; flex-direction: column; }
   .inv-gh { display: flex; justify-content: space-between; align-items: flex-end; margin: 18px 0 0; border-bottom: 3px solid var(--gc); }
@@ -546,6 +556,8 @@
   .inv-acts button { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--text); border-radius: 7px; background: #fff; color: var(--text); padding: 3px 9px; cursor: pointer; }
   .inv-acts button.cam { border-style: dashed; color: var(--muted); border-color: var(--muted); }
   .inv-acts .ids { font-family: var(--num); font-size: 13px; letter-spacing: .03em; }
+  /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
+  body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
 </head>
 <body>
@@ -676,7 +688,7 @@
           <div class="id-row">
             <input type="text" id="sId" placeholder="商品IDまたは右のボタンで選ぶ" autocapitalize="characters" autocomplete="off" spellcheck="false">
             <button type="button" id="btnPick">選ぶ</button>
-            <button type="button" id="btnScan"></button>
+            <button type="button" id="btnScan" aria-label="QRラベルを読み取る">読取</button>
           </div>
           <p class="hint" id="sIdHint"></p>
         </div>
@@ -724,7 +736,7 @@
           <label class="lbl" for="bSearch">商品をさがす</label>
           <div class="id-row">
             <input type="search" id="bSearch" placeholder="名前・色・サイズ" autocomplete="off">
-            <button type="button" id="btnScanBatch"></button>
+            <button type="button" id="btnScanBatch" aria-label="QRラベルを読み取る">読取</button>
           </div>
         </div>
         <p class="hint">＋ − で数を入れて、下の「確認へ」を押すとまとめて記録します</p>
@@ -923,7 +935,7 @@
       <button type="button" class="btn" id="editSave">保存する</button>
     </div>
     <button type="button" class="btn status" id="editStatus">販売終了にする</button>
-    <p class="hint">販売終了にすると、クライアント用ページと「在庫わずか」に出なくなります（データは残ります）</p>
+    <p class="hint">販売終了にすると、在庫確認ページ・販売レジ・「在庫わずか」に出なくなります（データは残ります）</p>
     <button type="button" class="btn delete" id="editDelete">この商品を削除</button>
     <p class="hint">販売履歴は残ります。削除した商品IDは再利用されません</p>
   </div>
@@ -1188,7 +1200,7 @@
   }
 
   function describe(p) {
-    return [p.category, p.type, p.color, p.size].map(esc).join(' / ');
+    return [p.category, p.type, p.color, p.size].filter(v => v && v !== '-').map(esc).join(' / ');
   }
 
   function yen(n) {
@@ -1926,7 +1938,7 @@
       const p = findProduct(id);
       const n = state.batch.items[id];
       const before = p.stock[location] || 0;
-      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　' + n + unitOf(p.type) + '（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）';
+      return '・<b>' + esc(p.id) + '</b> ' + describe(p) + '　<span class="nw">' + n + unitOf(p.type) + '（' + before + ' → ' + (before + (mode === 'sale' ? -n : n)) + '）</span>';
     }).join('<br>');
     const ok = await confirmBox((mode === 'sale' ? '販売' : '補充') + 'します。よろしいですか？',
       esc(location) + (event ? '　イベント：' + esc(event) : '') + '<br>' + lines,
@@ -2212,10 +2224,10 @@
   const TALLY_BLANKS = 10;
 
   function printTally(mode) {
-    const rows = sortByDisplay(inventoryRows());
+    const pool = state.config.owners[0];
+    const rows = sortByDisplay(inventoryRows()).filter(p => (p.stock[pool] || 0) > 0);   // 在庫0の商品は売れないので載せない
     if (!rows.length) return toast('印刷する商品がありません', true);
     const wide = mode === 'wide';
-    const pool = state.config.owners[0];
     const slots = TALLY_SLOTS;
     const count = rows.length + 1 + TALLY_BLANKS; // 商品＋区切り＋空欄
     const page = wide
@@ -2274,9 +2286,8 @@
       slots.map(sl => '<th class="slot">' + sl + '<small>（　：　）</small></th>').join('') +
       '<th class="sum">合計</th><th class="memo">備考</th></tr>';
     const tbody = rows.map(p => {
-      const sub = compact
-        ? esc(p.type) + '/' + esc(p.color) + '/' + esc(p.size) + ' ' + (p.stock[pool] || 0)
-        : esc(p.type) + ' / ' + esc(p.color) + ' / ' + esc(p.size) + '　' + (p.stock[pool] || 0) + unitOf(p.type);
+      const parts = [p.type, p.color, p.size].filter(v => v && v !== '-').map(esc);
+      const sub = compact ? parts.join('/') + ' ' + (p.stock[pool] || 0) : parts.join(' / ') + '　' + (p.stock[pool] || 0) + unitOf(p.type);
       return '<tr><td class="name"><b>' + esc(p.category) + '</b>' + (compact ? ' ' : '') + '<small>' + sub + '</small></td>' +
         slots.map(() => '<td></td>').join('') + '<td></td><td class="memo"></td></tr>';
     }).join('');
@@ -2376,7 +2387,7 @@
     const next = !p.discontinued;
     if (next) {
       const ok = await confirmBox('販売終了にしますか？',
-        '<b>' + esc(p.id) + '　' + describe(p) + '</b><br>クライアント用ページと「在庫わずか」に出なくなります。<br>在庫数と履歴は残り、あとで戻せます。', '販売終了にする');
+        '<b>' + esc(p.id) + '　' + describe(p) + '</b><br>在庫確認ページ・販売レジ・「在庫わずか」に出なくなります。<br>在庫数と履歴は残り、あとで戻せます。', '販売終了にする');
       if (!ok) return;
     }
     const btn = $('editStatus');
@@ -2595,11 +2606,11 @@
     const sets = (state.config.sets || []).slice();
     const types = unique(state.products.map(p => p.type));
     const priceOf = g => { const ps = unique(g.items.map(p => p.price === '' ? '' : String(p.price))); return ps.length === 1 ? ps[0] : ''; };
-    const setRow = (x, i) => '<tr><td><input class="tx" data-sn="' + i + '" value="' + esc(x.name || '') + '" placeholder="例：クリアファイル 2枚セット"></td>' +
-      '<td><select data-st="' + i + '">' + types.map(t => '<option' + (t === x.type ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select></td>' +
-      '<td><input type="number" min="2" data-sc="' + i + '" value="' + esc(x.count || 2) + '" style="width:60px"></td>' +
-      '<td><input class="pr" data-sp="' + i + '" inputmode="numeric" value="' + esc(x.price === undefined ? '' : x.price) + '" placeholder="円"></td>' +
-      '<td style="text-align:center"><input type="checkbox" data-so="' + i + '"' + (x.only ? ' checked' : '') + ' style="width:22px;height:22px" aria-label="セットだけで売る"></td></tr>';
+    const setRow = (x, i) => '<div class="set-edit"><label>セット名<input class="tx" data-sn="' + i + '" value="' + esc(x.name || '') + '" placeholder="例：クリアファイル 2枚セット"></label>' +
+      '<div class="set-row"><label>種類<select data-st="' + i + '">' + types.map(t => '<option' + (t === x.type ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '</select></label>' +
+      '<label>個数<input type="number" min="2" data-sc="' + i + '" value="' + esc(x.count || 2) + '"></label>' +
+      '<label>値段（円）<input class="pr" data-sp="' + i + '" inputmode="numeric" value="' + esc(x.price === undefined ? '' : x.price) + '" placeholder="円"></label></div>' +
+      '<label class="set-only"><input type="checkbox" data-so="' + i + '"' + (x.only ? ' checked' : '') + '>セットだけで売る（レジで1個ずつは入れない）</label></div>';
     const body = () => '<p class="hint">商品ごとの値段（税込）を入れてください。サイズ違いには同じ値段が入ります。空欄は「未設定」です。</p>' +
       '<table><thead><tr><th>商品</th><th class="num">価格（円）</th></tr></thead><tbody>' +
       groups.map((g, i) => '<tr><td><b>' + esc(g.p.category) + '</b><div class="sub">' + esc(g.p.type + (g.p.color && g.p.color !== '-' ? '・' + g.p.color : '') +
@@ -2607,9 +2618,8 @@
         '<td class="num"><input class="pr" inputmode="numeric" data-gp="' + i + '" value="' + esc(priceOf(g)) + '" placeholder="未設定"></td></tr>').join('') +
       '</tbody></table>' +
       '<div class="gh">セット販売（販売レジに「セット」ボタンが出ます）</div>' +
-      '<p class="hint">例：クリアファイルから好きな2枚で500円。値段を空欄にするとそのセットは消えます。<br>「セットだけ」にチェックすると、販売レジではその種類を1個ずつ入れられなくなり、セットからだけ選べます。</p>' +
-      '<table><thead><tr><th>セット名</th><th>種類</th><th>枚数</th><th>値段</th><th>セットだけ</th></tr></thead><tbody id="setRows">' +
-      sets.concat([{ name: '', type: types.indexOf('B5クリアファイル') >= 0 ? 'B5クリアファイル' : types[0], count: 2, price: '' }]).map(setRow).join('') + '</tbody></table>';
+      '<p class="hint">例：クリアファイルから好きな2枚で500円。値段を空欄にすると、そのセットは消えます。いちばん下の空欄に入れると、セットを追加できます。</p>' +
+      '<div id="setRows">' + sets.concat([{ name: '', type: types.indexOf('B5クリアファイル') >= 0 ? 'B5クリアファイル' : types[0], count: 2, price: '' }]).map(setRow).join('') + '</div>';
     toolOpen('価格・セット販売', body(), [
       { label: 'やめる', ghost: true, onClick: toolClose },
       { label: '保存する', onClick: async () => {
@@ -3120,7 +3130,7 @@
       const size = b.dataset.size;
       const i = state.sizes.indexOf(size);
       if (i >= 0) {
-        if (state.sizes.length === 1) return toast('サイズは1つ以上えらんでください', true);
+        if (state.sizes.length === 1) return toast('サイズを1つ以上えらんでください', true);
         state.sizes.splice(i, 1);
       } else {
         state.sizes.push(size);

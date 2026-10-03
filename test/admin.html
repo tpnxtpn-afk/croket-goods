@@ -502,6 +502,11 @@
     font-family: var(--display); font-weight: 900; font-size: 9px; line-height: 1.1; text-align: center; padding: 2px; overflow: hidden; word-break: keep-all; overflow-wrap: anywhere; }
 
   .card.alert-item { border-left: 5px solid var(--warn); }
+  .off-check { display: flex; align-items: center; padding: 6px; margin: -6px 0 -6px -6px; cursor: pointer; }
+  .off-check input { width: 24px; height: 24px; margin: 0; accent-color: var(--danger); }
+  .off-bar { position: sticky; top: 64px; z-index: 5; display: grid; gap: 8px; }
+  .off-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .off-pick .btn.mini { flex: 1 1 auto; white-space: nowrap; }
   .card.alert-item.zero { border-left-color: var(--danger); }
   .alert-item .count b { font-size: 30px; }
 
@@ -785,6 +790,14 @@
       </div>
       <p class="hint">販売終了にした商品は出ません（もう仕入れない商品は「販売終了」にしてください）</p>
     </div>
+    <div class="card off-bar" id="offBar" hidden>
+      <div class="off-pick">
+        <button type="button" class="btn ghost mini" id="offAll">すべて選ぶ</button>
+        <button type="button" class="btn ghost mini" id="offZero">在庫切れだけ選ぶ</button>
+        <button type="button" class="btn ghost mini" id="offNone">選ぶのをやめる</button>
+      </div>
+      <button type="button" class="btn" id="offGo" style="background:var(--danger)" disabled>選んだ商品を販売終了にする</button>
+    </div>
     <div id="alertList"></div>
   </section>
 
@@ -1026,6 +1039,7 @@
   const SCAN_LIB = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
 
   const state = {
+    offPicked: {},
     config: null,
     products: [],
     mode: 'sale',
@@ -2870,12 +2884,18 @@
     const zero = list.filter(p => p.total <= 0).length;
     $('alertSummary').innerHTML = '合計在庫 ' + state.config.lowStockThreshold + '点以下：<b>' + list.length + '件</b>（在庫切れ ' + zero + '件）';
     updateAlertBadge();
+    state.alerts = list;
+    Object.keys(state.offPicked).forEach(id => { if (!list.some(p => p.id === id)) delete state.offPicked[id]; });
+    updateOffBar();
     if (!list.length) {
+      $('offBar').hidden = true;
       $('alertList').innerHTML = '<div class="card empty">在庫が少ない商品はありません</div>';
       return;
     }
+    $('offBar').hidden = false;
     $('alertList').innerHTML = list.map(p =>
       '<div class="card alert-item' + (p.total <= 0 ? ' zero' : '') + '">' +
+      '<label class="off-check" aria-label="' + esc(p.id) + 'を選ぶ"><input type="checkbox" data-pick-off="' + esc(p.id) + '"' + (state.offPicked[p.id] ? ' checked' : '') + '></label>' +
       '<div class="body">' +
       '<div class="name">' + esc(p.id) + '　' + esc(p.category) + '</div>' +
       '<div>' + [p.type, p.color, p.size].map(esc).join(' / ') + '</div>' +
@@ -2885,6 +2905,44 @@
       '<br><button type="button" class="link-btn" data-replenish="' + esc(p.id) + '">▲ 補充</button>' +
       '<br><button type="button" class="link-btn" data-off="' + esc(p.id) + '" style="color:var(--muted)">販売終了</button></div>' +
       '</div>').join('');
+  }
+
+  // ---------- 在庫わずか：まとめて販売終了 ----------
+  function updateOffBar() {
+    const n = Object.keys(state.offPicked).length;
+    $('offGo').disabled = !n;
+    $('offGo').textContent = n ? '選んだ ' + n + '件を販売終了にする' : '販売終了にする商品を選んでください';
+  }
+  function pickOff(filter) {
+    state.offPicked = {};
+    (state.alerts || []).filter(filter).forEach(p => { state.offPicked[p.id] = true; });
+    document.querySelectorAll('[data-pick-off]').forEach(c => { c.checked = !!state.offPicked[c.dataset.pickOff]; });
+    updateOffBar();
+  }
+  async function bulkDiscontinue() {
+    const ids = Object.keys(state.offPicked);
+    if (!ids.length) return;
+    const names = ids.map(id => { const p = findProduct(id); return p ? esc(id + '　' + describe(p)) : esc(id); });
+    const ok = await confirmBox(ids.length + '件を販売終了にしますか？',
+      '<div style="max-height:40vh;overflow:auto;font-size:13px;line-height:1.7;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:8px">' + names.join('<br>') + '</div>' +
+      '販売終了にすると、レジ・在庫確認ページ・この一覧に出なくなります。<br>あとで在庫一覧の「販売終了も表示」から、商品ごとに販売中へ戻せます。',
+      '販売終了にする', 'var(--danger)');
+    if (!ok) return;
+    const btn = $('offGo');
+    setBusy(btn, true, '保存中…');
+    try {
+      const res = await call('setProductsStatus', { productIds: ids, discontinued: true });
+      res.forEach(upsertProduct);
+      state.offPicked = {};
+      refreshDerived();
+      toast(res.length + '件を販売終了にしました');
+      loadAlerts();
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      setBusy(btn, false);
+      updateOffBar();
+    }
   }
 
   // ---------- 集計 ----------
@@ -3169,6 +3227,15 @@
 
     // 在庫わずか
     $('btnReloadAlerts').addEventListener('click', loadAlerts);
+    $('alertList').addEventListener('change', e => {
+      const c = e.target.closest('[data-pick-off]'); if (!c) return;
+      if (c.checked) state.offPicked[c.dataset.pickOff] = true; else delete state.offPicked[c.dataset.pickOff];
+      updateOffBar();
+    });
+    $('offAll').addEventListener('click', () => pickOff(() => true));
+    $('offZero').addEventListener('click', () => pickOff(p => p.total <= 0));
+    $('offNone').addEventListener('click', () => pickOff(() => false));
+    $('offGo').addEventListener('click', bulkDiscontinue);
     $('alertList').addEventListener('click', e => {
       const b = e.target.closest('[data-replenish]');
       if (b) return goToSales(b.dataset.replenish, 'replenish');

@@ -10,8 +10,9 @@
 <meta name="apple-mobile-web-app-title" content="販売レジ">
 <meta name="robots" content="noindex, nofollow">
 <link rel="manifest" href="manifest-register.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icons/register-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/register-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/register-192.png">
 <title>コロッケ グッズ 販売レジ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@700;900&family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap">
@@ -704,7 +705,8 @@
         $('cart').classList.remove('open');
         toast(res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
       } catch (e) {
-        if (e.server) { toast(e.message, true); }
+        if (e.server && /パスワード/.test(e.message)) { queue(entry, 'パスワードが変わったため、会計は端末に保存しました。新しいパスワードを入れると送ります'); showLogin(); }
+        else if (e.server) { toast(e.message, true); }
         else if (e.name === 'AbortError') { toast('通信が途中で切れました。下の記録と在庫を確認してからやり直してください', true); }
         else { queue(entry, '送れなかったので端末に保存しました。つながったら自動で送ります'); }
       }
@@ -734,7 +736,12 @@
             await api('undoOperation', { opId: q[0].opId, operator: q[0].operator });
             const l = load(LOG_STORE, []); l.forEach(x => { if (x.opId === q[0].opId) x.undone = true; }); save(LOG_STORE, l);
           } else await send(q[0]);
-        } catch (e) { if (!e.server) break; toast((q[0].kind === 'undo' ? '取り消しを送れませんでした：' : '未送信の会計を送れませんでした：') + e.message, true); }
+        } catch (e) {
+          if (!e.server) break;
+          // パスワードが変わったときは消さずに残し、入れ直してもらってから送る
+          if (/パスワード/.test(e.message)) { showLogin(); toast('パスワードが変わりました。新しいパスワードを入れてください（未送信の会計は残っています）', true); break; }
+          toast((q[0].kind === 'undo' ? '取り消しを送れませんでした：' : '未送信の会計を送れませんでした：') + e.message, true);
+        }
         q = load(QUEUE_STORE, []); q.shift(); save(QUEUE_STORE, q);
       }
       if (!q.length) { toast('未送信の会計をすべて送りました'); loadProducts(true); }
@@ -951,7 +958,7 @@
   $('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
     state.key = $('key').value.trim();
-    try { await api('checkKey', {}, 15000); try { localStorage.setItem(KEY_STORE, state.key); } catch (err) { /* */ } $('login').hidden = true; loadProducts(true); }
+    try { await api('checkKey', {}, 15000); try { localStorage.setItem(KEY_STORE, state.key); } catch (err) { /* */ } $('login').hidden = true; loadProducts(true); flush(); }
     catch (err) { toast('パスワードが違います', true); }
   });
 

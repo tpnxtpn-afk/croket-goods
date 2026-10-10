@@ -237,6 +237,23 @@
   .login input { width: 100%; font-size: 18px; padding: 12px; border: 1.5px solid var(--ink); border-radius: 10px; margin-bottom: 12px; }
   .login button { width: 100%; padding: 14px; border-radius: 10px; background: var(--ink); color: #fff; font-size: 18px; font-weight: 700; }
 
+  .ready { white-space: nowrap; font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.35); color: #fff; }
+  .ready.ok { background: rgba(29,138,82,.35); border-color: #3ccf7f; }
+  .ready.ng { background: rgba(217,122,0,.45); border-color: #ffb547; }
+  .homewarn { position: fixed; left: 0; right: 0; top: 0; z-index: 45; background: #d97a00; color: #fff; font-size: 14px; padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top, 0px)); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .homewarn button { margin-left: auto; border: 1px solid #fff; border-radius: 8px; padding: 4px 10px; color: #fff; font-weight: 700; }
+  .prep-bg { position: fixed; inset: 0; background: rgba(15,18,24,.5); display: grid; place-items: center; z-index: 48; padding: 16px; }
+  .prep { background: var(--panel); border: 2px solid var(--ink); border-radius: 16px; padding: 20px; width: min(520px, 100%); }
+  .prep h2 { margin: 0 0 6px; font-family: var(--display); font-weight: 900; }
+  .prep p { margin: 0 0 12px; font-size: 14px; color: var(--sub); }
+  .prep ul { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 6px; }
+  .prep li { display: flex; gap: 8px; align-items: baseline; font-size: 15px; }
+  .prep li b { width: 1.4em; text-align: center; }
+  .prep li.ok b { color: var(--good); } .prep li.ng b { color: var(--bad); }
+  .prep-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .prep-btns .ok { background: var(--ink); color: #fff; }
+  .prep-btns .ok:disabled { opacity: .4; }
+  .login-off { color: var(--low) !important; font-weight: 700; margin-top: 10px !important; }
   .hsets { display: contents; }
   .phone-only { display: none !important; }
 
@@ -248,6 +265,8 @@
     header .spacer, #reload { display: none; }
     #salesBtn { font-size: 13px; padding: 6px 10px; }
     .net { font-size: 11px; margin-left: auto; padding: 4px 4px; }
+    .ready { font-size: 11px; padding: 4px 8px; margin-left: auto; }
+    .ready + .net { margin-left: 0; }
     .hsets { display: none; width: 100%; flex-direction: column; gap: 6px; }
     .hsets.open { display: flex; }
     .hfield input, .hfield select { width: 100%; flex: 1; }
@@ -308,6 +327,7 @@
     <label class="hfield"><span>在庫</span><select id="pool"></select></label>
     </div>
     <div class="spacer"></div>
+    <button class="ready" id="ready" type="button">オフライン準備：確認中</button>
     <div class="net" id="net">オンライン</div>
     <button class="hbtn" id="salesBtn">売れたもの</button>
     <button class="hbtn" id="reload">在庫を更新</button>
@@ -340,6 +360,13 @@
     </aside>
   </div>
 </div>
+<div class="homewarn" id="homewarn" hidden><b>ホーム画面のアイコンから開いてください。</b>LINEやSafariのタブで開くと、電波のない会場でレジが開かないことがあります。<button type="button" id="homewarnClose">閉じる</button></div>
+<div class="prep-bg" id="prep" hidden><div class="prep">
+  <h2>オフライン準備</h2>
+  <p>電波のない会場でも使えるように、この端末に画面・在庫・商品写真を保存します。<b>ネットがつながる場所で</b>押してください。</p>
+  <ul id="prepList"></ul>
+  <div class="prep-btns"><button type="button" class="close" id="prepClose">閉じる</button><button type="button" class="close ok" id="prepGo">いま保存する</button></div>
+</div></div>
 <div id="sheet" hidden></div>
 <div class="sales" id="sales" hidden>
   <div class="sales-hd">
@@ -363,6 +390,7 @@
     <p>管理画面と同じパスワードを入れてください。この端末に保存されます。</p>
     <input id="key" type="password" placeholder="パスワード" autocomplete="current-password">
     <button>はじめる</button>
+    <p class="login-off" id="loginOff" hidden>電波がないので、パスワードの確認はつながってから行います。会計はこのまま続けられます（つながったら送ります）。</p>
   </form>
 </div>
 
@@ -457,14 +485,60 @@
   }
 
   // 商品写真を前もって端末に保存しておく（オフラインでも写真が出るように）
-  let prefetched = false;
+  const photoUrls = () => [...new Set(state.products.filter(p => p.imageUrl).map(p => imageSrc(p.imageUrl, 400)))];
+  let prefetching = null;
   function prefetchImages() {
-    if (prefetched || !('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
-    prefetched = true;
-    const urls = [...new Set(state.products.filter(p => p.imageUrl).map(p => imageSrc(p.imageUrl, 400)))];
+    if (prefetching || !('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return prefetching || Promise.resolve();
+    const urls = photoUrls();
     let i = 0;
-    const next = () => { if (i >= urls.length || !navigator.onLine) return; fetch(urls[i++], { mode: 'no-cors' }).catch(() => {}).then(next); };
-    next(); next(); next();
+    const next = () => i >= urls.length ? Promise.resolve() : fetch(urls[i++], { mode: 'no-cors' }).catch(() => {}).then(next);
+    prefetching = Promise.all([next(), next(), next(), next()]).then(() => { prefetching = null; checkReady(); });
+    return prefetching;
+  }
+
+  // ---------- オフライン準備の確認（画面・在庫・写真が端末にあるか） ----------
+  const standalone = () => window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  async function readiness() {
+    const r = { sw: !!(navigator.serviceWorker && navigator.serviceWorker.controller), page: false, stock: false, photos: 0, need: 0, home: standalone(), at: load(STORE + '.registerSavedAt', 0) };
+    r.stock = !!load(STORE + '.registerProducts', null) && !!state.key;
+    try {
+      const keys = await caches.keys();
+      for (const k of keys.filter(k => k.startsWith('pages-'))) { const c = await caches.open(k); if (await c.match(location.pathname, { ignoreSearch: true })) r.page = true; }
+      const urls = photoUrls(); r.need = urls.length;
+      const ic = await caches.open('img-v1');
+      for (const u of urls) if (await ic.match(u, { ignoreVary: true })) r.photos++;
+    } catch (e) { /* 保存の場所が使えない環境 */ }
+    r.ok = r.sw && r.page && r.stock && r.photos >= r.need;
+    return r;
+  }
+  async function checkReady() {
+    const r = await readiness();
+    const b = $('ready');
+    b.textContent = r.ok ? 'オフライン準備OK' : 'オフライン準備：未完了';
+    b.className = 'ready ' + (r.ok ? 'ok' : 'ng');
+    if (!$('prep').hidden) drawPrep(r);
+    return r;
+  }
+  function drawPrep(r) {
+    const t = r.at ? new Date(r.at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+    const li = (ok, text) => '<li class="' + (ok ? 'ok' : 'ng') + '"><b>' + (ok ? '○' : '×') + '</b><span>' + text + '</span></li>';
+    $('prepList').innerHTML = li(r.home, r.home ? 'ホーム画面のアイコンから開いています' : 'ホーム画面のアイコンから開いてください（LINE・Safariのタブだと保存が消えることがあります）') +
+      li(r.sw && r.page, 'レジの画面を保存') + li(r.stock, '在庫とパスワードを保存（' + t + '）') +
+      li(r.photos >= r.need, '商品写真を保存（' + r.photos + ' / ' + r.need + '枚）');
+  }
+  async function prepare() {
+    const btn = $('prepGo');
+    if (!navigator.onLine) return toast('ネットがつながる場所で押してください', true);
+    btn.disabled = true; btn.textContent = '保存中…';
+    try {
+      if ('serviceWorker' in navigator) { const reg = await navigator.serviceWorker.getRegistration(); if (reg) await reg.update().catch(() => {}); }
+      await fetch(location.pathname, { cache: 'reload' }).then(res => res.ok && caches.open('pages-v2').then(c => c.put(location.pathname, res))).catch(() => {});
+      await loadProducts(true);
+      await prefetchImages();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+      const r = await checkReady();
+      toast(r.ok ? 'オフライン準備ができました' : '一部を保存できませんでした。もう一度押してください', !r.ok);
+    } finally { btn.disabled = false; btn.textContent = 'いま保存する'; }
   }
 
   async function loadProducts(quiet) {
@@ -477,6 +551,7 @@
       state.sets = d.config.sets || [];
       state.order = d.config.displayOrder || [];
       save(STORE + '.registerProducts', state.products);
+      save(STORE + '.registerSavedAt', Date.now());
       save(STORE + '.registerConfig', { sets: state.sets, order: state.order, owners: state.owners });
       applyPending();
       fillPools();
@@ -484,7 +559,7 @@
       prefetchImages();
       if (!quiet) toast('在庫を最新にしました');
     } catch (e) {
-      if (e.server && /パスワード/.test(e.message)) return showLogin();
+      if (e.server && /パスワード/.test(e.message)) { useCached(); return showLogin(); }
       useCached();
       toast('在庫を読み込めませんでした（前回の在庫で表示）', true);
     }
@@ -954,20 +1029,35 @@
   window.addEventListener('offline', renderLog);
   setInterval(flush, 20000);
 
-  function showLogin() { $('login').hidden = false; $('key').focus(); }
+  function showLogin() { $('login').hidden = false; $('loginOff').hidden = navigator.onLine; $('key').focus(); }
   $('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    state.key = $('key').value.trim();
-    try { await api('checkKey', {}, 15000); try { localStorage.setItem(KEY_STORE, state.key); } catch (err) { /* */ } $('login').hidden = true; loadProducts(true); flush(); }
-    catch (err) { toast('パスワードが違います', true); }
+    const key = $('key').value.trim();
+    if (!key) return;
+    state.key = key;
+    const keep = () => { try { localStorage.setItem(KEY_STORE, key); } catch (err) { /* */ } $('login').hidden = true; };
+    try { await api('checkKey', {}, 15000); keep(); loadProducts(true); flush(); }
+    catch (err) {
+      // 電波がない・つながらないときは、確認はあとにしてそのまま使えるようにする
+      if (!err.server) { keep(); useCached(); toast('電波がないので、パスワードはつながってから確認します'); checkReady(); return; }
+      toast('パスワードが違います', true);
+    }
   });
 
   if (ENV) $('envBadge').hidden = false;
+  // まず端末に保存した在庫ですぐ表示し、そのあと裏で最新にする（電波が弱くても待たない）
+  useCached();
   if (!state.key) showLogin(); else { loadProducts(true); flush(); }
+  if (!standalone() && /iPhone|iPad|Android|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document) $('homewarn').hidden = false;
+  $('homewarnClose').addEventListener('click', () => { $('homewarn').hidden = true; });
+  $('ready').addEventListener('click', async () => { $('prep').hidden = false; drawPrep(await readiness()); });
+  $('prepClose').addEventListener('click', () => { $('prep').hidden = true; });
+  $('prepGo').addEventListener('click', prepare);
+  setTimeout(checkReady, 1500);
   // GitHub Pages 版だけ：画面と写真を端末に保存して、オフラインでも開けるようにする
   if ('serviceWorker' in navigator && /github\.io$|^(127\.0\.0\.1|localhost)$/.test(location.hostname)) {
     navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(() => {
-      if (!navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', prefetchImages, { once: true });
+      if (!navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', () => { prefetchImages(); checkReady(); }, { once: true });
       else prefetchImages();
     }).catch(() => {});
   }

@@ -1798,10 +1798,17 @@
       const added = await call('registerProducts', data);
       upsertMany(added);
       toast('' + added.length + '商品を登録しました');
-      $('registerHint').innerHTML = '登録しました：' + added.map(p => '<b>' + esc(p.id) + '</b> ' + esc(p.size)).join('、');
-      // 同じカテゴリの色違いを続けて登録しやすいよう、商品情報は残す
+      // 入力欄は空に戻す。色違いを続けて登録するときは「同じ商品名で続けて登録」で商品名・種別・価格・サイズを戻せる
+      state.lastRegistered = { category: category, type: data.type, price: data.price, sizes: state.sizes.slice() };
+      $('registerHint').innerHTML = '登録しました：' + added.map(p => '<b>' + esc(p.id) + '</b> ' + esc(p.size)).join('、') +
+        ' <button type="button" class="link-btn" id="pAgain">同じ商品名で続けて登録（色違い）</button>';
       clearImage();
-      state.sizes.forEach((_, i) => state.config.owners.forEach((__, j) => { $('stock_' + i + '_' + j).value = 0; }));
+      $('pCategory').value = '';
+      $('pColor').value = '';
+      $('pPrice').value = '';
+      $('pType').selectedIndex = 0;
+      state.sizes = [];
+      renderSizePicker();
       updateDupWarn();
     } catch (err) {
       toast(err.message, true);
@@ -3953,6 +3960,18 @@
     $('pCamera').addEventListener('change', onImageSelected);
     $('pImageClear').addEventListener('click', clearImage);
     $('btnRegister').addEventListener('click', onRegister);
+    $('registerHint').addEventListener('click', e => {
+      const last = state.lastRegistered;
+      if (!e.target.closest('#pAgain') || !last) return;
+      $('pCategory').value = last.category;
+      $('pType').value = last.type;
+      $('pPrice').value = last.price;
+      state.sizes = last.sizes.slice();
+      renderSizePicker();
+      updateDupWarn();
+      $('pColor').focus();
+      toast('色を入れて登録してください');
+    });
     // 種別の選択肢にないとき：下の「④ 種別・サイズの選択肢」へ飛んで、入力欄にカーソルを置く
     $('pTypeNew').addEventListener('click', () => {
       $('optionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });

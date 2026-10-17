@@ -657,6 +657,12 @@
   .sh-q .ctl { display: flex; align-items: center; gap: 2px; }
   .sh-q .ctl button { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--text); background: #fff; font-size: 18px; font-weight: 700; line-height: 1; cursor: pointer; }
   .sh-q .ctl input { width: 46px; text-align: center; font-family: var(--num); font-weight: 700; font-size: 20px; padding: 2px; border: 0; background: none; }
+  .sh-q .rs { grid-column: 1 / -1; display: flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 4px; }
+  .sh-q .rs button { width: 26px; height: 26px; border-radius: 7px; border: 1.5px solid var(--muted); background: #fff; font-size: 15px; font-weight: 700; line-height: 1; cursor: pointer; color: var(--text); }
+  .sh-q .rs button:first-of-type { margin-left: auto; }
+  .sh-q .rs input { width: 38px; text-align: center; font-family: var(--num); font-weight: 700; font-size: 17px; padding: 0; border: 0; background: none; }
+  .sh-q .rs.on { color: var(--replenish); }
+  .sh-q .rs.on input { color: var(--replenish); }
   .sh-newp { border: 1.5px dashed var(--text); border-radius: 10px; padding: 12px; display: grid; gap: 10px; margin-top: 14px; background: #fff; }
   .sh-newp .row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
   .sh-newp label { display: grid; gap: 3px; font-size: 12px; font-weight: 700; color: var(--muted); }
@@ -783,7 +789,7 @@
       </div>
 
       <div id="shStep3" hidden>
-        <p class="hint" style="margin-top:0" id="shQtyHint">数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。</p>
+        <p class="hint" style="margin-top:0" id="shQtyHint"></p>
         <div class="card" style="padding:4px 12px" id="shQtyList"></div>
         <div class="sh-newp">
           <b style="font-family:var(--display);font-weight:900">新商品を追加</b>
@@ -3325,6 +3331,7 @@
       '<button type="button" class="btn ghost" data-act="tally">販売チェック表</button>' +
       '<button type="button" class="btn" data-act="newp">＋ 新商品を追加</button>' +
       '<button type="button" class="btn ghost" data-act="items">商品・数を直す</button>' +
+      '<button type="button" class="btn ghost" data-act="restock">補充</button>' +
       '<button type="button" class="btn ghost" data-act="info">公演の情報を直す</button>' +
       '</div>' +
       freshNote(x) +
@@ -3347,6 +3354,7 @@
     if (act === 'items') return startShowWizard('items');
     if (act === 'fresh') { startShowWizard('items'); $('shFresh').checked = true; return renderShowPick(); }
     if (act === 'newp') return startShowWizard('newp');
+    if (act === 'restock') { startShowWizard('items'); return goShowStep(3); }
     if (act === 'info') return startShowWizard('info');
     if (act === 'delete') {
       if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'もう一度押すと削除します'; return; }
@@ -3383,7 +3391,7 @@
     sh.d = {
       showId: x ? x.show.id : '', name: x ? x.show.name : '', venue: x ? x.show.venue : '', dates: x ? x.show.dates.slice() : [],
       staff: x ? x.show.staff.slice() : (state.operator ? [state.operator] : []), owner: x ? x.show.owner : state.config.owners[0],
-      base: base, picked: picked, qty: qty, newProducts: [], createdAt: x ? x.show.createdAt : '',
+      base: base, picked: picked, qty: qty, restock: {}, newProducts: [], createdAt: x ? x.show.createdAt : '',
     };
     $('shName').value = sh.d.name;
     $('shVenue').value = sh.d.venue;
@@ -3401,7 +3409,8 @@
     $('shFresh').checked = false;
     $('shQtyHint').textContent = mode === 'newp'
       ? '公演中に新しく来た商品を登録して、この公演の在庫に入れます。商品はメインの商品一覧にも登録されます（メインの在庫数は0、この公演に持ち込みとして入ります）。'
-      : '数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。';
+      : '上の数は「メインの在庫から持っていく数」です。最初は在庫をすべて入れてあります。減らした分はメインに残ります。' +
+        '「補充」は新しく届いた数です。メインの在庫に補充として記録され、そのままこの公演に入ります。';
     goShowStep(mode === 'items' ? 2 : mode === 'newp' ? 3 : 1);
   }
 
@@ -3477,7 +3486,7 @@
       g.items.forEach(p => { if (!(p.id in sh.d.qty)) sh.d.qty[p.id] = showMax(p); });   // 最初は在庫を全部持っていく
     } else {
       delete sh.d.picked[key];
-      g.items.forEach(p => { delete sh.d.qty[p.id]; });
+      g.items.forEach(p => { delete sh.d.qty[p.id]; delete sh.d.restock[p.id]; });
     }
   }
 
@@ -3503,7 +3512,10 @@
             '<span class="ctl"><button type="button" data-q="' + esc(p.id) + '" data-d="-1" aria-label="減らす">−</button>' +
             '<input type="number" inputmode="numeric" min="' + min + '" max="' + max + '" value="' + v + '" data-qin="' + esc(p.id) + '">' +
             '<button type="button" data-q="' + esc(p.id) + '" data-d="1" aria-label="増やす">＋</button></span>' +
-            '<span class="have">' + esc(sh.d.owner) + 'に残る ' + (max - v) + (min ? '・売れた ' + min : '') + '</span></div>';
+            '<span class="have">' + esc(sh.d.owner) + 'に残る ' + (max - v) + (min ? '・売れた ' + min : '') + '</span>' +
+            '<span class="rs' + (sh.d.restock[p.id] ? ' on' : '') + '">補充<button type="button" data-r="' + esc(p.id) + '" data-d="-1" aria-label="補充を減らす">−</button>' +
+            '<input type="number" inputmode="numeric" min="0" value="' + (sh.d.restock[p.id] || 0) + '" data-rin="' + esc(p.id) + '">' +
+            '<button type="button" data-r="' + esc(p.id) + '" data-d="1" aria-label="補充を増やす">＋</button></span></div>';
         }).join('') + '</div></div>';
     }).join('');
   }
@@ -3515,6 +3527,14 @@
     v = Math.max(min, Math.min(max, Math.floor(Number(v) || 0)));
     if (Number(v) === max && max === 0) v = 0;
     sh.d.qty[id] = v;
+  }
+
+  /** 補充：新しく届いた数（メインには「補充」として記録し、そのまま公演に入る） */
+  function setRestock(id, v) {
+    v = Math.max(0, Math.min(9999, Math.floor(Number(v) || 0)));
+    if (!(id in sh.d.qty)) sh.d.qty[id] = 0;   // まだ持ち込んでいないサイズでも、補充だけで公演に入れられる
+    if (v) sh.d.restock[id] = v;
+    else delete sh.d.restock[id];
   }
 
   function renderNpSizes() {
@@ -3543,6 +3563,7 @@
 
   function showTotals() {
     const n = Object.keys(sh.d.qty).reduce((s, id) => s + (sh.d.qty[id] || 0), 0) +
+      Object.keys(sh.d.restock).reduce((s, id) => s + sh.d.restock[id], 0) +
       sh.d.newProducts.reduce((s, x) => s + x.sizes.reduce((m, z) => m + z.qty, 0), 0);
     return { groups: Object.keys(sh.d.picked).length + sh.d.newProducts.length, qty: n };
   }
@@ -3597,7 +3618,8 @@
       if (!sh.d.newProducts.length) return toast('新商品を入れてください', true);
       params.newProducts = sh.d.newProducts;   // 持ち込みの商品・数はそのまま（新商品だけ足す）
     } else if (sh.mode !== 'info') {
-      params.items = Object.keys(sh.d.qty).filter(id => sh.d.qty[id] > 0).map(id => ({ productId: id, qty: sh.d.qty[id] }));
+      params.items = Object.keys(sh.d.qty).filter(id => sh.d.qty[id] > 0 || sh.d.restock[id] || sh.d.base[id]).map(id => ({ productId: id, qty: sh.d.qty[id] || 0 }));
+      params.restock = Object.keys(sh.d.restock).filter(id => id in sh.d.qty).map(id => ({ productId: id, qty: sh.d.restock[id] }));
       params.newProducts = sh.d.newProducts;
       if (!params.items.length && !params.newProducts.length && sh.mode === 'new') return toast('持っていく商品を1つ以上入れてください', true);
     }
@@ -3606,7 +3628,8 @@
       sh.detail = await call('saveShow', params);
       state.config.shows = (state.config.shows || []).filter(x => x.id !== sh.detail.show.id).concat([sh.detail.show]);
       if (sh.mode !== 'info') await refreshProductsQuiet();
-      toast(sh.mode === 'new' ? '公演をつくりました' : sh.mode === 'newp' ? '新商品を登録して、この公演に入れました' : '保存しました');
+      const rsN = (params.restock || []).reduce((n, r) => n + r.qty, 0);
+      toast(sh.mode === 'new' ? '公演をつくりました' : sh.mode === 'newp' ? '新商品を登録して、この公演に入れました' : rsN ? '保存しました（補充 ' + rsN + '点）' : '保存しました');
       $('showWizard').hidden = true;
       $('showDetail').hidden = false;
       try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
@@ -3675,12 +3698,15 @@
       const b = e.target.closest('button');
       if (!b) return;
       if (b.dataset.q) setShowQty(b.dataset.q, (sh.d.qty[b.dataset.q] || 0) + Number(b.dataset.d));
+      else if (b.dataset.r) setRestock(b.dataset.r, (sh.d.restock[b.dataset.r] || 0) + Number(b.dataset.d));
       else if (b.dataset.fill) showGroups(true).find(g => g.key === b.dataset.fill).items.forEach(p => setShowQty(p.id, showMax(p)));
       else if (b.dataset.npRm) sh.d.newProducts.splice(Number(b.dataset.npRm), 1);
       else return;
       renderShowQty(); updateShowFoot();
     });
     $('shQtyList').addEventListener('change', e => {
+      const r = e.target.closest('[data-rin]');
+      if (r) { setRestock(r.dataset.rin, r.value); renderShowQty(); updateShowFoot(); return; }
       const i = e.target.closest('[data-qin]');
       if (!i) return;
       setShowQty(i.dataset.qin, i.value);

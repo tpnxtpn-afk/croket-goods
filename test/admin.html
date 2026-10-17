@@ -680,6 +680,9 @@
   .sh-days { display: flex; flex-wrap: wrap; gap: 4px; }
   .sh-head .tk-state { background: rgba(255,255,255,.16); color: #fff; }
   .sh-head .tk-state.live { background: var(--sale); }
+  .sh-fresh { display: flex; gap: 10px; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--warn); border-left-width: 5px; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+  .sh-fresh small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .sh-fresh .btn { flex: none; white-space: nowrap; }
   .sh-acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
   .sh-acts a.btn, .sh-acts .btn { width: 100%; text-decoration: none; text-align: center; display: block; padding: 11px 8px; font-size: 14px; }
   .sh-total { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
@@ -770,6 +773,7 @@
         <div class="sh-pickbar">
           <input type="search" id="shQ" placeholder="商品名・種別・色でさがす">
           <label class="hint" style="margin:0"><input type="checkbox" id="shAll"> 在庫0も出す</label>
+          <label class="hint" style="margin:0"><input type="checkbox" id="shFresh"> 公演のあとに登録した商品だけ</label>
         </div>
         <div class="btn-row" style="margin-bottom:8px">
           <button type="button" class="btn ghost mini" id="shPickAll">表示中をすべてえらぶ</button>
@@ -779,7 +783,7 @@
       </div>
 
       <div id="shStep3" hidden>
-        <p class="hint" style="margin-top:0">数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。</p>
+        <p class="hint" style="margin-top:0" id="shQtyHint">数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。</p>
         <div class="card" style="padding:4px 12px" id="shQtyList"></div>
         <div class="sh-newp">
           <b style="font-family:var(--display);font-weight:900">新商品を追加</b>
@@ -3266,6 +3270,25 @@
     });
   }
 
+  /**
+   * 公演をつくったあとにメインの商品登録で足された商品（公演には自動で入らない）。
+   * 公演のページに知らせて、「商品・数を直す」からえらんで持ち込めるようにする
+   */
+  function freshProducts(x) {
+    const inShow = {};
+    x.items.forEach(i => { inShow[i.id] = true; });
+    const since = x.show.createdAt || '';
+    return state.products.filter(p => !p.discontinued && !inShow[p.id] && p.createdTs && p.createdTs > since && (p.stock[x.show.owner] || 0) > 0);
+  }
+
+  function freshNote(x) {
+    const list = freshProducts(x);
+    if (!list.length) return '';
+    const names = unique(list.map(p => p.category + '（' + p.type + '）'));
+    return '<div class="sh-fresh"><div><b>メインに新しく登録された商品が' + names.length + '件あります</b><small>' + names.slice(0, 4).map(esc).join('・') + (names.length > 4 ? ' ほか' : '') +
+      '　この公演には入っていません</small></div><button type="button" class="btn small" data-act="fresh">えらんで持ち込む</button></div>';
+  }
+
   function renderShowDetail() {
     const x = sh.detail, s = x.show;
     const ph = showPhase(s);
@@ -3293,9 +3316,11 @@
       '<a class="btn ghost" href="' + esc(view) + '" target="_blank" rel="noopener">在庫確認ページ ↗</a>' +
       '<button type="button" class="btn ghost" data-act="pop">値札・POP</button>' +
       '<button type="button" class="btn ghost" data-act="tally">販売チェック表</button>' +
+      '<button type="button" class="btn" data-act="newp">＋ 新商品を追加</button>' +
       '<button type="button" class="btn ghost" data-act="items">商品・数を直す</button>' +
       '<button type="button" class="btn ghost" data-act="info">公演の情報を直す</button>' +
       '</div>' +
+      freshNote(x) +
       '<div class="sh-total"><div>売上<b>' + Number(x.amount || 0).toLocaleString('ja-JP') + '</b>円</div>' +
       '<div>売れた<b>' + x.sold + '</b>点</div><div>残り<b>' + left + '</b>/ ' + alloc + '点</div></div>' +
       (x.days.length ? '<div class="sh-daylist">' + x.days.map(d => '<span>' + dayChip(d.date).replace(/<\/?em>/g, '') + '　<b>' + d.qty + '</b>点 <b>' + Number(d.amount).toLocaleString('ja-JP') + '</b>円</span>').join('') + '</div>' : '') +
@@ -3313,6 +3338,8 @@
     if (act === 'pop') return printPriceTags(showRows(true).filter(p => p.stock[x.show.key] > 0), x.show.name);
     if (act === 'tally') return printTally('fit', { rows: showRows(true), pool: x.show.key, label: x.show.name, title: x.show.name });
     if (act === 'items') return startShowWizard('items');
+    if (act === 'fresh') { startShowWizard('items'); $('shFresh').checked = true; return renderShowPick(); }
+    if (act === 'newp') return startShowWizard('newp');
     if (act === 'info') return startShowWizard('info');
     if (act === 'delete') {
       if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'もう一度押すと削除します'; return; }
@@ -3349,7 +3376,7 @@
     sh.d = {
       showId: x ? x.show.id : '', name: x ? x.show.name : '', venue: x ? x.show.venue : '', dates: x ? x.show.dates.slice() : [],
       staff: x ? x.show.staff.slice() : (state.operator ? [state.operator] : []), owner: x ? x.show.owner : state.config.owners[0],
-      base: base, picked: picked, qty: qty, newProducts: [],
+      base: base, picked: picked, qty: qty, newProducts: [], createdAt: x ? x.show.createdAt : '',
     };
     $('shName').value = sh.d.name;
     $('shVenue').value = sh.d.venue;
@@ -3363,8 +3390,12 @@
     $('showHome').hidden = true;
     $('showDetail').hidden = true;
     $('showWizard').hidden = false;
-    $('shSteps').hidden = mode === 'info';
-    goShowStep(mode === 'items' ? 2 : 1);
+    $('shSteps').hidden = mode === 'info' || mode === 'newp';
+    $('shFresh').checked = false;
+    $('shQtyHint').textContent = mode === 'newp'
+      ? '公演中に新しく来た商品を登録して、この公演の在庫に入れます。商品はメインの商品一覧にも登録されます（メインの在庫数は0、この公演に持ち込みとして入ります）。'
+      : '数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。';
+    goShowStep(mode === 'items' ? 2 : mode === 'newp' ? 3 : 1);
   }
 
   function renderShowChips() {
@@ -3417,7 +3448,9 @@
 
   function renderShowPick() {
     const q = $('shQ').value.trim();
-    const groups = showGroups($('shAll').checked).filter(g => !q || g.items.some(p => matches(p, q)));
+    const since = sh.d.createdAt || '';
+    const fresh = g => g.items.some(p => !sh.d.base[p.id] && p.createdTs && p.createdTs > since);
+    const groups = showGroups($('shAll').checked).filter(g => (!q || g.items.some(p => matches(p, q))) && (!$('shFresh').checked || fresh(g)));
     if (!groups.length) { $('shPickList').innerHTML = '<div class="empty">商品がありません</div>'; return; }
     $('shPickList').innerHTML = groups.map(g => {
       const on = !!sh.d.picked[g.key];
@@ -3442,12 +3475,16 @@
   }
 
   function renderShowQty() {
-    const groups = showGroups(true).filter(g => sh.d.picked[g.key]);
+    const groups = sh.mode === 'newp' ? [] : showGroups(true).filter(g => sh.d.picked[g.key]);
     const np = sh.d.newProducts.map((n, i) => '<div class="sh-qg"><div class="hd"><div class="thumb-empty txt" style="' + gc(n.type) + '">' + esc(n.category) + '</div>' +
       '<div class="nm">' + esc(n.category) + '<span class="sh-newtag">新商品</span><small>' + esc(n.type) + (n.color ? '・' + esc(n.color) : '') + (n.price !== '' ? '　' + yen(n.price) : '') + '</small></div>' +
       '<button type="button" data-np-rm="' + i + '">外す</button></div><div class="sh-qrows">' +
       n.sizes.map(z => '<div class="sh-q set"><span class="sz">' + esc(z.size === '-' ? '数' : z.size) + '</span><b style="font-family:var(--num);font-size:20px">' + z.qty + '</b></div>').join('') + '</div></div>').join('');
-    if (!groups.length && !np) { $('shQtyList').innerHTML = '<div class="empty">商品がえらばれていません。「2 商品をえらぶ」に戻るか、下で新商品を加えてください</div>'; return; }
+    $('shQtyList').hidden = sh.mode === 'newp' && !np;
+    if (!groups.length && !np) {
+      $('shQtyList').innerHTML = '<div class="empty">' + (sh.mode === 'newp' ? '下に新商品を入れて「この新商品を加える」を押してください' : '商品がえらばれていません。「2 商品をえらぶ」に戻るか、下で新商品を加えてください') + '</div>';
+      return;
+    }
     $('shQtyList').innerHTML = np + groups.map(g => {
       const img = g.items.find(p => p.imageUrl) || g.items[0];
       return '<div class="sh-qg" style="' + gc(g.type) + '"><div class="hd">' + thumbHtml(img, 120) +
@@ -3505,9 +3542,11 @@
 
   function updateShowFoot() {
     const t = showTotals(), st = sh.step, last = sh.mode === 'info' || st === 3;
-    $('shInfo').innerHTML = sh.mode === 'info' ? '' : '<b>' + t.groups + '</b>商品　<b>' + t.qty + '</b>点';
-    $('shNext').textContent = !last ? '次へ' : sh.mode === 'new' ? '公演をつくる' : '保存する';
-    $('shBack').textContent = (sh.mode === 'new' && st === 1) || (sh.mode === 'items' && st === 2) || sh.mode === 'info' ? 'やめる' : '戻る';
+    const np = sh.d.newProducts.reduce((s, x) => s + x.sizes.reduce((m, z) => m + z.qty, 0), 0);
+    $('shInfo').innerHTML = sh.mode === 'info' ? '' : sh.mode === 'newp' ? '新商品<b>' + sh.d.newProducts.length + '</b>件　<b>' + np + '</b>点'
+      : '<b>' + t.groups + '</b>商品　<b>' + t.qty + '</b>点';
+    $('shNext').textContent = !last ? '次へ' : sh.mode === 'new' ? '公演をつくる' : sh.mode === 'newp' ? '公演に追加する' : '保存する';
+    $('shBack').textContent = isFirstStep() ? 'やめる' : '戻る';
   }
 
   function goShowStep(n) {
@@ -3539,9 +3578,18 @@
   async function showNext() {
     if (sh.step === 1 && !readShowInfo()) return;
     if (sh.mode !== 'info' && sh.step < 3) return goShowStep(sh.step + 1);
+    // 新商品の欄に入れたまま「加える」を押し忘れていたら、ここで加える
+    if (sh.step === 3 && $('npCategory').value.trim()) {
+      const before = sh.d.newProducts.length;
+      addNewProduct();
+      if (sh.d.newProducts.length === before) return;
+    }
     const btn = $('shNext');
     const params = { showId: sh.d.showId, name: sh.d.name, venue: sh.d.venue, dates: sh.d.dates, staff: sh.d.staff, owner: sh.d.owner };
-    if (sh.mode !== 'info') {
+    if (sh.mode === 'newp') {
+      if (!sh.d.newProducts.length) return toast('新商品を入れてください', true);
+      params.newProducts = sh.d.newProducts;   // 持ち込みの商品・数はそのまま（新商品だけ足す）
+    } else if (sh.mode !== 'info') {
       params.items = Object.keys(sh.d.qty).filter(id => sh.d.qty[id] > 0).map(id => ({ productId: id, qty: sh.d.qty[id] }));
       params.newProducts = sh.d.newProducts;
       if (!params.items.length && !params.newProducts.length && sh.mode === 'new') return toast('持っていく商品を1つ以上入れてください', true);
@@ -3551,7 +3599,7 @@
       sh.detail = await call('saveShow', params);
       state.config.shows = (state.config.shows || []).filter(x => x.id !== sh.detail.show.id).concat([sh.detail.show]);
       if (sh.mode !== 'info') await refreshProductsQuiet();
-      toast(sh.mode === 'new' ? '公演をつくりました' : '保存しました');
+      toast(sh.mode === 'new' ? '公演をつくりました' : sh.mode === 'newp' ? '新商品を登録して、この公演に入れました' : '保存しました');
       $('showWizard').hidden = true;
       $('showDetail').hidden = false;
       try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
@@ -3565,9 +3613,12 @@
     }
   }
 
+  function isFirstStep() {
+    return (sh.mode === 'new' && sh.step === 1) || (sh.mode === 'items' && sh.step === 2) || sh.mode === 'info' || sh.mode === 'newp';
+  }
+
   function showBack() {
-    const first = (sh.mode === 'new' && sh.step === 1) || (sh.mode === 'items' && sh.step === 2) || sh.mode === 'info';
-    if (!first) return goShowStep(sh.step - 1);
+    if (!isFirstStep()) return goShowStep(sh.step - 1);
     $('showWizard').hidden = true;
     if (sh.detail && sh.mode !== 'new') { $('showDetail').hidden = false; renderShowDetail(); }
     else backToShowHome();
@@ -3597,6 +3648,7 @@
     });
     $('shQ').addEventListener('input', renderShowPick);
     $('shAll').addEventListener('change', renderShowPick);
+    $('shFresh').addEventListener('change', renderShowPick);
     $('shPickList').addEventListener('change', e => {
       const c = e.target.closest('[data-pick]');
       if (!c) return;

@@ -697,6 +697,7 @@
   .sh-tbl tr.gh td { background: color-mix(in srgb, var(--gc) 12%, #fff); font-family: var(--display); font-weight: 900; font-size: 13px; border-bottom: 2px solid var(--gc); }
   .sh-tbl td.zero { color: var(--danger); }
   .sh-tbl td.mute { color: #9aa2ad; }
+  .link-btn { font: inherit; font-size: 12px; font-weight: 700; color: var(--text); background: none; border: 0; padding: 0 0 0 8px; text-decoration: underline; cursor: pointer; }
   /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
   body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
@@ -784,7 +785,7 @@
           <b style="font-family:var(--display);font-weight:900">新商品を追加</b>
           <label>商品名<input type="text" id="npCategory" list="categoryList" autocomplete="off" placeholder="例：コロッケ 2026ツアー"></label>
           <div class="row2">
-            <label>種別<select id="npType"></select></label>
+            <label>種別<input type="text" id="npType" list="npTypeList" autocomplete="off" placeholder="えらぶか、新しく入力"><datalist id="npTypeList"></datalist></label>
             <label>色<input type="text" id="npColor" list="colorList" autocomplete="off" placeholder="なければ空欄"></label>
           </div>
           <label>価格（円）<input type="text" id="npPrice" inputmode="numeric" autocomplete="off" placeholder="例：3500"></label>
@@ -817,7 +818,7 @@
         <datalist id="categoryList"></datalist>
       </div>
       <div class="field">
-        <label class="lbl" for="pType">種別</label>
+        <label class="lbl" for="pType">種別 <button type="button" class="link-btn" id="pTypeNew">＋ 選択肢にない種別を追加</button></label>
         <select id="pType"></select>
       </div>
       <div class="field">
@@ -1834,7 +1835,13 @@
       const res = await call('addOption', { kind: kind, value: value });
       applyOptions(res.options);
       input.value = '';
-      toast('「' + res.value + '」を追加しました');
+      // 追加した種別をそのまま①の種別に入れて、①へ戻る
+      if (kind === 'type') {
+        $('pType').value = res.value;
+        $('pType').dispatchEvent(new Event('change'));
+        $('pType').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      toast('「' + res.value + '」を追加しました' + (kind === 'type' ? '（①の種別に入れました）' : ''));
     } catch (err) {
       toast(err.message, true);
     } finally {
@@ -3349,7 +3356,8 @@
     fillSelect($('shOwner'), state.config.owners);
     $('shOwner').value = sh.d.owner;
     $('shOwnerField').hidden = !!x;
-    fillSelect($('npType'), state.config.types);
+    $('npTypeList').innerHTML = unique(state.config.types.concat(state.products.map(p => p.type))).map(t => '<option value="' + esc(t) + '">').join('');
+    $('npType').value = '';
     renderNpSizes();
     renderShowChips();
     $('showHome').hidden = true;
@@ -3471,9 +3479,9 @@
   }
 
   function addNewProduct() {
-    const category = $('npCategory').value.trim(), type = $('npType').value, color = $('npColor').value.trim();
+    const category = $('npCategory').value.trim(), type = $('npType').value.trim(), color = $('npColor').value.trim();
     if (!category) return toast('商品名を入れてください', true);
-    if (!type) return toast('種別をえらんでください', true);
+    if (!type) return toast('種別をえらぶか、入力してください', true);   // 選択肢にない種別は、登録のときに選択肢へ自動で足される
     const priceText = $('npPrice').value.replace(/[,，円\s]/g, '');
     if (priceText && !/^\d+$/.test(priceText)) return toast('価格は数字で入れてください', true);
     const sizes = [];
@@ -3482,7 +3490,7 @@
     const dupe = state.products.find(p => norm(p.category) === norm(category) && p.type === type && norm(p.color) === norm(color || '-') && sizes.some(z => z.size === p.size));
     if (dupe) return toast('同じ商品が登録済みです（' + dupe.id + '）。「2 商品をえらぶ」からえらんでください', true);
     sh.d.newProducts.push({ category: category, type: type, color: color || '-', price: priceText ? Number(priceText) : '', sizes: sizes });
-    ['npCategory', 'npColor', 'npPrice'].forEach(id => { $(id).value = ''; });
+    ['npCategory', 'npType', 'npColor', 'npPrice'].forEach(id => { $(id).value = ''; });
     renderNpSizes();
     renderShowQty();
     updateShowFoot();
@@ -3893,6 +3901,11 @@
     $('pCamera').addEventListener('change', onImageSelected);
     $('pImageClear').addEventListener('click', clearImage);
     $('btnRegister').addEventListener('click', onRegister);
+    // 種別の選択肢にないとき：下の「④ 種別・サイズの選択肢」へ飛んで、入力欄にカーソルを置く
+    $('pTypeNew').addEventListener('click', () => {
+      $('optionCard').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => $('newType').focus(), 400);
+    });
     $('btnAddType').addEventListener('click', () => onAddOption('type'));
     $('btnAddSize').addEventListener('click', () => onAddOption('size'));
     // 日本語入力の変換確定の Enter では追加しない

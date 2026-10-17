@@ -678,6 +678,10 @@
   .sh-newp select { width: 100%; }
   .sh-newp .row2 { align-items: start; }
   .sh-newp #npType { margin-top: 6px; }
+  .np-saved { display: grid; gap: 4px; padding: 10px 2px; color: var(--ok); }
+  .np-saved b { color: var(--text); font-size: 13px; }
+  .np-saved span { font-weight: 700; }
+  .np-pending { padding: 10px 2px 0; font-size: 13px; font-weight: 700; color: var(--danger); }
   .np-err { margin: 0; padding: 8px 10px; border-radius: 8px; background: #fdeceb; color: var(--danger); font-weight: 700; font-size: 14px; }
   .sh-newtag { display: inline-block; font-size: 11px; font-weight: 700; background: var(--sale); color: #fff; border-radius: 5px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; }
   .sh-foot { position: sticky; bottom: 0; z-index: 6; display: flex; gap: 8px; align-items: center; background: var(--bg); padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1.5px solid var(--text); margin-top: 14px; }
@@ -825,7 +829,7 @@
           </div>
           <p class="np-err" id="npErr" hidden></p>
           <button type="button" class="btn ghost" id="npAdd">この新商品を加える</button>
-          <p class="hint" style="margin:0">新商品は保存したときに商品登録されます。写真はあとから撮影リストでも入れられます。</p>
+          <p class="hint" style="margin:0" id="npNote">新商品は、最後に下の「保存する」（新しい公演は「公演をつくる」）を押したときに登録されます。写真はあとから撮影リストでも入れられます。</p>
         </div>
       </div>
 
@@ -3432,6 +3436,8 @@
     $('showDetail').hidden = true;
     $('showWizard').hidden = false;
     $('shSteps').hidden = mode === 'info' || mode === 'newp';
+    $('npNote').textContent = mode === 'newp' ? '1件ずつ、押したらすぐ商品登録されて、この公演の在庫に入ります。続けて次の商品も入れられます。'
+      : '新商品は、最後に下の「保存する」（新しい公演は「公演をつくる」）を押したときに登録されます。写真はあとから撮影リストでも入れられます。';
     $('shFresh').checked = false;
     $('shQtyHint').textContent = mode === 'newp'
       ? '公演中に新しく来た商品を登録して、この公演の在庫に入れます。商品はメインの商品一覧にも登録されます（メインの在庫数は0、この公演に持ち込みとして入ります）。'
@@ -3522,7 +3528,13 @@
       '<div class="nm">' + esc(n.category) + '<span class="sh-newtag">新商品</span><small>' + esc(n.type) + (n.color && n.color !== '-' ? '・' + esc(n.color) : '') + (n.price !== '' ? '　' + yen(n.price) : '') + '</small></div>' +
       '<button type="button" data-np-rm="' + i + '">外す</button></div><div class="sh-qrows">' +
       n.sizes.map(z => '<div class="sh-q set"><span class="sz">' + esc(z.size === '-' ? '数' : z.size) + '</span><b style="font-family:var(--num);font-size:20px">' + z.qty + '</b></div>').join('') + '</div></div>').join('');
-    $('shQtyList').hidden = sh.mode === 'newp' && !np;
+    const saved = sh.mode === 'newp' && (sh.d.saved || []).length
+      ? '<div class="np-saved"><b>この公演に登録しました</b>' + sh.d.saved.map(n => '<span>✓ ' + esc(n) + '</span>').join('') + '</div>' : '';
+    $('shQtyList').hidden = sh.mode === 'newp' && !np && !saved;
+    if (sh.mode === 'newp') {
+      $('shQtyList').innerHTML = saved + (np ? '<div class="np-pending">まだ登録されていません</div>' + np : '');
+      return;
+    }
     if (!groups.length && !np) {
       $('shQtyList').innerHTML = '<div class="empty">' + (sh.mode === 'newp' ? '下に新商品を入れて「この新商品を加える」を押してください' : '商品がえらばれていません。「2 商品をえらぶ」に戻るか、下で新商品を加えてください') + '</div>';
       return;
@@ -3601,6 +3613,8 @@
   }
 
   function addNewProduct() {
+    // 公演中の追加：送れなかった分が残っていて欄が空なら、送り直す
+    if (sh.mode === 'newp' && !$('npCategory').value.trim() && sh.d.newProducts.length) return saveNewp();
     const sel = $('npTypeSel').value;
     const category = $('npCategory').value.trim(), type = (sel === '__new__' ? $('npType').value : sel).trim(), color = $('npColor').value.trim();
     if (!category) return npError('商品名を入れてください');
@@ -3621,7 +3635,9 @@
     renderNpSizes();
     renderShowQty();
     updateShowFoot();
-    toast('「' + category + '」を加えました');
+    // 公演中の追加は、押したらすぐ登録する（「加えた」だけで終わったと思って閉じてしまわないように）
+    if (sh.mode === 'newp') return saveNewp();
+    toast('「' + category + '」を加えました。最後に下の「' + $('shNext').textContent + '」を押すと登録されます');
   }
 
   function showTotals() {
@@ -3637,7 +3653,10 @@
     $('shInfo').innerHTML = sh.mode === 'info' ? '' : sh.mode === 'newp' ? '新商品<b>' + sh.d.newProducts.length + '</b>件　<b>' + np + '</b>点'
       : '<b>' + t.groups + '</b>商品　<b>' + t.qty + '</b>点';
     $('shNext').textContent = !last ? '次へ' : sh.mode === 'new' ? '公演をつくる' : sh.mode === 'newp' ? '公演に追加する' : '保存する';
-    $('shBack').textContent = isFirstStep() ? 'やめる' : '戻る';
+    $('shBack').textContent = sh.mode === 'newp' ? '公演のページへ戻る' : isFirstStep() ? 'やめる' : '戻る';
+    $('shNext').hidden = sh.mode === 'newp';
+    if (!$('npAdd').disabled) $('npAdd').textContent = sh.mode === 'newp' ? (sh.d.newProducts.length ? 'もう一度送る' : '登録して、この公演に入れる') : 'この新商品を加える';
+    $('npAdd').classList.toggle('ghost', sh.mode !== 'newp');
   }
 
   function goShowStep(n) {
@@ -3666,6 +3685,42 @@
     return true;
   }
 
+  /** 新商品の写真をアップロードして、送る形にする（アップロード済みは送り直さない） */
+  async function uploadNewProducts(btn) {
+    for (let i = 0; i < sh.d.newProducts.length; i++) {
+      const n = sh.d.newProducts[i];
+      if (!n.image || n.imageUrl) continue;
+      setBusy(btn, true, '写真を送信中… ' + (i + 1) + '/' + sh.d.newProducts.length);
+      n.imageUrl = (await call('uploadImage', n.image)).url;
+    }
+    return sh.d.newProducts.map(n => ({ category: n.category, type: n.type, color: n.color, price: n.price, sizes: n.sizes, imageUrl: n.imageUrl || '' }));
+  }
+
+  /** 公演中の新商品：すぐ商品登録して、この公演の在庫に入れる */
+  async function saveNewp() {
+    if (!sh.d.newProducts.length) return;
+    const btn = $('npAdd');
+    const names = sh.d.newProducts.map(n => n.category);
+    setBusy(btn, true, '登録中…');
+    try {
+      const list = await uploadNewProducts(btn);
+      setBusy(btn, true, '登録中…');
+      sh.detail = await call('saveShow', { showId: sh.d.showId, name: sh.d.name, venue: sh.d.venue, dates: sh.d.dates, staff: sh.d.staff, owner: sh.d.owner, newProducts: list });
+      state.config.shows = (state.config.shows || []).filter(x => x.id !== sh.detail.show.id).concat([sh.detail.show]);
+      sh.d.saved = (sh.d.saved || []).concat(names);
+      sh.d.newProducts = [];
+      npError('');
+      toast('「' + names.join('」「') + '」を登録して、この公演に入れました');
+      refreshProductsQuiet();
+    } catch (err) {
+      npError('登録できませんでした：' + err.message + '　電波の良い場所で、もう一度「登録して、この公演に入れる」を押してください（入れた内容は残っています）');
+    } finally {
+      setBusy(btn, false);
+      renderShowQty();
+      updateShowFoot();
+    }
+  }
+
   async function showNext() {
     if (sh.step === 1 && !readShowInfo()) return;
     if (sh.mode !== 'info' && sh.step < 3) return goShowStep(sh.step + 1);
@@ -3677,10 +3732,8 @@
     }
     const btn = $('shNext');
     const params = { showId: sh.d.showId, name: sh.d.name, venue: sh.d.venue, dates: sh.d.dates, staff: sh.d.staff, owner: sh.d.owner };
-    if (sh.mode === 'newp') {
-      if (!sh.d.newProducts.length) return npError('新商品を入れてください');
-      params.newProducts = sh.d.newProducts;   // 持ち込みの商品・数はそのまま（新商品だけ足す）
-    } else if (sh.mode !== 'info') {
+    if (sh.mode === 'newp') return;   // 公演中の追加は「登録して、この公演に入れる」で1件ずつ登録する
+    if (sh.mode !== 'info') {
       params.items = Object.keys(sh.d.qty).filter(id => sh.d.qty[id] > 0 || sh.d.restock[id] || sh.d.base[id]).map(id => ({ productId: id, qty: sh.d.qty[id] || 0 }));
       params.restock = Object.keys(sh.d.restock).filter(id => id in sh.d.qty).map(id => ({ productId: id, qty: sh.d.restock[id] }));
       params.newProducts = sh.d.newProducts;
@@ -3690,13 +3743,7 @@
     try {
       // 新商品の写真を先にアップロードして、URLだけを送る（2回目の保存では送り直さない）
       if (params.newProducts && params.newProducts.length) {
-        for (let i = 0; i < sh.d.newProducts.length; i++) {
-          const n = sh.d.newProducts[i];
-          if (!n.image || n.imageUrl) continue;
-          setBusy(btn, true, '写真を送信中… ' + (i + 1) + '/' + sh.d.newProducts.length);
-          n.imageUrl = (await call('uploadImage', n.image)).url;
-        }
-        params.newProducts = sh.d.newProducts.map(n => ({ category: n.category, type: n.type, color: n.color, price: n.price, sizes: n.sizes, imageUrl: n.imageUrl || '' }));
+        params.newProducts = await uploadNewProducts(btn);
         setBusy(btn, true, '保存中…');
       }
       sh.detail = await call('saveShow', params);

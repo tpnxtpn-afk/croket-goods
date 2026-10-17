@@ -311,6 +311,8 @@
     .log { display: none; }
     .hfield input { width: 110px; }
   }
+  .sale .sundo { margin-left: 8px; font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--ink); border-radius: 8px; background: var(--panel); padding: 4px 10px; white-space: nowrap; }
+  .sale .sundo[data-armed] { background: #d23a2f; border-color: #d23a2f; color: #fff; }
   .show-name { display: block; font-size: 12px; font-weight: 700; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
   .show-name:empty { display: none; }
   .hfield input[readonly] { background: transparent; border-style: dashed; }
@@ -861,9 +863,9 @@
     render();
   }
 
-  async function undo(opId) {
-    // 押し間違い防止：1回目は確認表示だけ
-    const btn = document.querySelector('[data-undo="' + opId + '"]');
+  async function undo(opId, el) {
+    // 押し間違い防止：1回目は確認表示だけ（押したボタンに出す。売れたもの画面からも取り消せる）
+    const btn = el || document.querySelector('[data-undo="' + opId + '"]');
     if (btn && !btn.dataset.armed) { btn.dataset.armed = '1'; btn.textContent = 'もう一度押すと取消'; setTimeout(() => { delete btn.dataset.armed; btn.textContent = '取り消す'; }, 4000); return; }
     if (!navigator.onLine) {
       // 電波がないときは取り消しを予約して、つながったら送る。在庫の表示はすぐ戻す
@@ -878,6 +880,7 @@
       await api('undoOperation', { opId: opId, operator: $('operator').value.trim() });
       const l = load(LOG_STORE, []); l.forEach(e => { if (e.opId === opId) e.undone = true; }); save(LOG_STORE, l);
       toast('取り消しました'); loadProducts(true);
+      if (!$('sales').hidden) loadSales();
     } catch (e) { toast(e.message, true); }
   }
 
@@ -904,7 +907,7 @@
     if (t.dataset.close && (e.target === t || t.tagName === 'BUTTON')) { $('sheet').hidden = true; return; }
     if (t.dataset.inc) return add(t.dataset.inc, 1);
     if (t.dataset.dec) return add(t.dataset.dec, -1);
-    if (t.dataset.undo) return undo(t.dataset.undo);
+    if (t.dataset.undo) return undo(t.dataset.undo, t);
     if (t.dataset.unq !== undefined) return unqueue(t.dataset.unq, t);
   });
   $('q').addEventListener('input', e => { state.q = e.target.value; render(); });
@@ -1004,7 +1007,9 @@
     if (salesState.view === 'list') {
       $('salesBody').innerHTML = shime + sales.map((x, k) => '<div class="sale' + (x.undone ? ' undone' : '') + '"><div class="top"><b>' + esc(x.at.slice(6)) + '</b>' +
         '<span>' + x.qty + '点' + (x.operator ? '・' + esc(x.operator) : '') + (x.undone ? '・取消済' : '') + '</span>' +
-        '<span class="amt">' + (x.amount ? yen(x.amount) : '') + '</span></div><ul>' +
+        '<span class="amt">' + (x.amount ? yen(x.amount) : '') + '</span>' +
+        // iPad縦では「この端末の記録」が出ないので、ここからも取り消せるようにする（今日の会計だけ）
+        (!x.undone && x.opId && x.date === today() ? '<button class="sundo" data-undo="' + esc(x.opId) + '">取り消す</button>' : '') + '</div><ul>' +
         x.items.map(i => '<li><span>' + esc(i.type) + '</span> ' + esc(label(i)) + '　×' + i.qty + '</li>').join('') + '</ul></div>').join('');
       shimeDiff();
       return;

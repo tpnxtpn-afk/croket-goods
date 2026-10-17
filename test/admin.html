@@ -594,6 +594,109 @@
   .inv-acts button { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--text); border-radius: 7px; background: #fff; color: var(--text); padding: 3px 9px; cursor: pointer; }
   .inv-acts button.cam { border-style: dashed; color: var(--muted); border-color: var(--muted); }
   .inv-acts .ids { font-family: var(--num); font-size: 13px; letter-spacing: .03em; }
+  /* ===== 公演：公演ごとに在庫を分けて持っていく ===== */
+  .sh-new { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .sh-list { display: grid; gap: 12px; margin-top: 14px; }
+  .ticket { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 96px; background: #fff; border: 1.5px solid var(--text); border-radius: 12px;
+    text-align: left; font: inherit; color: var(--text); padding: 0; cursor: pointer; overflow: hidden; }
+  .ticket .tk-main { padding: 12px 14px; min-width: 0; display: grid; gap: 6px; }
+  .ticket .tk-stub { border-left: 2px dashed var(--line); display: grid; place-content: center; text-align: center; gap: 2px; padding: 8px 4px; background: #f6f7f9; }
+  .ticket .tk-stub small { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .ticket .tk-stub b { font-family: var(--num); font-size: 26px; line-height: 1; }
+  .ticket::before, .ticket::after { content: ""; position: absolute; right: 89px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--text); }
+  .ticket::before { top: -8px; } .ticket::after { bottom: -8px; }
+  .tk-name { font-family: var(--display); font-weight: 900; font-size: 18px; line-height: 1.3; }
+  .tk-venue { font-size: 13px; color: var(--muted); }
+  .tk-days { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tk-days span, .sh-days span { font-family: var(--num); font-weight: 700; font-size: 14px; border: 1.5px solid var(--text); border-radius: 6px; padding: 0 6px; line-height: 1.5; background: #fff; }
+  .tk-days span.today { background: var(--text); color: #fff; }
+  .tk-days span em, .sh-days span em { font-style: normal; font-family: inherit; font-size: 11px; margin-left: 2px; }
+  .tk-state { justify-self: start; font-size: 11px; font-weight: 700; border-radius: 5px; padding: 1px 7px; background: var(--bg); }
+  .tk-state.live { background: var(--sale); color: #fff; }
+  .tk-state.done { background: #fff; border: 1px solid var(--line); color: var(--muted); }
+  .tk-nums { font-size: 12px; color: var(--muted); }
+  .tk-nums b { font-family: var(--num); font-size: 16px; color: var(--text); margin: 0 2px; }
+
+  .sh-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1.5px solid var(--text); border-radius: 10px; overflow: hidden; margin-bottom: 14px; background: #fff; }
+  .sh-steps button { border: 0; border-left: 1.5px solid var(--text); background: none; font: inherit; font-size: 12px; font-weight: 700; color: var(--muted); padding: 8px 2px; cursor: pointer; display: grid; justify-items: center; gap: 1px; }
+  .sh-steps button:first-child { border-left: 0; }
+  .sh-steps button b { font-family: var(--num); font-size: 20px; line-height: 1; }
+  .sh-steps button.on { background: var(--text); color: #fff; }
+  .sh-steps button.done { color: var(--text); }
+  .chip-in { display: flex; gap: 8px; }
+  .chip-in input { flex: 1; min-width: 0; }
+  .chip-in .btn { flex: none; width: auto; padding: 10px 14px; font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chips:empty { display: none; }
+  .chips span { display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid var(--text); border-radius: 8px; padding: 3px 4px 3px 10px; font-weight: 700; font-size: 14px; background: #fff; }
+  .chips span button { border: 0; background: none; font-size: 16px; line-height: 1; padding: 2px 6px; cursor: pointer; color: var(--muted); }
+  .sh-pickbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .sh-pickbar input[type=search] { flex: 1 1 180px; }
+  .sh-pick { display: grid; grid-template-columns: 26px 56px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .sh-pick input { width: 22px; height: 22px; margin: 0; accent-color: var(--text); }
+  .sh-pick .thumb, .sh-pick .thumb-empty { width: 56px; height: 56px; border-radius: 8px; }
+  .sh-pick .thumb-empty.txt, .sh-qg .thumb-empty.txt { font-size: 10px; display: grid; place-items: center; }
+  .sh-pick .nm { font-weight: 700; line-height: 1.3; }
+  .sh-pick .nm small { font-weight: 400; color: var(--muted); margin-left: 6px; }
+  .sh-pick .st { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .sh-pick .st b { font-family: var(--num); font-size: 15px; color: var(--text); }
+  .sh-pick.zero .nm { color: var(--muted); }
+  .sh-pick.on { background: color-mix(in srgb, var(--gc) 9%, #fff); }
+  .sh-qg { padding: 12px 2px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+  .sh-qg .hd { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+  .sh-qg .thumb, .sh-qg .thumb-empty { width: 44px; height: 44px; border-radius: 7px; }
+  .sh-qg .hd .nm { font-weight: 700; line-height: 1.3; }
+  .sh-qg .hd .nm small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .sh-qg .hd button { font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--text); border-radius: 7px; background: #fff; padding: 4px 8px; cursor: pointer; white-space: nowrap; }
+  .sh-qrows { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .sh-q { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 6px; border: 1.5px solid var(--line); border-radius: 9px; padding: 6px 8px; background: #fff; }
+  .sh-q.set { border-color: var(--text); }
+  .sh-q .sz { font-weight: 700; font-size: 14px; }
+  .sh-q .have { grid-column: 1 / -1; font-size: 11px; color: var(--muted); }
+  .sh-q .have.over { color: var(--danger); font-weight: 700; }
+  .sh-q .ctl { display: flex; align-items: center; gap: 2px; }
+  .sh-q .ctl button { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--text); background: #fff; font-size: 18px; font-weight: 700; line-height: 1; cursor: pointer; }
+  .sh-q .ctl input { width: 46px; text-align: center; font-family: var(--num); font-weight: 700; font-size: 20px; padding: 2px; border: 0; background: none; }
+  .sh-newp { border: 1.5px dashed var(--text); border-radius: 10px; padding: 12px; display: grid; gap: 10px; margin-top: 14px; background: #fff; }
+  .sh-newp .row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  .sh-newp label { display: grid; gap: 3px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .sh-newp .szq { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; }
+  .sh-newp .szq label { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px; border: 1.5px solid var(--line); border-radius: 8px; padding: 4px 8px; color: var(--text); }
+  .sh-newp .szq input { width: 100%; padding: 6px; font-family: var(--num); font-size: 18px; text-align: right; }
+  .sh-newtag { display: inline-block; font-size: 11px; font-weight: 700; background: var(--sale); color: #fff; border-radius: 5px; padding: 0 6px; margin-left: 6px; vertical-align: 2px; }
+  .sh-foot { position: sticky; bottom: 0; z-index: 6; display: flex; gap: 8px; align-items: center; background: var(--bg); padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); border-top: 1.5px solid var(--text); margin-top: 14px; }
+  .sh-foot .info { flex: 1; font-size: 12px; color: var(--muted); min-width: 0; }
+  .sh-foot .info b { font-family: var(--num); font-size: 20px; color: var(--text); margin: 0 2px; }
+  .sh-foot .btn { width: auto; padding: 12px 18px; }
+
+  .sh-head { background: var(--text); color: #fff; border-radius: 12px; padding: 14px 16px 16px; display: grid; gap: 8px; position: relative; overflow: hidden; }
+  .sh-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--rainbow); }
+  .sh-head .nm { font-family: var(--display); font-weight: 900; font-size: 21px; line-height: 1.3; }
+  .sh-head .venue { font-size: 13px; opacity: .8; }
+  .sh-head .sh-days span { background: transparent; color: #fff; border-color: rgba(255,255,255,.5); }
+  .sh-head .staff { font-size: 13px; }
+  .sh-head .staff b { font-weight: 700; }
+  .sh-head .back { justify-self: start; font: inherit; font-size: 12px; color: #fff; background: none; border: 1px solid rgba(255,255,255,.4); border-radius: 12px; padding: 3px 10px; cursor: pointer; }
+  .sh-days { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sh-head .tk-state { background: rgba(255,255,255,.16); color: #fff; }
+  .sh-head .tk-state.live { background: var(--sale); }
+  .sh-acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+  .sh-acts a.btn, .sh-acts .btn { width: 100%; text-decoration: none; text-align: center; display: block; padding: 11px 8px; font-size: 14px; }
+  .sh-total { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .sh-total div { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--muted); font-weight: 700; }
+  .sh-total b { display: block; font-family: var(--num); font-size: 26px; color: var(--text); line-height: 1.1; }
+  .sh-daylist { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .sh-daylist span { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; }
+  .sh-daylist b { font-family: var(--num); font-size: 15px; color: var(--text); }
+  .sh-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sh-tbl th { font-size: 11px; color: var(--muted); text-align: right; padding: 4px 6px; border-bottom: 1.5px solid var(--text); white-space: nowrap; }
+  .sh-tbl th:first-child { text-align: left; }
+  .sh-tbl td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; font-family: var(--num); font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .sh-tbl td:first-child { text-align: left; font-family: inherit; font-size: 13px; font-weight: 400; white-space: normal; }
+  .sh-tbl td:first-child b { font-weight: 700; }
+  .sh-tbl tr.gh td { background: color-mix(in srgb, var(--gc) 12%, #fff); font-family: var(--display); font-weight: 900; font-size: 13px; border-bottom: 2px solid var(--gc); }
+  .sh-tbl td.zero { color: var(--danger); }
+  .sh-tbl td.mute { color: #9aa2ad; }
   /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
   body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
@@ -611,6 +714,7 @@
 </nav>
 
 <nav class="tabs" id="tabs">
+  <button class="tab" data-tab="show"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>公演</button>
   <button class="tab" data-tab="product"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>商品登録</button>
   <button class="tab" data-tab="sales"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l-2 11H6z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>販売・補充</button>
   <button class="tab" data-tab="inventory"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>在庫一覧</button>
@@ -619,6 +723,90 @@
 </nav>
 
 <main>
+  <!-- ========== 公演 ========== -->
+  <section class="panel" id="panel-show">
+    <div id="showHome">
+      <button type="button" class="btn sh-new" id="btnShowNew">＋ 新しい公演をつくる</button>
+      <p class="hint">公演をつくると、持っていく商品の数を在庫（現場用など）から引いて、その公演の在庫にします。レジ・在庫確認ページ・値札POPは公演ごとに開けます。</p>
+      <div class="sh-list" id="showList"><div class="loading">読み込み中…</div></div>
+    </div>
+
+    <div id="showWizard" hidden>
+      <div class="sh-steps" id="shSteps">
+        <button type="button" data-step="1"><b>1</b>公演の情報</button>
+        <button type="button" data-step="2"><b>2</b>商品をえらぶ</button>
+        <button type="button" data-step="3"><b>3</b>数・新商品</button>
+      </div>
+
+      <div id="shStep1">
+        <div class="card">
+          <div class="field">
+            <label class="lbl" for="shName">公演名</label>
+            <input type="text" id="shName" autocomplete="off" placeholder="例：コロッケコンサート 新歌舞伎座">
+          </div>
+          <div class="field">
+            <label class="lbl" for="shVenue">会場</label>
+            <input type="text" id="shVenue" autocomplete="off" placeholder="例：新歌舞伎座">
+          </div>
+          <div class="field">
+            <label class="lbl" for="shDate">日程 <span class="sub">（1日ずつ追加。何日でも）</span></label>
+            <div class="chip-in"><input type="date" id="shDate"><button type="button" class="btn ghost" id="shDateAdd">追加</button></div>
+            <div class="chips" id="shDates"></div>
+          </div>
+          <div class="field">
+            <label class="lbl" for="shStaff">担当者 <span class="sub">（何人でも）</span></label>
+            <div class="chip-in"><input type="text" id="shStaff" autocomplete="off" placeholder="名前"><button type="button" class="btn ghost" id="shStaffAdd">追加</button></div>
+            <div class="chips" id="shStaffs"></div>
+          </div>
+          <div class="field" id="shOwnerField">
+            <label class="lbl" for="shOwner">どの在庫から持っていくか</label>
+            <select id="shOwner"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="shStep2" hidden>
+        <div class="sh-pickbar">
+          <input type="search" id="shQ" placeholder="商品名・種別・色でさがす">
+          <label class="hint" style="margin:0"><input type="checkbox" id="shAll"> 在庫0も出す</label>
+        </div>
+        <div class="btn-row" style="margin-bottom:8px">
+          <button type="button" class="btn ghost mini" id="shPickAll">表示中をすべてえらぶ</button>
+          <button type="button" class="btn ghost mini" id="shPickNone">えらび直す（全部外す）</button>
+        </div>
+        <div class="card" style="padding:4px 12px" id="shPickList"></div>
+      </div>
+
+      <div id="shStep3" hidden>
+        <p class="hint" style="margin-top:0">数は「持っていく数」です。最初は在庫をすべて入れてあります。減らした分は在庫に残ります。</p>
+        <div class="card" style="padding:4px 12px" id="shQtyList"></div>
+        <div class="sh-newp">
+          <b style="font-family:var(--display);font-weight:900">新商品を追加</b>
+          <label>商品名<input type="text" id="npCategory" list="categoryList" autocomplete="off" placeholder="例：コロッケ 2026ツアー"></label>
+          <div class="row2">
+            <label>種別<select id="npType"></select></label>
+            <label>色<input type="text" id="npColor" list="colorList" autocomplete="off" placeholder="なければ空欄"></label>
+          </div>
+          <label>価格（円）<input type="text" id="npPrice" inputmode="numeric" autocomplete="off" placeholder="例：3500"></label>
+          <div>
+            <div class="lbl" style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px">サイズごとの持っていく数（入れたサイズだけ登録）</div>
+            <div class="szq" id="npSizes"></div>
+          </div>
+          <button type="button" class="btn ghost" id="npAdd">この新商品を加える</button>
+          <p class="hint" style="margin:0">新商品は「公演をつくる」を押したときに商品登録されます。写真はあとで撮影リストから入れられます。</p>
+        </div>
+      </div>
+
+      <div class="sh-foot">
+        <button type="button" class="btn ghost" id="shBack">戻る</button>
+        <div class="info" id="shInfo"></div>
+        <button type="button" class="btn" id="shNext">次へ</button>
+      </div>
+    </div>
+
+    <div id="showDetail" hidden></div>
+  </section>
+
   <!-- ========== 商品登録 ========== -->
   <section class="panel" id="panel-product">
     <div class="card">
@@ -1094,7 +1282,7 @@
   const BATCH_STORE = STORE + '.batch';
   const ST_STORE = STORE + '.stocktake';
 
-  const TAB_COLORS = { product: '#14171d', sales: '#14171d', inventory: '#14171d', alerts: '#14171d', monthly: '#14171d' };
+  const TAB_COLORS = { show: '#14171d', product: '#14171d', sales: '#14171d', inventory: '#14171d', alerts: '#14171d', monthly: '#14171d' };
   const MAX_IMAGE_PX = 1200;
   const QR_LIB = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
   const SCAN_LIB = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
@@ -1297,7 +1485,10 @@
         '<i>' + (one ? '在庫' : esc(p.size)) + '</i><b>' + p.total + '</b></button>').join('');
       // 在庫区分が2つ以上に分かれているときだけ内訳を出す
       const split = owners.filter(o => g.items.some(p => p.stock[o]));
-      const sub = split.length > 1 ? '<div class="inv-sub">' + split.map(o => esc(o) + ' ' + g.items.reduce((n, p) => n + (p.stock[o] || 0), 0)).join('　') + '</div>' : '';
+      // 公演に持ち込んでいる数（在庫の数には入っていない）
+      const inShows = (state.config.shows || []).map(x => ({ name: x.name, n: g.items.reduce((n, p) => n + ((p.shows || {})[x.key] || 0), 0) })).filter(x => x.n);
+      const sub = split.length > 1 || inShows.length ? '<div class="inv-sub">' + (split.length > 1 ? split.map(o => esc(o) + ' ' + g.items.reduce((n, p) => n + (p.stock[o] || 0), 0)).join('　') : '') +
+        inShows.map(x => '<span class="nw">　公演「' + esc(x.name) + '」に ' + x.n + '</span>').join('') + '</div>' : '';
       const off = g.items.every(p => p.discontinued);
       html += '<div class="inv-g' + (off ? ' off' : '') + '">' + pic + '<div><div class="inv-nm">' + esc(g.type) +
         (g.color && g.color !== '-' ? '<small>' + esc(g.color) + '</small>' : '') + (off ? '<span class="off-tag">終了</span>' : '') + price + '</div>' +
@@ -1440,6 +1631,7 @@
     if (name === 'inventory') renderInventory();
     if (name === 'alerts') loadAlerts();
     if (name === 'monthly' && state.monthlyStale) loadMonthly();
+    if (name === 'show') openShowHome();
     updateBars();
     window.scrollTo(0, 0);
   }
@@ -2272,9 +2464,10 @@
   const TALLY_SLOTS = ['①', '②', '③', '④', '⑤', '⑥', '⑦'];
   const TALLY_BLANKS = 10;
 
-  function printTally(mode) {
-    const pool = state.config.owners[0];
-    const rows = sortByDisplay(inventoryRows()).filter(p => (p.stock[pool] || 0) > 0);   // 在庫0の商品は売れないので載せない
+  function printTally(mode, opt) {
+    opt = opt || {};
+    const pool = opt.pool || state.config.owners[0];
+    const rows = sortByDisplay(opt.rows || inventoryRows()).filter(p => (p.stock[pool] || 0) > 0);   // 在庫0の商品は売れないので載せない
     if (!rows.length) return toast('印刷する商品がありません', true);
     const wide = mode === 'wide';
     const slots = TALLY_SLOTS;
@@ -2328,10 +2521,10 @@
       '}' +
       '</style>';
 
-    const head = '<div class="sheet-head"><h2>販売チェック表</h2><div class="fields">' +
+    const head = '<div class="sheet-head"><h2>販売チェック表' + (opt.title ? '　' + esc(opt.title) : '') + '</h2><div class="fields">' +
       '<span class="date">日付：<u></u></span><span>担当者①：<u></u></span><span>担当者②：<u></u></span>' +
       '<span class="note">マスに「正」＝5個</span></div></div>';
-    const thead = '<tr><th class="name">商品（' + esc(pool) + 'の在庫）</th>' +
+    const thead = '<tr><th class="name">商品（' + esc(opt.label || pool) + 'の在庫）</th>' +
       slots.map(sl => '<th class="slot">' + sl + '<small>（　：　）</small></th>').join('') +
       '<th class="sum">合計</th><th class="memo">備考</th></tr>';
     const tbody = rows.map(p => {
@@ -2351,7 +2544,7 @@
     const alt = $('printAlt');
     alt.hidden = false;
     alt.textContent = wide ? 'A4縦1枚にする' : 'A4横（大きめ）にする';
-    alt.onclick = () => printTally(wide ? 'fit' : 'wide');
+    alt.onclick = () => printTally(wide ? 'fit' : 'wide', opt);
   }
 
   async function printPoster() {
@@ -2956,9 +3149,9 @@
   }
 
   // ---------- 値札・POP（商品名・種別・色ごとに1枚。価格が無ければ手書き欄） ----------
-  async function printPriceTags() {
+  async function printPriceTags(list, title) {
     const map = {}, groups = [];
-    inventoryRows().forEach(p => {
+    (Array.isArray(list) ? list : inventoryRows()).forEach(p => {
       const k = [p.category, p.type, p.color].join('|');
       let g = map[k];
       if (!g) { g = map[k] = { p: p, sizes: [], prices: [], img: '' }; groups.push(g); }
@@ -2976,7 +3169,459 @@
         (g.sizes.length ? '<div class="ps">' + g.sizes.map(esc).join(' / ') + '</div>' : '') +
         '<div class="pp">' + price + '<small>（税込）</small></div></div></div>';
     }).join('');
-    openPrint('値札・POP', '<h2 style="font-size:16px">値札・POP（' + groups.length + '件）</h2><div class="ptags">' + tags + '</div>');
+    openPrint('値札・POP', '<h2 style="font-size:16px">値札・POP' + (typeof title === 'string' ? '　' + esc(title) : '') + '（' + groups.length + '件）</h2><div class="ptags">' + tags + '</div>');
+  }
+
+  // ---------- 公演（公演ごとに在庫を分けて持っていく） ----------
+  // 1 公演の情報 → 2 商品をえらぶ → 3 数・新商品。つくると在庫区分（現場用など）から持っていく分が引かれる
+  const sh = { list: null, detail: null, mode: '', step: 1, d: null, pendingId: '' };
+  const WD = '日月火水木金土';
+  const jstToday = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const gkey = p => [p.category, p.type, p.color].join('|');
+
+  function dayChip(d) {
+    const [y, m, dd] = d.split('-').map(Number);
+    return m + '/' + dd + '<em>' + WD[new Date(y, m - 1, dd).getDay()] + '</em>';
+  }
+
+  function showPhase(x) {
+    if (x.status === '終了') return { cls: 'done', text: '終了' };
+    const t = jstToday(), ds = x.dates || [];
+    if (!ds.length || t < ds[0]) return { cls: '', text: '準備中' };
+    if (t > ds[ds.length - 1]) return { cls: 'done', text: '公演後' };
+    return { cls: 'live', text: ds.indexOf(t) >= 0 ? '本日公演' : '公演期間中' };
+  }
+
+  async function openShowHome() {
+    if (!$('showWizard').hidden) return;     // 入力の途中なら、そのまま
+    if (sh.pendingId) { const id = sh.pendingId; sh.pendingId = ''; return openShowDetail(id); }
+    if (!$('showDetail').hidden && sh.detail) return;
+    $('showHome').hidden = false;
+    try {
+      sh.list = await call('getShows');
+      renderShowList();
+    } catch (err) {
+      $('showList').innerHTML = '<div class="empty">' + esc(err.message) + '</div>';
+    }
+  }
+
+  function backToShowHome() {
+    sh.detail = null;
+    $('showDetail').hidden = true;
+    $('showWizard').hidden = true;
+    $('showHome').hidden = false;
+    try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+    openShowHome();
+    window.scrollTo(0, 0);
+  }
+
+  function renderShowList() {
+    const list = sh.list || [];
+    if (!list.length) {
+      $('showList').innerHTML = '<div class="empty">まだ公演はありません。上のボタンからつくれます</div>';
+      return;
+    }
+    const t = jstToday();
+    $('showList').innerHTML = list.map(x => {
+      const ph = showPhase(x);
+      return '<button type="button" class="ticket" data-show="' + esc(x.id) + '"><div class="tk-main">' +
+        '<span class="tk-state ' + ph.cls + '">' + ph.text + '</span>' +
+        '<div class="tk-name">' + esc(x.name) + '</div>' + (x.venue ? '<div class="tk-venue">' + esc(x.venue) + '</div>' : '') +
+        '<div class="tk-days">' + x.dates.map(d => '<span' + (d === t ? ' class="today"' : '') + '>' + dayChip(d) + '</span>').join('') + '</div>' +
+        '<div class="tk-nums">持ち込み<b>' + x.alloc + '</b>点　売れた<b>' + x.sold + '</b>点' + (x.staff.length ? '　担当 ' + x.staff.map(esc).join('・') : '') + '</div></div>' +
+        '<div class="tk-stub"><small>売上</small><b>' + Number(x.amount || 0).toLocaleString('ja-JP') + '</b><small>円</small></div></button>';
+    }).join('');
+  }
+
+  async function openShowDetail(id) {
+    $('showHome').hidden = true;
+    $('showWizard').hidden = true;
+    $('showDetail').hidden = false;
+    $('showDetail').innerHTML = '<div class="loading">読み込み中…</div>';
+    try {
+      sh.detail = await call('getShow', { showId: id });
+      try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
+      renderShowDetail();
+    } catch (err) {
+      $('showDetail').innerHTML = '<div class="empty">' + esc(err.message) + '<br><button type="button" class="btn ghost mini" data-act="home">公演の一覧へ</button></div>';
+    }
+    window.scrollTo(0, 0);
+  }
+
+  /** 公演の在庫を商品の形に（印刷用：stock[公演:S001] に残数を入れる） */
+  function showRows(withLeft) {
+    const x = sh.detail;
+    return x.items.map(it => {
+      const p = findProduct(it.id) || it;
+      const stock = Object.assign({}, p.stock);
+      stock[x.show.key] = withLeft ? it.left : it.alloc;
+      return Object.assign({}, p, { stock: stock });
+    });
+  }
+
+  function renderShowDetail() {
+    const x = sh.detail, s = x.show;
+    const ph = showPhase(s);
+    const alloc = x.items.reduce((n, i) => n + i.alloc, 0), left = x.items.reduce((n, i) => n + i.left, 0);
+    const reg = CLIENT_URL + 'register.html?show=' + encodeURIComponent(s.id);
+    const view = CLIENT_URL + '?show=' + encodeURIComponent(s.id);
+    // 商品名ごとに見出しを付けた表（持ち込み・売れた・残り・金額）
+    const rows = sortByDisplay(x.items.map(i => Object.assign({}, findProduct(i.id) || i, { _i: i })));
+    let body = '', last = null;
+    rows.forEach(r => {
+      if (r.category !== last) { last = r.category; body += '<tr class="gh" style="' + gc(r.type) + '"><td colspan="5">' + esc(r.category) + '</td></tr>'; }
+      const i = r._i;
+      const name = [r.type, r.color, r.size].filter(v => v && v !== '-').map(esc).join(' / ');
+      body += '<tr><td>' + name + '</td><td>' + i.alloc + '</td><td' + (i.sold ? '' : ' class="mute"') + '>' + i.sold + '</td><td class="' + (i.left ? '' : 'zero') + '">' + i.left + '</td>' +
+        '<td' + (i.amount ? '' : ' class="mute"') + '>' + (i.amount ? Number(i.amount).toLocaleString('ja-JP') : '-') + '</td></tr>';
+    });
+    $('showDetail').innerHTML =
+      '<div class="sh-head"><button type="button" class="back" data-act="home">← 公演の一覧</button>' +
+      '<span class="tk-state ' + ph.cls + '">' + ph.text + '</span>' +
+      '<div class="nm">' + esc(s.name) + '</div>' + (s.venue ? '<div class="venue">' + esc(s.venue) + '</div>' : '') +
+      '<div class="sh-days">' + s.dates.map(d => '<span>' + dayChip(d) + '</span>').join('') + '</div>' +
+      '<div class="staff">担当 ' + (s.staff.length ? '<b>' + s.staff.map(esc).join('・') + '</b>' : '未定') + '　／　' + esc(s.owner) + 'から持ち込み</div></div>' +
+      '<div class="sh-acts">' +
+      '<a class="btn" href="' + esc(reg) + '" target="_blank" rel="noopener">この公演のレジ ↗</a>' +
+      '<a class="btn ghost" href="' + esc(view) + '" target="_blank" rel="noopener">在庫確認ページ ↗</a>' +
+      '<button type="button" class="btn ghost" data-act="pop">値札・POP</button>' +
+      '<button type="button" class="btn ghost" data-act="tally">販売チェック表</button>' +
+      '<button type="button" class="btn ghost" data-act="items">商品・数を直す</button>' +
+      '<button type="button" class="btn ghost" data-act="info">公演の情報を直す</button>' +
+      '</div>' +
+      '<div class="sh-total"><div>売上<b>' + Number(x.amount || 0).toLocaleString('ja-JP') + '</b>円</div>' +
+      '<div>売れた<b>' + x.sold + '</b>点</div><div>残り<b>' + left + '</b>/ ' + alloc + '点</div></div>' +
+      (x.days.length ? '<div class="sh-daylist">' + x.days.map(d => '<span>' + dayChip(d.date).replace(/<\/?em>/g, '') + '　<b>' + d.qty + '</b>点 <b>' + Number(d.amount).toLocaleString('ja-JP') + '</b>円</span>').join('') + '</div>' : '') +
+      '<div class="card" style="margin-top:12px;padding:8px 10px">' +
+      (x.items.length ? '<div class="table-wrap"><table class="sh-tbl"><thead><tr><th>商品</th><th>持込</th><th>売れた</th><th>残り</th><th>金額</th></tr></thead><tbody>' + body + '</tbody></table></div>'
+        : '<div class="empty">まだ商品が入っていません。「商品・数を直す」から入れてください</div>') + '</div>' +
+      (x.sold ? '' : '<button type="button" class="btn delete" data-act="delete">この公演を削除（持ち込み分は在庫に戻します）</button>');
+  }
+
+  async function onShowDetailClick(e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const act = b.dataset.act, x = sh.detail;
+    if (act === 'home') return backToShowHome();
+    if (act === 'pop') return printPriceTags(showRows(true).filter(p => p.stock[x.show.key] > 0), x.show.name);
+    if (act === 'tally') return printTally('fit', { rows: showRows(true), pool: x.show.key, label: x.show.name, title: x.show.name });
+    if (act === 'items') return startShowWizard('items');
+    if (act === 'info') return startShowWizard('info');
+    if (act === 'delete') {
+      if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'もう一度押すと削除します'; return; }
+      setBusy(b, true, '削除中…');
+      try {
+        await call('deleteShow', { showId: x.show.id });
+        state.config.shows = (state.config.shows || []).filter(y => y.id !== x.show.id);
+        await refreshProductsQuiet();
+        toast('公演を削除しました');
+        backToShowHome();
+      } catch (err) {
+        toast(err.message, true);
+        setBusy(b, false);
+      }
+    }
+  }
+
+  async function refreshProductsQuiet() {
+    try {
+      state.products = await call('getInventoryList');
+      state.monthlyStale = true;
+      refreshDerived();
+    } catch (e) { /* 次に開いたときに読み直す */ }
+  }
+
+  // ----- つくる・直す -----
+  function startShowWizard(mode) {
+    const x = mode === 'new' ? null : sh.detail;
+    const base = {};
+    if (x) x.items.forEach(i => { base[i.id] = { alloc: i.alloc, left: i.left, sold: i.sold }; });
+    const picked = {}, qty = {};
+    if (x) x.items.forEach(i => { const p = findProduct(i.id); if (p) picked[gkey(p)] = true; qty[i.id] = i.alloc; });
+    sh.mode = mode;
+    sh.d = {
+      showId: x ? x.show.id : '', name: x ? x.show.name : '', venue: x ? x.show.venue : '', dates: x ? x.show.dates.slice() : [],
+      staff: x ? x.show.staff.slice() : (state.operator ? [state.operator] : []), owner: x ? x.show.owner : state.config.owners[0],
+      base: base, picked: picked, qty: qty, newProducts: [],
+    };
+    $('shName').value = sh.d.name;
+    $('shVenue').value = sh.d.venue;
+    fillSelect($('shOwner'), state.config.owners);
+    $('shOwner').value = sh.d.owner;
+    $('shOwnerField').hidden = !!x;
+    fillSelect($('npType'), state.config.types);
+    renderNpSizes();
+    renderShowChips();
+    $('showHome').hidden = true;
+    $('showDetail').hidden = true;
+    $('showWizard').hidden = false;
+    $('shSteps').hidden = mode === 'info';
+    goShowStep(mode === 'items' ? 2 : 1);
+  }
+
+  function renderShowChips() {
+    const d = sh.d;
+    $('shDates').innerHTML = d.dates.map((v, i) => '<span>' + dayChip(v).replace(/<\/?em>/g, ' ').trim() + '<button type="button" data-rm-date="' + i + '" aria-label="外す">×</button></span>').join('');
+    $('shStaffs').innerHTML = d.staff.map((v, i) => '<span>' + esc(v) + '<button type="button" data-rm-staff="' + i + '" aria-label="外す">×</button></span>').join('');
+  }
+
+  function addShowDate() {
+    const v = $('shDate').value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return toast('日付をえらんでください', true);
+    if (sh.d.dates.indexOf(v) < 0) sh.d.dates.push(v);
+    sh.d.dates.sort();
+    // 次の日を入れておく（連日の公演を続けて足しやすく）
+    const [y, m, dd] = v.split('-').map(Number);
+    const n = new Date(Date.UTC(y, m - 1, dd + 1));
+    $('shDate').value = n.toISOString().slice(0, 10);
+    renderShowChips();
+  }
+
+  function addShowStaff() {
+    const v = $('shStaff').value.trim();
+    if (!v) return;
+    if (sh.d.staff.indexOf(v) < 0) sh.d.staff.push(v);
+    $('shStaff').value = '';
+    renderShowChips();
+  }
+
+  /** その商品を持っていける最大数（在庫区分の今の在庫 ＋ もう持ち込んである数） */
+  function showMax(p) {
+    const b = sh.d.base[p.id];
+    return (p.stock[sh.d.owner] || 0) + (b ? b.alloc : 0);
+  }
+  const showMin = p => (sh.d.base[p.id] ? sh.d.base[p.id].sold : 0);
+
+  function showGroups(all) {
+    const groups = [], by = {};
+    sortByDisplay(state.products.filter(p => !p.discontinued || sh.d.base[p.id])).forEach(p => {
+      const k = gkey(p);
+      if (!by[k]) { by[k] = { key: k, category: p.category, type: p.type, color: p.color, items: [] }; groups.push(by[k]); }
+      by[k].items.push(p);
+    });
+    const sizeIdx = s => { const i = (state.config.sizes || []).indexOf(s); return i < 0 ? 99 : i; };
+    groups.forEach(g => {
+      g.items.sort((a, b) => sizeIdx(a.size) - sizeIdx(b.size));
+      g.max = g.items.reduce((n, p) => n + showMax(p), 0);
+    });
+    return all ? groups : groups.filter(g => g.max > 0 || sh.d.picked[g.key]);
+  }
+
+  function renderShowPick() {
+    const q = $('shQ').value.trim();
+    const groups = showGroups($('shAll').checked).filter(g => !q || g.items.some(p => matches(p, q)));
+    if (!groups.length) { $('shPickList').innerHTML = '<div class="empty">商品がありません</div>'; return; }
+    $('shPickList').innerHTML = groups.map(g => {
+      const on = !!sh.d.picked[g.key];
+      const img = g.items.find(p => p.imageUrl) || g.items[0];
+      const sizes = g.items.map(p => (p.size && p.size !== '-' ? esc(p.size) + ' ' : '') + '<b>' + showMax(p) + '</b>').join('　');
+      return '<label class="sh-pick' + (on ? ' on' : '') + (g.max ? '' : ' zero') + '" style="' + gc(g.type) + '"><input type="checkbox" data-pick="' + esc(g.key) + '"' + (on ? ' checked' : '') + '>' +
+        thumbHtml(img, 120) + '<div><div class="nm">' + esc(g.category) + '<small>' + esc(g.type) + (g.color && g.color !== '-' ? '・' + esc(g.color) : '') + '</small></div>' +
+        '<div class="st">' + esc(sh.d.owner) + '　' + sizes + '</div></div></label>';
+    }).join('');
+  }
+
+  function setShowPick(key, on) {
+    const g = showGroups(true).find(x => x.key === key);
+    if (!g) return;
+    if (on) {
+      sh.d.picked[key] = true;
+      g.items.forEach(p => { if (!(p.id in sh.d.qty)) sh.d.qty[p.id] = showMax(p); });   // 最初は在庫を全部持っていく
+    } else {
+      delete sh.d.picked[key];
+      g.items.forEach(p => { delete sh.d.qty[p.id]; });
+    }
+  }
+
+  function renderShowQty() {
+    const groups = showGroups(true).filter(g => sh.d.picked[g.key]);
+    const np = sh.d.newProducts.map((n, i) => '<div class="sh-qg"><div class="hd"><div class="thumb-empty txt" style="' + gc(n.type) + '">' + esc(n.category) + '</div>' +
+      '<div class="nm">' + esc(n.category) + '<span class="sh-newtag">新商品</span><small>' + esc(n.type) + (n.color ? '・' + esc(n.color) : '') + (n.price !== '' ? '　' + yen(n.price) : '') + '</small></div>' +
+      '<button type="button" data-np-rm="' + i + '">外す</button></div><div class="sh-qrows">' +
+      n.sizes.map(z => '<div class="sh-q set"><span class="sz">' + esc(z.size === '-' ? '数' : z.size) + '</span><b style="font-family:var(--num);font-size:20px">' + z.qty + '</b></div>').join('') + '</div></div>').join('');
+    if (!groups.length && !np) { $('shQtyList').innerHTML = '<div class="empty">商品がえらばれていません。「2 商品をえらぶ」に戻るか、下で新商品を加えてください</div>'; return; }
+    $('shQtyList').innerHTML = np + groups.map(g => {
+      const img = g.items.find(p => p.imageUrl) || g.items[0];
+      return '<div class="sh-qg" style="' + gc(g.type) + '"><div class="hd">' + thumbHtml(img, 120) +
+        '<div class="nm">' + esc(g.category) + '<small>' + esc(g.type) + (g.color && g.color !== '-' ? '・' + esc(g.color) : '') + '</small></div>' +
+        '<button type="button" data-fill="' + esc(g.key) + '">全部</button></div><div class="sh-qrows">' +
+        g.items.map(p => {
+          const v = sh.d.qty[p.id] || 0, max = showMax(p), min = showMin(p);
+          return '<div class="sh-q' + (v ? ' set' : '') + '"><span class="sz">' + esc(p.size && p.size !== '-' ? p.size : '数') + '</span>' +
+            '<span class="ctl"><button type="button" data-q="' + esc(p.id) + '" data-d="-1" aria-label="減らす">−</button>' +
+            '<input type="number" inputmode="numeric" min="' + min + '" max="' + max + '" value="' + v + '" data-qin="' + esc(p.id) + '">' +
+            '<button type="button" data-q="' + esc(p.id) + '" data-d="1" aria-label="増やす">＋</button></span>' +
+            '<span class="have">' + esc(sh.d.owner) + 'に残る ' + (max - v) + (min ? '・売れた ' + min : '') + '</span></div>';
+        }).join('') + '</div></div>';
+    }).join('');
+  }
+
+  function setShowQty(id, v) {
+    const p = findProduct(id);
+    if (!p) return;
+    const max = showMax(p), min = showMin(p);
+    v = Math.max(min, Math.min(max, Math.floor(Number(v) || 0)));
+    if (Number(v) === max && max === 0) v = 0;
+    sh.d.qty[id] = v;
+  }
+
+  function renderNpSizes() {
+    $('npSizes').innerHTML = (state.config.sizes || []).map(z => '<label>' + esc(z === '-' ? 'サイズなし' : z) +
+      '<input type="number" inputmode="numeric" min="0" data-npz="' + esc(z) + '" placeholder="0"></label>').join('');
+  }
+
+  function addNewProduct() {
+    const category = $('npCategory').value.trim(), type = $('npType').value, color = $('npColor').value.trim();
+    if (!category) return toast('商品名を入れてください', true);
+    if (!type) return toast('種別をえらんでください', true);
+    const priceText = $('npPrice').value.replace(/[,，円\s]/g, '');
+    if (priceText && !/^\d+$/.test(priceText)) return toast('価格は数字で入れてください', true);
+    const sizes = [];
+    document.querySelectorAll('[data-npz]').forEach(i => { const n = Math.floor(Number(i.value) || 0); if (n > 0) sizes.push({ size: i.dataset.npz, qty: n }); });
+    if (!sizes.length) return toast('持っていく数をサイズごとに入れてください', true);
+    const dupe = state.products.find(p => norm(p.category) === norm(category) && p.type === type && norm(p.color) === norm(color || '-') && sizes.some(z => z.size === p.size));
+    if (dupe) return toast('同じ商品が登録済みです（' + dupe.id + '）。「2 商品をえらぶ」からえらんでください', true);
+    sh.d.newProducts.push({ category: category, type: type, color: color || '-', price: priceText ? Number(priceText) : '', sizes: sizes });
+    ['npCategory', 'npColor', 'npPrice'].forEach(id => { $(id).value = ''; });
+    renderNpSizes();
+    renderShowQty();
+    updateShowFoot();
+    toast('「' + category + '」を加えました');
+  }
+
+  function showTotals() {
+    const n = Object.keys(sh.d.qty).reduce((s, id) => s + (sh.d.qty[id] || 0), 0) +
+      sh.d.newProducts.reduce((s, x) => s + x.sizes.reduce((m, z) => m + z.qty, 0), 0);
+    return { groups: Object.keys(sh.d.picked).length + sh.d.newProducts.length, qty: n };
+  }
+
+  function updateShowFoot() {
+    const t = showTotals(), st = sh.step, last = sh.mode === 'info' || st === 3;
+    $('shInfo').innerHTML = sh.mode === 'info' ? '' : '<b>' + t.groups + '</b>商品　<b>' + t.qty + '</b>点';
+    $('shNext').textContent = !last ? '次へ' : sh.mode === 'new' ? '公演をつくる' : '保存する';
+    $('shBack').textContent = (sh.mode === 'new' && st === 1) || (sh.mode === 'items' && st === 2) || sh.mode === 'info' ? 'やめる' : '戻る';
+  }
+
+  function goShowStep(n) {
+    sh.step = n;
+    [1, 2, 3].forEach(i => { $('shStep' + i).hidden = i !== n; });
+    document.querySelectorAll('#shSteps button').forEach(b => {
+      const i = Number(b.dataset.step);
+      b.classList.toggle('on', i === n);
+      b.classList.toggle('done', i < n);
+      b.disabled = sh.mode === 'items' && i === 1;
+    });
+    if (n === 2) renderShowPick();
+    if (n === 3) renderShowQty();
+    updateShowFoot();
+    window.scrollTo(0, 0);
+  }
+
+  function readShowInfo() {
+    sh.d.name = $('shName').value.trim();
+    sh.d.venue = $('shVenue').value.trim();
+    if (!$('shOwnerField').hidden) sh.d.owner = $('shOwner').value;
+    if ($('shDate').value && !sh.d.dates.length) addShowDate();
+    if ($('shStaff').value.trim()) addShowStaff();
+    if (!sh.d.name) { toast('公演名を入れてください', true); return false; }
+    if (!sh.d.dates.length) { toast('日程を1日以上追加してください', true); return false; }
+    return true;
+  }
+
+  async function showNext() {
+    if (sh.step === 1 && !readShowInfo()) return;
+    if (sh.mode !== 'info' && sh.step < 3) return goShowStep(sh.step + 1);
+    const btn = $('shNext');
+    const params = { showId: sh.d.showId, name: sh.d.name, venue: sh.d.venue, dates: sh.d.dates, staff: sh.d.staff, owner: sh.d.owner };
+    if (sh.mode !== 'info') {
+      params.items = Object.keys(sh.d.qty).filter(id => sh.d.qty[id] > 0).map(id => ({ productId: id, qty: sh.d.qty[id] }));
+      params.newProducts = sh.d.newProducts;
+      if (!params.items.length && !params.newProducts.length && sh.mode === 'new') return toast('持っていく商品を1つ以上入れてください', true);
+    }
+    setBusy(btn, true, '保存中…');
+    try {
+      sh.detail = await call('saveShow', params);
+      state.config.shows = (state.config.shows || []).filter(x => x.id !== sh.detail.show.id).concat([sh.detail.show]);
+      if (sh.mode !== 'info') await refreshProductsQuiet();
+      toast(sh.mode === 'new' ? '公演をつくりました' : '保存しました');
+      $('showWizard').hidden = true;
+      $('showDetail').hidden = false;
+      try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
+      renderShowDetail();
+      window.scrollTo(0, 0);
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      setBusy(btn, false);
+      updateShowFoot();
+    }
+  }
+
+  function showBack() {
+    const first = (sh.mode === 'new' && sh.step === 1) || (sh.mode === 'items' && sh.step === 2) || sh.mode === 'info';
+    if (!first) return goShowStep(sh.step - 1);
+    $('showWizard').hidden = true;
+    if (sh.detail && sh.mode !== 'new') { $('showDetail').hidden = false; renderShowDetail(); }
+    else backToShowHome();
+  }
+
+  function bindShow() {
+    $('btnShowNew').addEventListener('click', () => startShowWizard('new'));
+    $('showList').addEventListener('click', e => { const t = e.target.closest('[data-show]'); if (t) openShowDetail(t.dataset.show); });
+    $('showDetail').addEventListener('click', onShowDetailClick);
+    $('shDateAdd').addEventListener('click', addShowDate);
+    $('shStaffAdd').addEventListener('click', addShowStaff);
+    $('shStaff').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); addShowStaff(); } });
+    ['shDates', 'shStaffs'].forEach(id => $(id).addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.rmDate) sh.d.dates.splice(Number(b.dataset.rmDate), 1);
+      if (b.dataset.rmStaff) sh.d.staff.splice(Number(b.dataset.rmStaff), 1);
+      renderShowChips();
+    }));
+    $('shOwner').addEventListener('change', () => { sh.d.owner = $('shOwner').value; sh.d.qty = {}; sh.d.picked = {}; });
+    $('shSteps').addEventListener('click', e => {
+      const b = e.target.closest('[data-step]');
+      if (!b || b.disabled) return;
+      const n = Number(b.dataset.step);
+      if (sh.step === 1 && n > 1 && !readShowInfo()) return;
+      goShowStep(n);
+    });
+    $('shQ').addEventListener('input', renderShowPick);
+    $('shAll').addEventListener('change', renderShowPick);
+    $('shPickList').addEventListener('change', e => {
+      const c = e.target.closest('[data-pick]');
+      if (!c) return;
+      setShowPick(c.dataset.pick, c.checked);
+      c.closest('.sh-pick').classList.toggle('on', c.checked);
+      updateShowFoot();
+    });
+    $('shPickAll').addEventListener('click', () => {
+      document.querySelectorAll('#shPickList [data-pick]').forEach(c => setShowPick(c.dataset.pick, true));
+      renderShowPick(); updateShowFoot();
+    });
+    $('shPickNone').addEventListener('click', () => {
+      Object.keys(sh.d.picked).forEach(k => setShowPick(k, false));
+      renderShowPick(); updateShowFoot();
+    });
+    $('shQtyList').addEventListener('click', e => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.q) setShowQty(b.dataset.q, (sh.d.qty[b.dataset.q] || 0) + Number(b.dataset.d));
+      else if (b.dataset.fill) showGroups(true).find(g => g.key === b.dataset.fill).items.forEach(p => setShowQty(p.id, showMax(p)));
+      else if (b.dataset.npRm) sh.d.newProducts.splice(Number(b.dataset.npRm), 1);
+      else return;
+      renderShowQty(); updateShowFoot();
+    });
+    $('shQtyList').addEventListener('change', e => {
+      const i = e.target.closest('[data-qin]');
+      if (!i) return;
+      setShowQty(i.dataset.qin, i.value);
+      renderShowQty(); updateShowFoot();
+    });
+    $('npAdd').addEventListener('click', addNewProduct);
+    $('shNext').addEventListener('click', showNext);
+    $('shBack').addEventListener('click', showBack);
   }
 
   // ---------- 在庫わずか ----------
@@ -3389,7 +4034,9 @@
     $('undoBtn').addEventListener('click', onUndo);
     $('undoClose').addEventListener('click', hideUndo);
 
-    showTab(stored(TAB_STORE) || 'product');
+    bindShow();
+    sh.pendingId = new URLSearchParams(location.search).get('show') || '';
+    showTab(sh.pendingId ? 'show' : stored(TAB_STORE) || 'product');
     setEntry('single');
     setMode('sale');
     if (!state.operator) setTimeout(openOperator, 400);

@@ -276,6 +276,15 @@
 
   let owners = [];
   let ownerNotes = [];
+  let showNames = {};   // 公演の在庫（「公演:S001」）→ 公演名
+  const Q_SHOW = (new URLSearchParams(location.search).get('show') || '').trim().toUpperCase();
+  const label = o => showNames[o] || o;
+  const isShowPool = o => /^公演:/.test(o);
+  /** 公演の残数を在庫区分のひとつとして stock に入れる */
+  function withShows(products) {
+    (products || []).forEach(p => { if (p.shows) Object.assign(p.stock, p.shows); });
+    return products || [];
+  }
   let sizes = [];
   let threshold = 5;
   let newDays = 14;
@@ -443,7 +452,7 @@
   function loadPrefs() {
     try {
       const saved = JSON.parse(stored(STORE) || '{}');
-      if (owners.indexOf(saved.pool) >= 0) state.pool = saved.pool;
+      if (!Q_SHOW && owners.indexOf(saved.pool) >= 0) state.pool = saved.pool;
       if (SORTS.indexOf(saved.sort) >= 0) state.sort = saved.sort;
       state.showZero = saved.showZero === true;
       state.big = saved.big === true;
@@ -467,6 +476,7 @@
         return;
       }
       if (q && searchText(p).indexOf(q) < 0) return;
+      if (isShowPool(state.pool) ? !(state.pool in p.stock) : p.showOnly) return;
       const key = [p.category, p.type, p.color].join(' |');
       let g = byKey[key];
       if (!g) {
@@ -512,7 +522,7 @@
     $('tabs').innerHTML = owners.map(o => {
       const total = state.products.reduce((sum, p) => sum + (p.stock[o] || 0), 0);
       return '<button type="button" class="tab' + (o === state.pool ? ' active' : '') + '" data-pool="' + esc(o) +
-        '" style="--tab-color:' + poolColor(o) + '">' + esc(o) + '<small>' + total + '点</small></button>';
+        '" style="--tab-color:' + poolColor(o) + '">' + esc(label(o)) + '<small>' + total + '点</small></button>';
     }).join('');
     const note = ownerNotes[owners.indexOf(state.pool)] || '';
     $('poolNote').textContent = note;
@@ -570,7 +580,7 @@
   function emptyHtml() {
     const message = state.q
       ? '「' + esc(state.q) + '」に合う商品は見つかりませんでした'
-      : (state.type ? 'この種類の在庫はありません' : esc(state.pool) + 'に在庫がある商品はありません');
+      : (state.type ? 'この種類の在庫はありません' : esc(label(state.pool)) + 'に在庫がある商品はありません');
     return '<div class="empty">' + message +
       (state.q ? '<br><button type="button" class="link" data-action="clear-q">検索をやめてすべて表示</button>' : '') +
       (state.showZero ? '' : '<br><button type="button" class="link" data-action="show-zero">売り切れの商品も表示する</button>') +
@@ -633,7 +643,7 @@
       .map(v => '<span class="tag">' + esc(v) + '</span>').join('　');
     $('detailSizes').innerHTML = sizeChipsHtml(g);
     const st = stateOf(g.total);
-    $('detailNote').textContent = state.pool + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
+    $('detailNote').textContent = label(state.pool) + 'の在庫：合計 ' + g.total + unitOf(g.type) + '（' + st.word + '）';
     $('detail').hidden = false;
   }
 
@@ -648,7 +658,7 @@
         done();
         if (!res || !res.ok) return toast('最新の在庫を読み込めませんでした：' + (res ? res.error : '返事がありません'), true);
         applyConfig(res.data.config);
-        state.products = res.data.products;
+        state.products = withShows(res.data.products);
         state.loadedAt = Date.now();
         saveCache(res.data.config, res.data.products);
         stampUpdated();
@@ -663,8 +673,13 @@
 
   function applyConfig(config) {
     BOOT.config = config;
-    owners = config.owners;
-    ownerNotes = config.ownerNotes || owners.map(() => '');
+    const shows = config.shows || [];
+    showNames = {};
+    shows.forEach(x => { showNames[x.key] = x.name; });
+    const md = d => { const [, m, dd] = d.split('-').map(Number); return m + '/' + dd; };
+    owners = config.owners.concat(shows.map(x => x.key));
+    ownerNotes = (config.ownerNotes || config.owners.map(() => '')).concat(shows.map(x =>
+      [x.venue, x.dates.map(md).join('・')].filter(Boolean).join('　') + '　公演に持ち込んだ在庫です'));
     sizes = config.sizes;
     threshold = config.lowStockThreshold;
     newDays = config.newDays || 14;
@@ -674,7 +689,7 @@
 
   // ---------- 使い方・ホーム画面への追加 ----------
   function showGuide() {
-    $('guidePools').textContent = owners.join('・') + 'を切り替えられます';
+    $('guidePools').textContent = owners.map(label).join('・') + 'を切り替えられます';
     $('guide').hidden = false;
   }
 
@@ -834,8 +849,8 @@
   function start(boot, loadedAt) {
     BOOT = boot;
     applyConfig(boot.config);
-    state.pool = owners[0];
-    state.products = boot.products || [];
+    state.pool = owners.indexOf('公演:' + Q_SHOW) >= 0 ? '公演:' + Q_SHOW : owners[0];
+    state.products = withShows(boot.products);
     state.loadedAt = loadedAt || Date.now();
     init();
   }

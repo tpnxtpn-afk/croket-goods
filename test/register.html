@@ -311,6 +311,9 @@
     .log { display: none; }
     .hfield input { width: 110px; }
   }
+  .show-name { display: block; font-size: 12px; font-weight: 700; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
+  .show-name:empty { display: none; }
+  .hfield input[readonly] { background: transparent; border-style: dashed; }
   /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
   body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
 </style>
@@ -318,12 +321,12 @@
 <body>
 <div class="app">
   <header>
-    <h1>販売レジ</h1>
+    <h1>販売レジ<small class="show-name" id="showName"></small></h1>
     <button class="hbtn phone-only" id="setBtn">公演・担当</button>
     <span class="badge" id="envBadge" hidden>テスト版</span>
     <div class="hsets" id="hsets">
     <label class="hfield"><span>公演</span><input id="event" placeholder="例：10/5 大阪 昼" autocomplete="off"></label>
-    <label class="hfield"><span>担当</span><input id="operator" placeholder="名前" autocomplete="off"></label>
+    <label class="hfield"><span>担当</span><input id="operator" placeholder="名前" autocomplete="off" list="staffList"></label><datalist id="staffList"></datalist>
     <label class="hfield"><span>在庫</span><select id="pool"></select></label>
     </div>
     <div class="spacer"></div>
@@ -419,7 +422,7 @@
   const loadKey = () => { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return ''; } };
   const yen = n => n.toLocaleString('ja-JP') + '円';
 
-  const state = { key: loadKey(), products: [], owners: [], genre: '', q: '', cart: {}, bundles: [], sets: [], order: [], paid: '', sending: false };
+  const state = { key: loadKey(), products: [], owners: [], shows: [], genre: '', q: '', cart: {}, bundles: [], sets: [], order: [], paid: '', sending: false };
   const settings = load(REG_STORE, { event: '', operator: '', pool: '' });
 
   function imageSrc(url, w) {
@@ -465,7 +468,7 @@
   function useCached() {
     const cached = load(STORE + '.registerProducts', null);
     const cc = load(STORE + '.registerConfig', {});
-    state.sets = cc.sets || []; state.order = cc.order || [];
+    state.sets = cc.sets || []; state.order = cc.order || []; state.shows = cc.shows || [];
     if (cached && !state.products.length) { state.products = cached; state.owners = cc.owners || ['現場用', 'ファンクラブ用', '販売在庫']; applyPending(); fillPools(); render(); }
     return !!cached;
   }
@@ -546,13 +549,16 @@
     if (!navigator.onLine) { useCached(); return; }
     try {
       const d = await api('getBootData', {}, 20000);
-      state.products = d.products.filter(p => !p.discontinued);
+      // 公演の在庫（「公演:S001」）も在庫区分のひとつとして stock に入れる
+      state.products = d.products.filter(p => !p.discontinued || p.shows);
+      state.products.forEach(p => { if (p.shows) Object.assign(p.stock, p.shows); });
       state.owners = d.config.owners || ['現場用'];
+      state.shows = d.config.shows || [];
       state.sets = d.config.sets || [];
       state.order = d.config.displayOrder || [];
       save(STORE + '.registerProducts', state.products);
       save(STORE + '.registerSavedAt', Date.now());
-      save(STORE + '.registerConfig', { sets: state.sets, order: state.order, owners: state.owners });
+      save(STORE + '.registerConfig', { sets: state.sets, order: state.order, owners: state.owners, shows: state.shows });
       applyPending();
       fillPools();
       render();
@@ -567,9 +573,26 @@
 
   function fillPools() {
     const sel = $('pool');
-    sel.innerHTML = state.owners.map(o => '<option>' + esc(o) + '</option>').join('');
-    sel.value = state.owners.indexOf(settings.pool) >= 0 ? settings.pool : state.owners[0];
+    const keys = state.shows.map(x => x.key).concat(state.owners);
+    sel.innerHTML = state.shows.map(x => '<option value="' + esc(x.key) + '">公演：' + esc(x.name) + '</option>').join('') +
+      state.owners.map(o => '<option>' + esc(o) + '</option>').join('');
+    sel.value = keys.indexOf(settings.pool) >= 0 ? settings.pool : state.owners[0];
+    applyShow();
   }
+
+  // 公演の在庫で売るときは、公演名をその公演に固定し、担当者の候補に公演の担当者を出す
+  const showOf = pool => state.shows.find(x => x.key === pool);
+  function applyShow() {
+    const show = showOf($('pool').value);
+    const ev = $('event');
+    const was = ev.readOnly;
+    ev.readOnly = !!show;
+    if (show) ev.value = show.name;
+    else if (was) ev.value = settings.event || '';
+    $('staffList').innerHTML = (show ? show.staff : []).map(n => '<option value="' + esc(n) + '">').join('');
+    $('showName').textContent = show ? show.name : '';
+  }
+  const inPool = (p, pool) => (/^公演:/.test(pool) ? pool in p.stock : !p.discontinued);
 
   // ---------- 商品をカード（種類・商品名・色）ごとにまとめる ----------
   // セットだけで売る種類（管理画面の「セットだけ」）。レジでは1個ずつ入れられない
@@ -583,6 +606,7 @@
     state.products.forEach(p => {
       if (state.genre && p.type !== state.genre) return;
       if (only.indexOf(p.type) >= 0) return;
+      if (!inPool(p, pool)) return;
       const text = [p.category, p.type, p.color, p.size].join(' ').normalize('NFKC').toLowerCase();
       if (q && text.indexOf(q) < 0) return;
       const k = [p.type, p.category, p.color].join('|');
@@ -621,7 +645,8 @@
   function render() {
     // ジャンル
     const counts = {};
-    state.products.forEach(p => { counts[p.type] = (counts[p.type] || 0) + 1; });
+    const here = $('pool').value;
+    state.products.forEach(p => { if (inPool(p, here)) counts[p.type] = (counts[p.type] || 0) + 1; });
     const types = Object.keys(counts).sort((a, b) => famRank(a) - famRank(b) || counts[b] - counts[a]);
     $('genres').innerHTML = ['', ...types].map(t =>
       '<button class="genre' + (state.genre === t ? ' on' : '') + '" data-genre="' + esc(t) + '"' + (t ? ' style="' + gc(t) + '"' : '') + '><i></i>' + (t ? esc(t) : 'すべて') +
@@ -629,7 +654,7 @@
     // 商品
     const gs = groups();
     const qn = state.q.trim().normalize('NFKC').toLowerCase();
-    const setTiles = state.sets.map((x, i) => ({ x: x, i: i })).filter(o => (!state.genre || state.genre === o.x.type) &&
+    const setTiles = state.sets.map((x, i) => ({ x: x, i: i })).filter(o => (!state.genre || state.genre === o.x.type) && counts[o.x.type] &&
       (!qn || (o.x.name + ' ' + o.x.type + ' ' + state.products.filter(p => p.type === o.x.type).map(p => p.category).join(' ')).normalize('NFKC').toLowerCase().indexOf(qn) >= 0));
     const pool = $('pool').value;
     $('grid').innerHTML = setTiles.map(o => '<div class="tile settile" style="' + gc(o.x.type) + '"><span class="gtab">セット</span><div class="tcard">' +
@@ -896,7 +921,7 @@
   function drawSet() {
     const { set, ids } = state.picking;
     const pool = $('pool').value;
-    const list = state.products.filter(p => p.type === set.type);
+    const list = state.products.filter(p => p.type === set.type && inPool(p, pool));
     $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet"><div class="hd"><div class="ph txt" style="' + gc(set.type) + '">セット</div><div><b>' + esc(set.name) + '　' + yen(set.price) +
       '</b><small>好きな' + set.count + unitOf(set.type) + 'を選んでください（' + ids.length + ' / ' + set.count + '）</small></div></div>' +
       '<div class="sizes setpick">' + list.map(p => {
@@ -1021,9 +1046,17 @@
   $('cartBar').addEventListener('click', () => $('cart').classList.add('open'));
   $('cartClose').addEventListener('click', () => $('cart').classList.remove('open'));
   $('reload').addEventListener('click', () => loadProducts());
+  // register.html?show=S001 で開いたら、その公演の在庫で売る
+  const qShow = new URLSearchParams(location.search).get('show');
+  if (qShow) { settings.pool = '公演:' + qShow.trim().toUpperCase(); save(REG_STORE, settings); }
   ['event', 'operator', 'pool'].forEach(id => {
     $(id).value = settings[id] || $(id).value;
-    $(id).addEventListener('change', () => { settings[id] = $(id).value; save(REG_STORE, settings); if (id === 'pool') { state.cart = {}; render(); } });
+    $(id).addEventListener('change', () => {
+      if (id === 'pool') applyShow();
+      if (id !== 'event' || !$('event').readOnly) settings[id] = $(id).value;
+      save(REG_STORE, settings);
+      if (id === 'pool') { state.cart = {}; render(); }
+    });
   });
   window.addEventListener('online', () => { renderLog(); flush(); });
   window.addEventListener('offline', renderLog);

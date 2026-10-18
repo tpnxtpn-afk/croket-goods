@@ -677,9 +677,20 @@
     showNames = {};
     shows.forEach(x => { showNames[x.key] = x.name; });
     const md = d => { const [, m, dd] = d.split('-').map(Number); return m + '/' + dd; };
+    // 続いている日は「10/18〜11/5」のようにまとめる
+    const spans = ds => {
+      const out = [];
+      ds.slice().sort().forEach(d => {
+        const last = out[out.length - 1];
+        const [y, m, dd] = d.split('-').map(Number);
+        const prev = new Date(Date.UTC(y, m - 1, dd - 1)).toISOString().slice(0, 10);
+        if (last && last[1] === prev) last[1] = d; else out.push([d, d]);
+      });
+      return out.map(r => r[0] === r[1] ? md(r[0]) : md(r[0]) + '〜' + md(r[1]));
+    };
     owners = config.owners.concat(shows.map(x => x.key));
     ownerNotes = (config.ownerNotes || config.owners.map(() => '')).concat(shows.map(x =>
-      [x.venue, x.dates.map(md).join('・')].filter(Boolean).join('　') + '　公演に持ち込んだ在庫です'));
+      [x.venue, spans(x.dates).join('・')].filter(Boolean).join('　') + '　公演に持ち込んだ在庫です'));
     sizes = config.sizes;
     threshold = config.lowStockThreshold;
     newDays = config.newDays || 14;

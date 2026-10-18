@@ -282,7 +282,8 @@
   const isShowPool = o => /^公演:/.test(o);
   /** 公演の残数を在庫区分のひとつとして stock に入れる */
   function withShows(products) {
-    (products || []).forEach(p => { if (p.shows) Object.assign(p.stock, p.shows); });
+    // 公演の残数がマイナス（在庫の数より多く売れた）のときは 0 と出す
+    (products || []).forEach(p => { if (p.shows) Object.keys(p.shows).forEach(k => { p.stock[k] = Math.max(0, p.shows[k]); }); });
     return products || [];
   }
   let sizes = [];

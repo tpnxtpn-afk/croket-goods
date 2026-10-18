@@ -313,6 +313,11 @@
   }
   .sale .sundo { margin-left: 8px; font: inherit; font-size: 12px; font-weight: 700; border: 1.5px solid var(--ink); border-radius: 8px; background: var(--panel); padding: 4px 10px; white-space: nowrap; }
   .sale .sundo[data-armed] { background: #d23a2f; border-color: #d23a2f; color: #fff; }
+  .tag.minus b { color: #d23a2f; }
+  .quickbtn { flex: none; font: inherit; font-weight: 700; font-size: 14px; border: 1.5px dashed var(--ink); border-radius: 999px; background: var(--panel); padding: 0 16px; white-space: nowrap; }
+  .sheet.quick label { display: grid; gap: 4px; font-weight: 700; font-size: 13px; color: var(--sub); margin-top: 12px; }
+  .sheet.quick input { font-size: 18px; padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 10px; }
+  .sheet.quick .qrow { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
   .show-name { display: block; font-size: 12px; font-weight: 700; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
   .show-name:empty { display: none; }
   .hfield input[readonly] { background: transparent; border-style: dashed; }
@@ -340,7 +345,7 @@
   <div class="main">
     <nav class="genres" id="genres"></nav>
     <section class="items">
-      <div class="search"><input id="q" placeholder="商品名・色で探す" autocomplete="off"></div>
+      <div class="search"><input id="q" placeholder="商品名・色で探す" autocomplete="off"><button class="quickbtn" id="quickBtn" hidden>＋ 一覧にない商品</button></div>
       <div class="grid" id="grid"></div>
     </section>
     <button class="cartbar phone-only" id="cartBar"><span id="barQty">0点</span><span id="barYen"></span><b>お会計へ ›</b></button>
@@ -424,7 +429,7 @@
   const loadKey = () => { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return ''; } };
   const yen = n => n.toLocaleString('ja-JP') + '円';
 
-  const state = { key: loadKey(), products: [], owners: [], shows: [], genre: '', q: '', cart: {}, bundles: [], sets: [], order: [], paid: '', sending: false };
+  const state = { key: loadKey(), products: [], owners: [], shows: [], quick: [], warned: {}, genre: '', q: '', cart: {}, bundles: [], sets: [], order: [], paid: '', sending: false };
   const settings = load(REG_STORE, { event: '', operator: '', pool: '' });
 
   function imageSrc(url, w) {
@@ -593,6 +598,7 @@
     else if (was) ev.value = settings.event || '';
     $('staffList').innerHTML = (show ? show.staff : []).map(n => '<option value="' + esc(n) + '">').join('');
     $('showName').textContent = show ? show.name : '';
+    $('quickBtn').hidden = !show;
   }
   const inPool = (p, pool) => (/^公演:/.test(pool) ? pool in p.stock : !p.discontinued);
 
@@ -633,10 +639,12 @@
   const byId = id => state.products.find(p => p.id === id);
 
   // サイズのハンガー札（押すとそのままカゴへ）。残りは「在庫 − カゴの数」
+  // 公演のレジは在庫0でも押せる（実物があるのに在庫の数がずれていても売れるように。足りない分はあとで補充の知らせが出る）
+  const canOversell = pool => /^公演:/.test(pool);
   function tag(p, pool, wide) {
     const s = p.stock[pool] || 0, c = qtyIn(p.id), left = s - c;
-    const cls = s === 0 ? ' out' : left <= 3 ? ' low' : '';
-    return '<button class="tag' + cls + '" data-add="' + esc(p.id) + '"' + (left > 0 ? '' : ' disabled') + ' aria-label="' + esc((p.size !== '-' ? p.size + ' ' : '') + '残り' + left) + '">' +
+    const cls = s <= 0 ? ' out' : left <= 3 ? ' low' : '';
+    return '<button class="tag' + cls + (left < 0 ? ' minus' : '') + '" data-add="' + esc(p.id) + '"' + (left > 0 || canOversell(pool) ? '' : ' disabled') + ' aria-label="' + esc((p.size !== '-' ? p.size + ' ' : '') + '残り' + left) + '">' +
       '<i>' + (wide ? '在庫' : esc(p.size)) + '</i><b>' + left + '</b>' + (wide ? '<i>' + unitOf(p.type) + '</i>' : '') + (c ? '<span class="c">' + c + '</span>' : '') + '</button>';
   }
   function rack(items, pool, one) {
@@ -683,7 +691,12 @@
       return '<div class="line"><div class="th txt" style="' + gc(byId(b.ids[0]) ? byId(b.ids[0]).type : '') + '">セット</div><div><b>' + esc(b.name) + '</b><small>' + b.ids.map(id => { const p = byId(id); return p ? esc([p.category, p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ')) : esc(id); }).join('<br>') +
         '　' + yen(b.price) + '</small></div><div class="qty"><button data-unbundle="' + i + '">✕</button></div></div>';
     }).join('');
-    $('lines').innerHTML = (ids.length || state.bundles.length) ? bundleHtml + ids.map(id => {
+    const quickHtml = state.quick.map((x, i) => {
+      qty += x.qty; total += x.price * x.qty;
+      return '<div class="line"><div class="th txt">手入力</div><div><b>' + esc(x.name) + '</b><small>一覧にない商品　' + yen(x.price) + ' ×' + x.qty + '　' + yen(x.price * x.qty) + '</small></div>' +
+        '<div class="qty"><button data-unquick="' + i + '">✕</button></div></div>';
+    }).join('');
+    $('lines').innerHTML = (ids.length || state.bundles.length || state.quick.length) ? quickHtml + bundleHtml + ids.map(id => {
       const p = byId(id); const n = state.cart[id];
       qty += n;
       if (p.price === '' || p.price == null) unpriced += n; else total += p.price * n;
@@ -721,7 +734,15 @@
     if (d > 0 && setOnly().indexOf(p.type) >= 0) return toast(p.type + 'はセットだけで売ります。「セット」の札から選んでください', true);
     const pool = $('pool').value;
     const next = (state.cart[id] || 0) + d;
-    if (d > 0 && qtyIn(id) + d > (p.stock[pool] || 0)) return toast(p.category + '（' + (p.size !== '-' ? p.size : p.color) + '）は在庫が' + (p.stock[pool] || 0) + unitOf(p.type) + 'です', true);
+    if (d > 0 && qtyIn(id) + d > (p.stock[pool] || 0)) {
+      if (!canOversell(pool)) return toast(p.category + '（' + (p.size !== '-' ? p.size : p.color) + '）は在庫が' + (p.stock[pool] || 0) + unitOf(p.type) + 'です', true);
+      if (!state.warned[id]) {
+        state.warned[id] = 1;
+        const show = showOf(pool), main = show ? (p.stock[show.owner] || 0) : 0;
+        toast(main > 0 ? '在庫の数が0ですが売れます（' + show.owner + 'の在庫から自動で移します）'
+          : '在庫の数が0ですが売れます（あとで管理画面に「補充してください」と出ます）');
+      }
+    }
     if (next <= 0) delete state.cart[id]; else state.cart[id] = next;
     render();
   }
@@ -740,7 +761,7 @@
 
   // 未送信の会計の金額（値段が入っている分だけ）
   function entryAmount(entry) {
-    return entry.items.reduce((n, i) => {
+    return (entry.quick || []).reduce((n, x) => n + x.price * x.qty, 0) + entry.items.reduce((n, i) => {
       if (i.unitPrice !== undefined) return n + i.unitPrice * i.qty;
       const p = byId(i.id); return n + (p && p.price !== '' && p.price != null ? p.price * i.qty : 0);
     }, 0);
@@ -774,15 +795,38 @@
     });
   }
 
+  // 会計を送る。公演のレジは在庫が足りなくても売る（allowShort）。手入力の商品は quickSale で1件ずつ。
+  // 途中まで送れたら印を付けておき、送り直しで同じ分を二重に記録しない
   async function send(entry) {
-    const res = await api('processBatch', { mode: 'sale', location: entry.pool, event: entry.event, operator: entry.operator,
-      items: entry.items.map(i => i.unitPrice !== undefined ? { productId: i.id, quantity: i.qty, unitPrice: i.unitPrice } : { productId: i.id, quantity: i.qty }) }, 45000);
-    const l = load(LOG_STORE, []);
-    l.push({ at: entry.at, qty: res.quantity, amount: res.amount, opId: res.opId, items: entry.names || itemNames(entry.items),
-      lines: entry.items.map(i => ({ id: i.id, qty: i.qty })), pool: entry.pool, operator: entry.operator, event: entry.event });
-    save(LOG_STORE, l.slice(-300));
-    res.products.forEach(np => { const i = state.products.findIndex(p => p.id === np.id); if (i >= 0) state.products[i] = Object.assign(state.products[i], np); });
-    return res;
+    const total = { quantity: 0, amount: 0, pulled: [], short: [], products: [] };
+    const logIt = (res, names, lines) => {
+      const l = load(LOG_STORE, []);
+      l.push({ at: entry.at, qty: res.quantity, amount: res.amount, opId: res.opId, items: names, lines: lines, pool: entry.pool, operator: entry.operator, event: entry.event });
+      save(LOG_STORE, l.slice(-300));
+      total.quantity += res.quantity; total.amount += res.amount || 0;
+      total.pulled = total.pulled.concat(res.pulled || []); total.short = total.short.concat(res.short || []);
+      // サーバーから返った在庫（stock は在庫区分だけ）に、公演の残数（shows）を入れ直す。入れないと公演のレジから札が消える
+      (res.products || []).forEach(np => {
+        if (np.shows) np.stock = Object.assign({}, np.stock, np.shows);
+        const i = state.products.findIndex(p => p.id === np.id);
+        if (i >= 0) state.products[i] = Object.assign(state.products[i], np); else state.products.push(np);
+      });
+      save(STORE + '.registerProducts', state.products);
+    };
+    const mark = () => { const q = load(QUEUE_STORE, []); const k = q.findIndex(e => e.lid && e.lid === entry.lid); if (k >= 0) { q[k] = entry; save(QUEUE_STORE, q); } };
+    if (entry.items.length && !entry.itemsSent) {
+      const res = await api('processBatch', { mode: 'sale', location: entry.pool, event: entry.event, operator: entry.operator, allowShort: canOversell(entry.pool),
+        items: entry.items.map(i => i.unitPrice !== undefined ? { productId: i.id, quantity: i.qty, unitPrice: i.unitPrice } : { productId: i.id, quantity: i.qty }) }, 45000);
+      entry.itemsSent = true; mark();
+      logIt(res, (entry.names || itemNames(entry.items)).filter(n => !/（手入力）/.test(n)), entry.items.map(i => ({ id: i.id, qty: i.qty })));
+    }
+    for (const x of (entry.quick || [])) {
+      if (x.sent) continue;
+      const res = await api('quickSale', { location: entry.pool, name: x.name, price: x.price, quantity: x.qty, event: entry.event, operator: entry.operator }, 45000);
+      x.sent = true; mark();
+      logIt(res, [x.name + '（手入力）×' + x.qty], (res.items || []).map(i => ({ id: i.id, qty: i.quantity })));
+    }
+    return total;
   }
 
   async function pay() {
@@ -794,18 +838,22 @@
       b.ids.forEach((id, k) => items.push({ id: id, qty: 1, unitPrice: each + (k === 0 ? b.price - each * b.ids.length : 0) }));
       names.unshift('セット ' + b.name + '（' + itemNames(b.ids.map(id => ({ id: id, qty: 1 }))).map(n => n.replace(/ ×1$/, '')).join('・') + '）');
     });
-    if (!items.length) return;
+    const quick = state.quick.slice();
+    quick.forEach(x => names.push(x.name + '（手入力）×' + x.qty));
+    if (!items.length && !quick.length) return;
     const entry = { at: new Date(Date.now() + 9 * 3600e3).toISOString().replace('Z', ''), pool: $('pool').value, event: $('event').value.trim(),
-      operator: $('operator').value.trim(), items: items, qty: items.reduce((n, i) => n + i.qty, 0), names: names };
+      operator: $('operator').value.trim(), items: items, quick: quick, qty: items.reduce((n, i) => n + i.qty, 0) + quick.reduce((n, x) => n + x.qty, 0), names: names };
     state.sending = true; renderCart();
     if (!navigator.onLine) {
       queue(entry, '電波がないので端末に保存しました。つながったら自動で送ります');
     } else {
       try {
         const res = await send(entry);
-        state.cart = {}; state.bundles = []; state.paid = '';
+        state.cart = {}; state.bundles = []; state.quick = []; state.paid = '';
         $('cart').classList.remove('open');
-        toast(res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : ''));
+        toast(res.quantity + '点の販売を記録しました' + (res.amount ? '（' + yen(res.amount) + '）' : '') +
+          (res.pulled && res.pulled.length ? '。' + res.pulled.reduce((n, x) => n + x.qty, 0) + '点を元の在庫から移しました' : '') +
+          (res.short && res.short.length ? '。在庫が足りない分は、あとで管理画面に補充の知らせが出ます' : ''));
       } catch (e) {
         if (e.server && /パスワード/.test(e.message)) { queue(entry, 'パスワードが変わったため、会計は端末に保存しました。新しいパスワードを入れると送ります'); showLogin(); }
         else if (e.server) { toast(e.message, true); }
@@ -822,7 +870,7 @@
     const q = load(QUEUE_STORE, []); q.push(entry); save(QUEUE_STORE, q);
     // 在庫の表示だけ先に減らしておく
     entry.items.forEach(i => { const p = byId(i.id); if (p) p.stock[entry.pool] = Math.max(0, (p.stock[entry.pool] || 0) - i.qty); });
-    state.cart = {}; state.bundles = []; state.paid = '';
+    state.cart = {}; state.bundles = []; state.quick = []; state.paid = '';
     toast(msg);
   }
 
@@ -893,6 +941,9 @@
     if (t.dataset.pick) return pickForSet(t.dataset.pick);
     if (t.dataset.setDone) return finishSet();
     if (t.dataset.unbundle !== undefined) { state.bundles.splice(+t.dataset.unbundle, 1); return render(); }
+    if (t.dataset.unquick !== undefined) { state.quick.splice(+t.dataset.unquick, 1); return render(); }
+    if (t.id === 'quickBtn') return openQuick();
+    if (t.id === 'qkAdd') return addQuick();
     if (t.dataset.paid !== undefined) { state.paid = t.dataset.paid === 'exact' ? String(state.total) : String((Number(state.paid) || 0) + Number(t.dataset.paid)); return renderChange(); }
     if (t.classList.contains('tpic') && t.dataset.key) {
       const g = groups().find(x => x.key === t.dataset.key); if (!g) return;
@@ -931,13 +982,35 @@
         const left = (p.stock[pool] || 0) - qtyIn(p.id) - ids.filter(x => x === p.id).length;
         const c = ids.filter(x => x === p.id).length;
         const ph = p.imageUrl ? '<span class="sph" style="background-image:url(\'' + esc(imageSrc(p.imageUrl, 400)) + '\')"></span>' : '';
-        return '<button class="size" data-pick="' + esc(p.id) + '"' + (left > 0 && ids.length < set.count ? '' : ' disabled') + '>' + ph + '<b class="sn">' + esc(p.category) + '</b><small>' +
+        return '<button class="size" data-pick="' + esc(p.id) + '"' + ((left > 0 || canOversell(pool)) && ids.length < set.count ? '' : ' disabled') + '>' + ph + '<b class="sn">' + esc(p.category) + '</b><small>' +
           esc([p.color !== '-' ? p.color : '', p.size !== '-' ? p.size : ''].filter(Boolean).join(' ')) + '　残り ' + Math.max(0, left) + '</small>' + (c ? '<br><span class="c">選択 ' + c + '</span>' : '') + '</button>';
       }).join('') + '</div><div class="setbtns"><button class="close" data-close="1">やめる</button>' +
       '<button class="close ok" data-set-done="1"' + (ids.length === set.count ? '' : ' disabled') + '>カゴに入れる</button></div></div></div>';
     $('sheet').hidden = false;
     $('sheet').dataset.key = '';
   }
+  // ---------- 一覧にない商品（登録漏れ）：名前と値段を入れて売る ----------
+  function openQuick() {
+    $('sheet').innerHTML = '<div class="sheet-bg" data-close="1"><div class="sheet quick"><div class="hd"><div class="ph txt">手入力</div><div><b>一覧にない商品を売る</b>' +
+      '<small>管理画面に「その他」で登録され、あとで直すように知らせが出ます</small></div></div>' +
+      '<label>商品名<input id="qkName" autocomplete="off" placeholder="例：ポーチ（青）"></label>' +
+      '<div class="qrow"><label>値段（円）<input id="qkPrice" inputmode="numeric" autocomplete="off" placeholder="例：1500"></label>' +
+      '<label>数<input id="qkQty" inputmode="numeric" autocomplete="off" value="1"></label></div>' +
+      '<div class="setbtns"><button class="close" data-close="1">やめる</button><button class="close ok" id="qkAdd">カゴに入れる</button></div></div></div>';
+    $('sheet').hidden = false;
+    setTimeout(() => $('qkName').focus(), 50);
+  }
+  function addQuick() {
+    const n = s => Number(String(s || '').normalize('NFKC').replace(/[^0-9]/g, '')) || 0;
+    const name = $('qkName').value.trim(), price = n($('qkPrice').value), qty = n($('qkQty').value);
+    if (!name) return toast('商品名を入れてください', true);
+    if (!price) return toast('値段を入れてください', true);
+    if (!qty) return toast('数を入れてください', true);
+    state.quick.push({ name: name.slice(0, 40), price: price, qty: qty });
+    $('sheet').hidden = true;
+    render();
+  }
+
   function pickForSet(id) {
     if (!state.picking) return;
     if (state.picking.ids.length < state.picking.set.count) state.picking.ids.push(id);

@@ -713,6 +713,12 @@
   .sh-days { display: flex; flex-wrap: wrap; gap: 4px; }
   .sh-head .tk-state { background: rgba(255,255,255,.16); color: #fff; }
   .sh-head .tk-state.live { background: var(--sale); }
+  .sh-minus { background: #fff; border: 2px solid var(--danger); border-left-width: 6px; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+  .sh-minus b { color: var(--danger); }
+  .sh-minus ul { margin: 6px 0; padding-left: 18px; font-size: 14px; }
+  .sh-minus em { font-style: normal; font-weight: 700; color: var(--danger); }
+  .sh-minus small { display: block; font-size: 12px; color: var(--muted); }
+  .badge.minus { background: var(--danger); }
   .sh-fresh { display: flex; gap: 10px; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--warn); border-left-width: 5px; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
   .sh-fresh small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
   .sh-fresh .btn { flex: none; white-space: nowrap; }
@@ -751,7 +757,7 @@
 </nav>
 
 <nav class="tabs" id="tabs">
-  <button class="tab" data-tab="show"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>公演</button>
+  <button class="tab" data-tab="show"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg>公演<span class="badge minus" id="showBadge" hidden></span></button>
   <button class="tab" data-tab="product"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>商品登録</button>
   <button class="tab" data-tab="sales"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16l-2 11H6z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>販売・補充</button>
   <button class="tab" data-tab="inventory"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>在庫一覧</button>
@@ -3423,6 +3429,25 @@
     return state.products.filter(p => !p.discontinued && !inShow[p.id] && p.createdTs && p.createdTs > since && (p.stock[x.show.owner] || 0) > 0);
   }
 
+  /** 在庫の数が足りないまま売れた商品（レジで残数がマイナスになったもの）。直すまで出し続ける */
+  function minusNote(x) {
+    const list = x.items.filter(i => i.left < 0);
+    if (!list.length) return '';
+    const name = i => [i.category, i.type === 'その他' ? '（手入力）' : '', i.color !== '-' ? i.color : '', i.size !== '-' ? i.size : ''].filter(Boolean).join(' ');
+    return '<div class="sh-minus"><b>在庫の数より多く売れた商品が' + list.length + '件あります</b>' +
+      '<ul>' + list.map(i => '<li>' + esc(name(i)) + '　<em>' + (-i.left) + '点不足</em></li>').join('') + '</ul>' +
+      '<small>実物の数を確かめて「補充」で足りない分を入れてください（補充すると知らせは消えます）。' +
+      (list.some(i => i.type === 'その他') ? '（手入力）の商品は、レジで一覧にない商品として売った分です。在庫一覧で正しい名前・種別に直すか、あとで相談してください。' : '') + '</small>' +
+      '<div class="btn-row" style="margin-top:8px"><button type="button" class="btn small" data-act="restock">補充する</button></div></div>';
+  }
+
+  /** 公演タブのバッジ：開催中の公演で、残数がマイナスの商品の数 */
+  function updateShowBadge() {
+    const n = state.products.filter(p => p.shows && Object.keys(p.shows).some(k => p.shows[k] < 0)).length;
+    $('showBadge').textContent = n;
+    $('showBadge').hidden = !n;
+  }
+
   function freshNote(x) {
     const list = freshProducts(x);
     if (!list.length) return '';
@@ -3444,7 +3469,7 @@
       if (r.category !== last) { last = r.category; body += '<tr class="gh" style="' + gc(r.type) + '"><td colspan="5">' + esc(r.category) + '</td></tr>'; }
       const i = r._i;
       const name = [r.type, r.color, r.size].filter(v => v && v !== '-').map(esc).join(' / ');
-      body += '<tr><td>' + name + '</td><td>' + i.alloc + '</td><td' + (i.sold ? '' : ' class="mute"') + '>' + i.sold + '</td><td class="' + (i.left ? '' : 'zero') + '">' + i.left + '</td>' +
+      body += '<tr><td>' + name + '</td><td>' + i.alloc + '</td><td' + (i.sold ? '' : ' class="mute"') + '>' + i.sold + '</td><td class="' + (i.left > 0 ? '' : 'zero') + '">' + (i.left < 0 ? '−' + (-i.left) : i.left) + '</td>' +
         '<td' + (i.amount ? '' : ' class="mute"') + '>' + (i.amount ? Number(i.amount).toLocaleString('ja-JP') : '-') + '</td></tr>';
     });
     $('showDetail').innerHTML =
@@ -3463,6 +3488,7 @@
       '<button type="button" class="btn ghost" data-act="restock">補充</button>' +
       '<button type="button" class="btn ghost" data-act="info">公演の情報を直す</button>' +
       '</div>' +
+      minusNote(x) +
       freshNote(x) +
       '<div class="sh-total"><div>売上<b>' + Number(x.amount || 0).toLocaleString('ja-JP') + '</b>円</div>' +
       '<div>売れた<b>' + x.sold + '</b>点</div><div>残り<b>' + left + '</b>/ ' + alloc + '点</div></div>' +
@@ -4211,6 +4237,7 @@
     $('eventList').innerHTML = (state.config.events || []).map(v => '<option value="' + esc(v) + '">').join('');
     refreshFilters();
     updateAlertBadge();
+    updateShowBadge();
     updateIdHint();
     renderOptions();
     updateDupWarn();

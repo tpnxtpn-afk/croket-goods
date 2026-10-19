@@ -179,6 +179,7 @@
   .toast.error { background: var(--bad); }
   /* 日本語の改行：文節の途中で切らない（長すぎる語だけ最後の手段で折る） */
   body { word-break: keep-all; overflow-wrap: anywhere; line-break: strict; }
+  .all-link { display: block; margin: 6px 16px 6px; font-size: 13px; font-weight: 700; color: inherit; opacity: .75; }
 </style>
 </head>
 <body>
@@ -187,7 +188,7 @@
   <header class="app-header">
     <div class="brand">
       <h1>コロッケ グッズ在庫</h1>
-      <div class="sub">在庫確認</div>
+      <div class="sub" id="headSub">在庫確認</div>
     </div>
     <button type="button" class="hbtn" id="btnFont" aria-label="文字の大きさを変える">大</button>
     <button type="button" class="hbtn" id="btnHelp" aria-label="使い方">？</button>
@@ -199,6 +200,7 @@
   </div>
   <nav class="tabs" id="tabs"></nav>
   <p class="pool-note" id="poolNote"></p>
+  <a class="all-link" id="allLink" href="./?all=1" hidden>この公演だけを表示しています。全体の在庫を見る ›</a>
   <div class="controls">
     <div class="search">
       <input type="search" id="q" placeholder="名前・色・サイズで探す" autocomplete="off" enterkeyhint="search">
@@ -278,6 +280,10 @@
   let ownerNotes = [];
   let showNames = {};   // 公演の在庫（「公演:S001」）→ 公演名
   const Q_SHOW = (new URLSearchParams(location.search).get('show') || '').trim().toUpperCase();
+  // 公演の在庫確認ページ：?show=S001 で開くと、その公演の在庫だけを出す（全体の在庫は出さない）。
+  // ホーム画面のアイコンから開き直しても公演のページのままにするため、端末に覚えておく。?all=1 で全体に戻る
+  const SHOW_ONLY_KEY = STORE + '.showOnly';
+  let showOnly = '';
   const label = o => showNames[o] || o;
   const isShowPool = o => /^公演:/.test(o);
   /** 公演の残数を在庫区分のひとつとして stock に入れる */
@@ -453,7 +459,7 @@
   function loadPrefs() {
     try {
       const saved = JSON.parse(stored(STORE) || '{}');
-      if (!Q_SHOW && owners.indexOf(saved.pool) >= 0) state.pool = saved.pool;
+      if (!showOnly && owners.indexOf(saved.pool) >= 0) state.pool = saved.pool;
       if (SORTS.indexOf(saved.sort) >= 0) state.sort = saved.sort;
       state.showZero = saved.showZero === true;
       state.big = saved.big === true;
@@ -692,6 +698,15 @@
     owners = config.owners.concat(shows.map(x => x.key));
     ownerNotes = (config.ownerNotes || config.owners.map(() => '')).concat(shows.map(x =>
       [x.venue, spans(x.dates).join('・')].filter(Boolean).join('　') + '　公演に持ち込んだ在庫です'));
+    const only = shows.find(x => x.id === showOnly);
+    if (showOnly && !only) { showOnly = ''; store(SHOW_ONLY_KEY, null); }   // 終わった公演なら全体に戻す
+    if (only) {
+      owners = [only.key];
+      ownerNotes = [[only.venue, spans(only.dates).join('・')].filter(Boolean).join('　')];
+    }
+    $('headSub').textContent = only ? '「' + only.name + '」の在庫' : '在庫確認';
+    $('allLink').hidden = !only;
+    $('tabs').hidden = !!only;
     sizes = config.sizes;
     threshold = config.lowStockThreshold;
     newDays = config.newDays || 14;
@@ -863,9 +878,13 @@
   }
 
   function start(boot, loadedAt) {
+    const qs = new URLSearchParams(location.search);
+    if (qs.get('all')) store(SHOW_ONLY_KEY, null);
+    else if (Q_SHOW) store(SHOW_ONLY_KEY, Q_SHOW);
+    showOnly = qs.get('all') ? '' : Q_SHOW || stored(SHOW_ONLY_KEY) || '';
     BOOT = boot;
     applyConfig(boot.config);
-    state.pool = owners.indexOf('公演:' + Q_SHOW) >= 0 ? '公演:' + Q_SHOW : owners[0];
+    state.pool = owners[0];
     state.products = withShows(boot.products);
     state.loadedAt = loadedAt || Date.now();
     init();

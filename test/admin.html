@@ -713,6 +713,12 @@
   .sh-days { display: flex; flex-wrap: wrap; gap: 4px; }
   .sh-head .tk-state { background: rgba(255,255,255,.16); color: #fff; }
   .sh-head .tk-state.live { background: var(--sale); }
+  .sf-head { display: grid; gap: 6px; }
+  .sf-head h2 { margin: 0; font-family: var(--display); font-weight: 900; font-size: 20px; }
+  .sf-opt { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+  .sf-opt select { flex: 1; }
+  .sf-opt.chk { font-weight: 400; font-size: 13px; }
+  .sf-opt.chk input { width: 20px; height: 20px; }
   .sh-minus { background: #fff; border: 2px solid var(--danger); border-left-width: 6px; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
   .sh-minus b { color: var(--danger); }
   .sh-minus ul { margin: 6px 0; padding-left: 18px; font-size: 14px; }
@@ -861,6 +867,23 @@
     </div>
 
     <div id="showDetail" hidden></div>
+
+    <!-- 公演：売上をまとめて入力／数えて合わせる（棚卸し） -->
+    <div id="showForm" hidden>
+      <div class="sf-head">
+        <button type="button" class="link-btn" id="sfBack" style="padding:0">← 公演のページへ</button>
+        <h2 id="sfTitle"></h2>
+        <p class="hint" id="sfHint" style="margin:0"></p>
+        <div id="sfOpts"></div>
+      </div>
+      <input type="search" id="sfQ" placeholder="商品名・色でさがす" style="margin:10px 0">
+      <div class="card" style="padding:4px 12px" id="sfList"></div>
+      <div class="sh-foot">
+        <button type="button" class="btn ghost" id="sfCancel">やめる</button>
+        <div class="info" id="sfInfo"></div>
+        <button type="button" class="btn" id="sfSave">記録する</button>
+      </div>
+    </div>
   </section>
 
   <!-- ========== 商品登録 ========== -->
@@ -3353,6 +3376,7 @@
 
   async function openShowHome() {
     if (!$('showWizard').hidden) return;     // 入力の途中なら、そのまま
+    if (!$('showForm').hidden) return;
     if (sh.pendingId) { const id = sh.pendingId; sh.pendingId = ''; return openShowDetail(id); }
     if (!$('showDetail').hidden && sh.detail) return;
     $('showHome').hidden = false;
@@ -3366,6 +3390,7 @@
 
   function backToShowHome() {
     sh.detail = null;
+    $('showForm').hidden = true;
     $('showDetail').hidden = true;
     $('showWizard').hidden = true;
     $('showHome').hidden = false;
@@ -3441,6 +3466,113 @@
       '<div class="btn-row" style="margin-top:8px"><button type="button" class="btn small" data-act="restock">補充する</button></div></div>';
   }
 
+  // ----- 売上をまとめて入力（bulk）／数えて合わせる（count） -----
+  const sf = { mode: '', vals: {}, date: '', noStock: false };
+
+  function openShowForm(mode) {
+    const x = sh.detail;
+    sf.mode = mode; sf.vals = {}; sf.noStock = false;
+    const t = jstToday();
+    const past = x.show.dates.filter(d => d <= t);
+    sf.date = past.length ? past[0] : t;
+    $('sfTitle').textContent = mode === 'bulk' ? '売上をまとめて入力' : '数えて合わせる（棚卸し）';
+    $('sfHint').textContent = mode === 'bulk'
+      ? 'レジが使えなかった日の売上を、商品ごとの数で入れます。紙のチェック表などを見ながら入れてください。'
+      : '公演の在庫を実物の数に合わせます。数えたサイズだけ入れてください（空欄はそのまま）。差は「棚卸」として記録に残り、売上には入りません。';
+    $('sfOpts').innerHTML = mode === 'bulk'
+      ? '<label class="sf-opt">売れた日 <select id="sfDate">' + unique(x.show.dates.filter(d => d <= t).concat([t])).sort()
+          .map(d => '<option value="' + d + '"' + (d === sf.date ? ' selected' : '') + '>' + dayChip(d).replace(/<\/?em>/g, ' ') + '</option>').join('') + '</select></label>' +
+        '<label class="sf-opt chk"><input type="checkbox" id="sfNoStock"> 在庫は減らさない（先に「数えて合わせる」をした日の分）</label>'
+      : '';
+    $('sfQ').value = '';
+    $('sfSave').textContent = mode === 'bulk' ? '売上を記録する' : '在庫を合わせる';
+    $('showDetail').hidden = true;
+    $('showForm').hidden = false;
+    renderShowForm();
+    window.scrollTo(0, 0);
+  }
+
+  function closeShowForm() {
+    $('showForm').hidden = true;
+    $('showDetail').hidden = false;
+    renderShowDetail();
+  }
+
+  /** セットだけで売る種類（クリアファイル2枚で500円など）は、1枚あたりの値段 */
+  function unitPriceOf(p) {
+    const st = (state.config.sets || []).find(x => x.only && x.type === p.type);
+    return st ? Math.round(st.price / st.count) : (p.price === '' ? 0 : Number(p.price));
+  }
+
+  function renderShowForm() {
+    const x = sh.detail, q = $('sfQ').value.trim();
+    const items = sortByDisplay(x.items.map(i => Object.assign({}, findProduct(i.id) || i, { _i: i }))).filter(p => !q || matches(p, q));
+    const groups = [], by = {};
+    items.forEach(p => { const k = gkey(p); if (!by[k]) { by[k] = { key: k, items: [] }; groups.push(by[k]); } by[k].items.push(p); });
+    $('sfList').innerHTML = groups.map(g => {
+      const f = g.items[0], img = g.items.find(p => p.imageUrl) || f;
+      return '<div class="sh-qg" style="' + gc(f.type) + '"><div class="hd">' + thumbHtml(img, 120) +
+        '<div class="nm">' + esc(f.category) + '<small>' + esc(f.type) + (f.color && f.color !== '-' ? '・' + esc(f.color) : '') +
+        (sf.mode === 'bulk' ? '　' + yen(unitPriceOf(f)) : '') + '</small></div><span></span></div><div class="sh-qrows">' +
+        g.items.map(p => {
+          const v = sf.vals[p.id];
+          const left = p._i.left;
+          return '<div class="sh-q' + (v !== undefined && v !== '' ? ' set' : '') + '"><span class="sz">' + esc(p.size && p.size !== '-' ? p.size : '数') + '</span>' +
+            '<span class="ctl"><input type="text" inputmode="numeric" placeholder="' + (sf.mode === 'bulk' ? '0' : '数えた数') + '" value="' + (v === undefined ? '' : v) + '" data-sf="' + esc(p.id) + '" style="width:72px;border:1.5px solid var(--line);border-radius:8px"></span>' +
+            '<span class="have">' + (sf.mode === 'bulk' ? '今の残り ' + left : '今の記録 ' + left + (v !== undefined && v !== '' ? '　→ 差 ' + (v - left > 0 ? '+' : '') + (v - left) : '')) + '</span></div>';
+        }).join('') + '</div></div>';
+    }).join('') || '<div class="empty">商品がありません</div>';
+    updateShowFormInfo();
+  }
+
+  function updateShowFormInfo() {
+    const ids = Object.keys(sf.vals).filter(id => sf.vals[id] !== '' && sf.vals[id] !== undefined);
+    if (sf.mode === 'bulk') {
+      const n = ids.reduce((s, id) => s + sf.vals[id], 0);
+      const amt = ids.reduce((s, id) => { const p = findProduct(id); return s + (p ? unitPriceOf(p) * sf.vals[id] : 0); }, 0);
+      $('sfInfo').innerHTML = '<b>' + n + '</b>点　<b>' + amt.toLocaleString('ja-JP') + '</b>円';
+    } else {
+      const x = sh.detail;
+      const diff = ids.filter(id => { const i = x.items.find(y => y.id === id); return i && i.left !== sf.vals[id]; }).length;
+      $('sfInfo').innerHTML = '数えた <b>' + ids.length + '</b>件　差あり <b>' + diff + '</b>件';
+    }
+  }
+
+  async function saveShowForm() {
+    const x = sh.detail, btn = $('sfSave');
+    const ids = Object.keys(sf.vals).filter(id => sf.vals[id] !== '' && sf.vals[id] !== undefined);
+    if (sf.mode === 'bulk') {
+      const items = ids.filter(id => sf.vals[id] > 0).map(id => { const p = findProduct(id); return { productId: id, quantity: sf.vals[id], unitPrice: p ? unitPriceOf(p) : '' }; });
+      if (!items.length) return toast('売れた数を入れてください', true);
+      const day = $('sfDate').value, noStock = $('sfNoStock').checked;
+      const n = items.reduce((s, i) => s + i.quantity, 0);
+      const ok = await confirmBox('この内容で記録しますか？', dayChip(day).replace(/<\/?em>/g, ' ') + 'の売上として <b>' + n + '点</b> を記録します。' +
+        (noStock ? '<br>在庫は減らしません。' : '<br>公演の在庫から引きます（足りない分はマイナスになります）。'), '記録する');
+      if (!ok) return;
+      setBusy(btn, true, '記録中…');
+      try {
+        const res = await call('showBulkSale', { showId: x.show.id, saleDate: day, noStock: noStock, items: items });
+        toast(n + '点の売上を記録しました（' + Number(res.amount || 0).toLocaleString('ja-JP') + '円）');
+        await afterShowForm();
+      } catch (err) { toast(err.message, true); } finally { setBusy(btn, false); }
+    } else {
+      const items = ids.map(id => ({ productId: id, counted: sf.vals[id] }));
+      if (!items.length) return toast('数えた数を入れてください', true);
+      setBusy(btn, true, '合わせています…');
+      try {
+        const res = await call('showStocktake', { showId: x.show.id, items: items });
+        toast(res.changed ? res.changed + '件の在庫を数えた数に合わせました' : '記録と同じでした（変更なし）');
+        await afterShowForm();
+      } catch (err) { toast(err.message, true); } finally { setBusy(btn, false); }
+    }
+  }
+
+  async function afterShowForm() {
+    sh.detail = await call('getShow', { showId: sh.detail.show.id });
+    await refreshProductsQuiet();
+    closeShowForm();
+  }
+
   /** 公演タブのバッジ：開催中の公演で、残数がマイナスの商品の数 */
   function updateShowBadge() {
     const n = state.products.filter(p => p.shows && Object.keys(p.shows).some(k => p.shows[k] < 0)).length;
@@ -3487,6 +3619,8 @@
       '<button type="button" class="btn ghost" data-act="items">商品・数を直す</button>' +
       '<button type="button" class="btn ghost" data-act="restock">補充</button>' +
       '<button type="button" class="btn ghost" data-act="info">公演の情報を直す</button>' +
+      '<button type="button" class="btn ghost" data-act="bulk">売上をまとめて入力</button>' +
+      '<button type="button" class="btn ghost" data-act="count">数えて合わせる（棚卸し）</button>' +
       '</div>' +
       minusNote(x) +
       freshNote(x) +
@@ -3509,6 +3643,7 @@
     if (act === 'items') return startShowWizard('items');
     if (act === 'fresh') { startShowWizard('items'); $('shFresh').checked = true; return renderShowPick(); }
     if (act === 'newp') return startShowWizard('newp');
+    if (act === 'bulk' || act === 'count') return openShowForm(act);
     if (act === 'restock') { startShowWizard('items'); return goShowStep(3); }
     if (act === 'info') return startShowWizard('info');
     if (act === 'delete') {
@@ -3954,6 +4089,17 @@
 
   function bindShow() {
     $('btnShowNew').addEventListener('click', () => startShowWizard('new'));
+    $('sfBack').addEventListener('click', closeShowForm);
+    $('sfCancel').addEventListener('click', closeShowForm);
+    $('sfSave').addEventListener('click', saveShowForm);
+    $('sfQ').addEventListener('input', renderShowForm);
+    $('sfList').addEventListener('change', e => {
+      const i = e.target.closest('[data-sf]');
+      if (!i) return;
+      const raw = norm(i.value).replace(/[^\d]/g, '');
+      if (raw === '') delete sf.vals[i.dataset.sf]; else sf.vals[i.dataset.sf] = Number(raw);
+      renderShowForm();
+    });
     $('showList').addEventListener('click', e => { const t = e.target.closest('[data-show]'); if (t) openShowDetail(t.dataset.show); });
     $('showDetail').addEventListener('click', onShowDetailClick);
     $('shDateAdd').addEventListener('click', addShowDate);

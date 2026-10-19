@@ -831,6 +831,10 @@
       if (item) openDetail(item.dataset.key);
     });
     $('detailClose').addEventListener('click', () => { $('detail').hidden = true; });
+    // 「戻る」（ホーム画面のアイコンの戻る・iPhoneのスワイプ）で商品の大きい表示を閉じる
+    new MutationObserver(() => { if (!$('detail').hidden) { try { history.pushState({ detail: 1 }, ''); } catch (e) { /* ignore */ } } })
+      .observe($('detail'), { attributes: true, attributeFilter: ['hidden'] });
+    window.addEventListener('popstate', () => { if (!$('detail').hidden) $('detail').hidden = true; });
     $('detail').addEventListener('click', e => { if (e.target === $('detail')) $('detail').hidden = true; });
     $('guideClose').addEventListener('click', () => {
       $('guide').hidden = true;

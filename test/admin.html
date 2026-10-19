@@ -1720,8 +1720,13 @@
   }
 
   // ---------- タブ ----------
-  function showTab(name) {
+  function showTab(name, fromHistory) {
     if (!TAB_COLORS[name]) name = 'product';
+    // タブの切り替えも「戻る」で前のタブへ戻れるように履歴に残す
+    const cur = (document.querySelector('.tab.active') || {}).dataset;
+    if (!fromHistory && cur && cur.tab && cur.tab !== name) {
+      try { history.pushState({ tab: name }, ''); } catch (e) { /* ignore */ }
+    }
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
     document.documentElement.style.setProperty('--theme', TAB_COLORS[name]);
@@ -3394,7 +3399,7 @@
     $('showDetail').hidden = true;
     $('showWizard').hidden = true;
     $('showHome').hidden = false;
-    try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+    try { history.replaceState(history.state, '', location.pathname); } catch (e) { /* ignore */ }
     openShowHome();
     window.scrollTo(0, 0);
   }
@@ -3424,7 +3429,7 @@
     $('showDetail').innerHTML = '<div class="loading">読み込み中…</div>';
     try {
       sh.detail = await call('getShow', { showId: id });
-      try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
+      try { history.replaceState(history.state, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
       renderShowDetail();
     } catch (err) {
       $('showDetail').innerHTML = '<div class="empty">' + esc(err.message) + '<br><button type="button" class="btn ghost mini" data-act="home">公演の一覧へ</button></div>';
@@ -4064,7 +4069,7 @@
       toast(sh.mode === 'new' ? '公演をつくりました' : sh.mode === 'newp' ? '新商品を登録して、この公演に入れました' : rsN ? '保存しました（補充 ' + rsN + '点）' : '保存しました');
       $('showWizard').hidden = true;
       $('showDetail').hidden = false;
-      try { history.replaceState(null, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
+      try { history.replaceState(history.state, '', location.pathname + '?show=' + encodeURIComponent(sh.detail.show.id)); } catch (e) { /* ignore */ }
       renderShowDetail();
       window.scrollTo(0, 0);
     } catch (err) {
@@ -4174,6 +4179,59 @@
     $('npPhotoClear').addEventListener('click', () => setNpPhoto(null));
     $('shNext').addEventListener('click', showNext);
     $('shBack').addEventListener('click', showBack);
+  }
+
+  // ---------- 戻る（ホーム画面のアイコンの「戻る」、iPhoneの左端からのスワイプ） ----------
+  // 1ページの画面なので、上に開く画面（棚卸し・公演・印刷・撮影リスト・各ウィンドウ）を開いたら履歴を1つ足し、
+  // 「戻る」で一番上のものから1つずつ閉じる
+  const NAV_LAYERS = [
+    ['stocktakePanel', () => $('btnStCancel').click()],
+    ['showDetail', () => { if ($('showHome').hidden && $('showWizard').hidden && $('showForm').hidden) backToShowHome(); }],
+    ['showWizard', () => showBack()],
+    ['showForm', () => closeShowForm()],
+    ['shoot', () => $('shootClose').click()],
+    ['printArea', () => $('printClose').click()],
+    ['editModal', () => $('editCancel').click()],
+    ['imgModal', () => $('imgModalClose').click()],
+    ['sizeModal', () => $('szCancel').click()],
+    ['pickModal', () => $('pickClose').click()],
+    ['scanModal', () => $('scanClose').click()],
+    ['bulkModal', () => $('bulkCancel').click()],
+    ['toolModal', () => { $('toolModal').hidden = true; }],
+    ['confirmModal', () => $('confirmNo').click()],
+  ];
+  const navStack = [];
+  let navPopping = false;
+
+  function bindBackNav() {
+    try { history.replaceState({ tab: (document.querySelector('.tab.active') || { dataset: {} }).dataset.tab || '' }, ''); } catch (e) { /* ignore */ }
+    const obs = new MutationObserver(list => list.forEach(m => {
+      const el = m.target;
+      if (el.hidden || navPopping) return;
+      if (navStack[navStack.length - 1] === el.id) return;
+      navStack.push(el.id);
+      try { history.pushState({ layer: el.id, tab: (document.querySelector('.tab.active') || { dataset: {} }).dataset.tab }, ''); } catch (e) { /* ignore */ }
+    }));
+    NAV_LAYERS.forEach(([id]) => { if ($(id)) obs.observe($(id), { attributes: true, attributeFilter: ['hidden'] }); });
+    window.addEventListener('popstate', e => {
+      navPopping = true;
+      try {
+        // 開いている一番上の画面を閉じる
+        while (navStack.length) {
+          const id = navStack.pop();
+          const layer = NAV_LAYERS.find(l => l[0] === id);
+          if (layer && $(id) && !$(id).hidden) { layer[1](); return; }
+        }
+        // 公演のページ・入力の途中も閉じる（履歴に入る前に開いていたもの）
+        if (!$('showForm').hidden) return closeShowForm();
+        if (!$('showWizard').hidden) return showBack();
+        if (!$('showDetail').hidden && $('panel-show').classList.contains('active')) return backToShowHome();
+        const tab = e.state && e.state.tab;
+        if (tab && TAB_COLORS[tab]) showTab(tab, true);
+      } finally {
+        setTimeout(() => { navPopping = false; }, 0);
+      }
+    });
   }
 
   // ---------- 在庫わずか ----------
@@ -4609,6 +4667,7 @@
     bindShow();
     sh.pendingId = new URLSearchParams(location.search).get('show') || '';
     showTab(sh.pendingId ? 'show' : stored(TAB_STORE) || 'product');
+    bindBackNav();
     setEntry('single');
     setMode('sale');
     if (!state.operator) setTimeout(openOperator, 400);

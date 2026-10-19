@@ -1173,6 +1173,32 @@
       else prefetchImages();
     }).catch(() => {});
   }
+  // ---------- 戻る（ホーム画面のアイコンの「戻る」、iPhoneの左端からのスワイプ）で、上に開いた画面を閉じる ----------
+  (function bindBackNav() {
+    const layers = [
+      ['sheet', el => !el.hidden, () => { $('sheet').hidden = true; state.picking = null; }],
+      ['sales', el => !el.hidden, () => { $('sales').hidden = true; }],
+      ['prep', el => !el.hidden, () => { $('prep').hidden = true; }],
+      ['cart', el => el.classList.contains('open'), () => { $('cart').classList.remove('open'); }],
+    ];
+    const stack = [];
+    let popping = false;
+    const obs = new MutationObserver(list => list.forEach(m => {
+      const l = layers.find(x => x[0] === m.target.id);
+      if (!l || popping || !l[1](m.target) || stack[stack.length - 1] === l[0]) return;
+      stack.push(l[0]);
+      try { history.pushState({ layer: l[0] }, ''); } catch (e) { /* ignore */ }
+    }));
+    layers.forEach(([id]) => { if ($(id)) obs.observe($(id), { attributes: true, attributeFilter: ['hidden', 'class'] }); });
+    window.addEventListener('popstate', () => {
+      popping = true;
+      while (stack.length) {
+        const l = layers.find(x => x[0] === stack.pop());
+        if (l && l[1]($(l[0]))) { l[2](); break; }
+      }
+      setTimeout(() => { popping = false; }, 0);
+    });
+  })();
   renderLog();
 })();
 </script>

@@ -889,5 +889,46 @@
     }
   }
 </script>
+
+<style>
+  #appnav { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 9999; display: flex; align-items: center; font-family: -apple-system, "Hiragino Sans", sans-serif; }
+  #appnav[hidden] { display: none !important; }
+  #appnav .tab { width: 22px; height: 64px; border: 0; border-radius: 0 12px 12px 0; background: rgba(20,23,29,.82); color: #fff; font-size: 14px; font-weight: 700; padding: 0; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  #appnav .tab::before { content: "›"; }
+  #appnav.open .tab::before { content: "‹"; }
+  #appnav .btns { display: none; flex-direction: column; gap: 6px; padding: 8px; margin-left: 4px; border-radius: 14px; background: rgba(20,23,29,.92); box-shadow: 0 4px 16px rgba(0,0,0,.3); }
+  #appnav.open .btns { display: flex; }
+  #appnav .btns button { display: grid; justify-items: center; gap: 2px; width: 58px; padding: 7px 0 6px; border: 0; border-radius: 10px; background: rgba(255,255,255,.1); color: #fff; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+  #appnav .btns button:active { background: rgba(255,255,255,.3); }
+  #appnav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+<div id="appnav" hidden>
+  <button class="tab" type="button" aria-label="移動のボタンを開く"></button>
+  <div class="btns">
+    <button type="button" data-nav="back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>戻る</button>
+    <button type="button" data-nav="fwd"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>進む</button>
+    <button type="button" data-nav="reload"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>更新</button>
+    <button type="button" data-nav="home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>ホーム</button>
+  </div>
+</div>
+<script>
+(function () {
+  var nav = document.getElementById('appnav');
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  if (!standalone && !/[?&]appnav=1/.test(location.search)) return;
+  nav.hidden = false;
+  nav.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.classList.contains('tab')) { nav.classList.toggle('open'); return; }
+    var a = b.dataset.nav;
+    nav.classList.remove('open');
+    if (a === 'back') history.back();
+    else if (a === 'fwd') history.forward();
+    else if (a === 'reload') location.reload();
+    else if (a === 'home') location.href = "./";
+  });
+})();
+</script>
 </body>
 </html>
